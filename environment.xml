@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<COMPATIBILITY_MATRIX>
+  <PLUGIN name="tool_excimer">
+    <PHP_EXTENSIONS>
+      <PHP_EXTENSION name="excimer" level="required">
+      </PHP_EXTENSION>
+    </PHP_EXTENSIONS>
+  </PLUGIN>
+</COMPATIBILITY_MATRIX>
