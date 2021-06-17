@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20210616" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="tool_excimer" COMMENT="Table to store excimer log entries for hourly/daily flamegraphs">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="day" TYPE="int" LENGTH="8" NOTNULL="true" SEQUENCE="false" COMMENT="e.g. 20210610 for 10 Jun 2021"/>
+        <FIELD NAME="hour" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="e.g. 20 for 8PM to 9PM"/>
+        <FIELD NAME="graphpath" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Graph path, semi-colon-separated"/>
+        <FIELD NAME="graphpathmd5" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false" COMMENT="Field for efficient comparison of graphpaths"/>
+        <FIELD NAME="elapsed" TYPE="number" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="6" COMMENT="Time in seconds since ExcimerProfiler started"/>
+        <FIELD NAME="total" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Hourly hits for this graphpath"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

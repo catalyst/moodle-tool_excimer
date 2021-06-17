@@ -17,9 +17,10 @@
 /**
  * Strings for availability conditions options.
  *
- * @package core_availability
- * @copyright 2014 The Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   tool_excimer
+ * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
+ * @copyright 2021, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Excimer Sampling Profiler';
