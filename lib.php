@@ -248,6 +248,10 @@ function tool_excimer_save_log() {
 
     global $DB;
     global $EXCIMER_LOG_ENTRIES;
+
+    if (!is_iterable($EXCIMER_LOG_ENTRIES)) {
+        return;
+    }
     
     foreach ($EXCIMER_LOG_ENTRIES as $entry) {
 

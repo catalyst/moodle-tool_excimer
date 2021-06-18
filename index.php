@@ -36,7 +36,7 @@ require_login(null, false);
 //  ----------------------------------------------------------------------
 //
 //  $PAGE->requires->js('/admin/tool/excimer/amd/build/bundle.js');
-//  $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
+$PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
 
 $pluginName = get_string('pluginname', 'tool_excimer');
 
@@ -73,7 +73,7 @@ if ($paramDay === null) {
     echo '<thead>';
     echo '<th></th>';
     foreach (range(0, 23) as $hour) {
-        echo '<th>' . str_pad($hour, 2, '0', STR_PAD_LEFT) . '</th>';
+        echo "<th>$hour</th>";
     }
     echo '</thead>';
     echo '<tbody>';
@@ -97,12 +97,69 @@ if ($paramDay === null) {
 
 } else {
 
-    $tree = tool_excimer_tree_data($paramDay, $paramHour);
+    //  Now handled by json.ph
+    //  $tree = tool_excimer_tree_data($paramDay, $paramHour);
 
     echo $OUTPUT->header();
 
-    echo "<p><a href=\"?\">Summary</a> &gt; Day: " . json_encode($paramDay) . ", Hour: " . json_encode($paramHour) . "</p>";
+    echo "<p></p>";
 
+?>
+
+    <nav>
+      <div class="pull-right">
+        <form class="form-inline" id="form">
+          <a class="btn" href="javascript: resetZoom();">Reset zoom</a>
+          <a class="btn" href="javascript: clear();">Clear</a>
+          <div class="form-group">
+            <input type="text" class="form-control" id="term">
+          </div>
+          <a class="btn btn-primary" href="javascript: search();">Search</a>
+        </form>
+      </div>
+    </nav>
+    <h3 class="text-muted"><a href="?">Summary</a> &gt; Day: <?= ($paramDay) ?>, Hour: <?= json_encode($paramHour) ?></h3>
+    <div id="details">
+    </div>
+    <div id="chart" style="margin-top: 2em;">
+    </div>
+    <hr/>
+
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.0.6/dist/d3-flamegraph.min.js"></script>
+    <script type="text/javascript">
+    const chartElement = document.querySelector('div#chart');
+    const chartWidth = chartElement.offsetWidth - 20;
+    var chart = flamegraph().width(chartWidth).inverted(true);
+    d3.json("json.php?<?= $_SERVER['QUERY_STRING'] ?>", function(error, data) {
+        if (error) return console.warn(error);
+        d3.select("#chart").datum(data).call(chart);
+    });
+    document.getElementById("form").addEventListener("submit", function(event){
+      event.preventDefault();
+      search();
+    });
+
+    function search() {
+      var term = document.getElementById("term").value;
+      chart.search(term);
+    }
+
+    function clear() {
+      document.getElementById('term').value = '';
+      chart.clear();
+    }
+
+    function resetZoom() {
+      chart.resetZoom();
+    }
+    </script>
+
+<?php 
+
+    /**
+     * HTML tree if needed for debugging.
+     *
     function ol($ul) {
         echo "<ol>";
         foreach ($ul as $li) {
@@ -115,6 +172,8 @@ if ($paramDay === null) {
     }
 
     ol($tree);
+     *
+     */
 
     echo $OUTPUT->footer();
 
