@@ -119,16 +119,17 @@ if ($paramDay === null) {
       </div>
     </nav>
     <h3 class="text-muted"><a href="?">Summary</a> &gt; Day: <?= ($paramDay) ?>, Hour: <?= json_encode($paramHour) ?></h3>
-    <div id="details">
+    <div id="details" style="min-height: 1.5rem;">
     </div>
-    <div id="chart" style="margin-top: 2em;">
+    <div id="chart" style="margin-top: 1rem;">
     </div>
     <hr/>
 
     <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.0.6/dist/d3-flamegraph.min.js"></script>
     <script type="text/javascript">
-    const chartElement = document.querySelector('div#chart');
+
+    var chartElement = document.getElementById('chart');
     const chartWidth = chartElement.offsetWidth - 20;
     var chart = flamegraph().width(chartWidth).inverted(true);
     d3.json("json.php?<?= $_SERVER['QUERY_STRING'] ?>", function(error, data) {
@@ -139,6 +140,9 @@ if ($paramDay === null) {
       event.preventDefault();
       search();
     });
+
+    var detailsElement = document.getElementById("details");
+    chart.setDetailsElement(details);
 
     function search() {
       var term = document.getElementById("term").value;
