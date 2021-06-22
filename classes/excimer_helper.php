@@ -1,4 +1,4 @@
-<?php 
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 /**
  * Helper functions for Excimer data formatting
  *
@@ -69,7 +69,7 @@ class excimer_helper {
     /**
      * Render D3 tree stucture as HTML OL tag.
      *
-     * (Degugging function, unused) 
+     * (Degugging function, unused)
      *
      * @param array $ol Associative array of ['name', 'value', 'children'].
      * @return str HTML ordered list

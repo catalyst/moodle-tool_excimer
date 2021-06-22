@@ -1,4 +1,4 @@
-<?php 
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 /**
  * Plugin administration pages are defined here.
  *
@@ -67,33 +67,5 @@ if ($hassiteconfig) {
         '',
         '100'
     ));
-
-    /**
-     * No filtering yet.
-     * Check in core_profiling.
-     *
-
-    $settings->add(new admin_setting_configtextarea(
-        'tool_excimer/excimeruri_contains',
-        new lang_string('excimeruri_contains', 'tool_excimer'),
-        '',
-        '',
-        PARAM_RAW,
-        '50',
-        '10'
-    ));
-
-    $settings->add(new admin_setting_configtextarea(
-        'tool_excimer/excimeruri_contains_not',
-        new lang_string('excimeruri_not_contains', 'tool_excimer'),
-        new lang_string('excimeruri_patterns_help', 'tool_excimer'),
-        '',
-        PARAM_RAW,
-        '50',
-        '10'
-    ));
-
-     *
-     */
 
 }

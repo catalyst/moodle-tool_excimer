@@ -31,10 +31,6 @@ defined('MOODLE_INTERNAL') || die();
  */
 class excimer_log {
 
-    //  --------------------------------------------------------
-    //  Create
-    //  --------------------------------------------------------
-
     /**
      * Save Excimer log to DB.
      *
@@ -61,19 +57,19 @@ class excimer_log {
 
         $day = (int)date('Ymd');
         $hour = (int)date('H');
-        $graphPath = excimer_helper::get_graph_path($entry);
-        $graphPathMD5 = md5($graphPath);
+        $graphpath = excimer_helper::get_graph_path($entry);
+        $graphpathmd5 = md5($graphpath);
         $elapsed = $entry->getTimestamp();
         $total = $entry->getEventCount();
 
         $matching = [
             'day' => $day,
             'hour' => $hour,
-            'graphpathmd5' => $graphPathMD5,
+            'graphpathmd5' => $graphpathmd5,
         ];
 
-        //  SLOW; FIXME: Will be more efficient on some data to process wholly
-        //  in memory and save as a single bulk insert at the end. 
+        // SLOW; FIXME: Will be more efficient on some data to process wholly
+        // in memory and save as a single bulk insert at the end.
         //
         $record = $DB->get_record($table, $matching);
         if (is_object($record)) {
@@ -84,18 +80,14 @@ class excimer_log {
             $record = (object) [
                 'day' => $day,
                 'hour' => $hour,
-                'graphpath' => $graphPath,
-                'graphpathmd5' => $graphPathMD5,
+                'graphpath' => $graphpath,
+                'graphpathmd5' => $graphpathmd5,
                 'elapsed' => $elapsed,
                 'total' => $total,
             ];
             $DB->insert_record($table, $record);
         }
     }
-
-    //  --------------------------------------------------------
-    //  Read
-    //  --------------------------------------------------------
 
     /**
      * Summarise data by day and hour
@@ -145,14 +137,14 @@ class excimer_log {
     public static function get_log_data($day=null, $hour=null) {
         global $DB;
 
-        $safeDay = (int)$day;
-        $safeHour = (int)$hour;
+        $safeday = (int)$day;
+        $safehour = (int)$hour;
         $clauses = ['1 = 1'];
-        if ($safeDay > 0) {
-            $clauses[] = "day = $safeDay";
+        if ($safeday > 0) {
+            $clauses[] = "day = $safeday";
         }
-        if ($safeHour > 0) {
-            $clauses[] = "hour = $safeHour";
+        if ($safehour > 0) {
+            $clauses[] = "hour = $safehour";
         }
         $condition = join(' AND ', $clauses);
 
@@ -179,7 +171,7 @@ class excimer_log {
 
         $logs = self::get_log_data($day, $hour);
         $tree = self::build_tree($logs);
-        $data = self::format_json($tree); // <-- ready for D3 json
+        $data = self::format_json($tree); // Ready for D3 json.
 
         $total = array_sum(array_map(fn($node) => (int)$node['value'], $data));
         return (object)[
@@ -201,7 +193,7 @@ class excimer_log {
      * ]
      *
      * @param iterable $data of {graphpath, total, elapsed}
-     * @return array 
+     * @return array
      */
     public static function build_tree($data) {
         $tree = [];
@@ -214,7 +206,7 @@ class excimer_log {
 
     /**
      * Build tree of call paths, storing totals.
-     * 
+     *
      * @param array $tree Reference to array, recursively updated in-place
      * @param array $path array of graph path calls
      * @param int Total calls to this graph path
@@ -223,9 +215,9 @@ class excimer_log {
      */
     public static function add_to_tree(&$tree, $path, $total, $elapsed) {
         if (count($path) > 0) {
-            [$head, $tail] = [$path[0], array_slice($path, 1)]; 
+            [$head, $tail] = [$path[0], array_slice($path, 1)];
             if (isset($tree[$head])) {
-                $tree[$head]['total'] += $total; 
+                $tree[$head]['total'] += $total;
                 if (count($tail) > 0) {
                     if (!isset($tree[$head]['total'])) {
                         $tree[$head]['children'] = [];
@@ -252,9 +244,9 @@ class excimer_log {
 
     /**
      * Turn PHP assoc array into JSON where the $name array key becomes a property.
-     * 
-     * @param array $tree associative array 
-     * @return array JSON D3 format 
+     *
+     * @param array $tree associative array
+     * @return array JSON D3 format
      */
     public static function format_json($tree) {
         $nodes = [];
@@ -271,30 +263,24 @@ class excimer_log {
         return $nodes;
     }
 
-
-    //  --------------------------------------------------------
-    //  Delete
-    //  --------------------------------------------------------
-
-
     /**
      * Delete log entries earlier than a given time; but preserve whole hours.
      *
-     * @param int $expiryTime Epoch seconds 
+     * @param int $expirytime Epoch seconds
      * @return void
      */
-    public static function delete_before_epoch_time($expiryTime) {
+    public static function delete_before_epoch_time($expirytime) {
         global $DB;
 
-        $expiryDay = date('Ymd', $expiryTime);
-        $expiryHour = date('H', $expiryTime);
+        $expiryday = date('Ymd', $expirytime);
+        $expiryhour = date('H', $expirytime);
 
         $DB->delete_records_select(
             $table = 'tool_excimer',
             $where = 'day < :expiry_day OR (day = :expiry_day AND hour < :expiry_hour)',
             $params = [
-                'expiry_day' => $expiryDay,
-                'expiry_hour' => $expiryHour,
+                'expiry_day' => $expiryday,
+                'expiry_hour' => $expiryhour,
             ]
         );
     }
