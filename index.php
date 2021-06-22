@@ -111,61 +111,87 @@ if ($paramDay === null) {
 
 ?>
 
-    <nav>
-      <div class="pull-right">
-        <form class="form-inline" id="form">
-          <a class="btn" href="javascript: resetZoom();">Reset zoom</a>
-          <div class="form-group">
-            <input type="text" class="form-control" id="term">
-          </div>
-          <a class="btn btn-primary" href="javascript: search();">Search</a>
-          <a class="btn" href="javascript: clear();">Clear</a>
-        </form>
-      </div>
+    <nav class="vertical-padding pull-right">
+      <form class="form-inline" id="form">
+        <a class="btn" href="javascript: resetZoom();">Reset zoom</a>
+        <div class="form-group">
+          <input type="text" class="form-control" id="term">
+        </div>
+        <a class="btn btn-primary" href="javascript: search();">Search</a>
+        <a class="btn" href="javascript: clear();">Clear</a>
+      </form>
     </nav>
-    <h3 class="text-muted"><a href="?">Summary</a> &gt; Day: <?= ($paramDay) ?>, Hour: <?= json_encode($paramHour) ?></h3>
+
+    <h3 class="text-muted vertical-padding"><a href="?">Summary</a>&nbsp;&gt;&nbsp;<?= ($paramDay) ?>&nbsp;/&nbsp;<?= json_encode($paramHour) ?></h3>
+
     <div id="details" style="min-height: 1.5rem;">
     </div>
-    <div id="chart" style="margin-top: 1rem;">
-    </div>
-    <hr/>
 
     <div id="loading">
         Loading...
+    </div>
+
+    <div id="chart" style="margin-top: 1rem;">
     </div>
 
     <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.0.6/dist/d3-flamegraph.min.js"></script>
     <script type="text/javascript">
 
-    var chartElement = document.getElementById('chart');
-    const chartWidth = chartElement.offsetWidth - 20;
-    var chart = flamegraph().width(chartWidth).inverted(true);
-    d3.json("json.php?<?= $_SERVER['QUERY_STRING'] ?>", function(error, data) {
-        document.getElementById('loading').remove();
-        if (error) return console.warn(error);
-        d3.select("#chart").datum(data).call(chart);
-    });
+    init();
+    window.addEventListener('resize', _ => init());
+
     document.getElementById("form").addEventListener("submit", function(event){
       event.preventDefault();
       search();
     });
 
-    var detailsElement = document.getElementById("details");
-    chart.setDetailsElement(details);
+    function init() {
+
+        var chart = document.getElementById('chart');
+        var details = document.getElementById("details");
+
+        const chartWidth = Math.max(chart.offsetWidth - 15, 500);
+
+        window.excimerChart = flamegraph();
+        window.excimerChart.width(chartWidth).inverted(true);
+        window.excimerChart.setDetailsElement(details);
+
+        if (window.excimerData === undefined) {
+            setLoading(true);
+            d3.json("json.php?<?= $_SERVER['QUERY_STRING'] ?>", function(error, data) {
+                setLoading(false);
+                if (error) return console.warn(error);
+                window.excimerData = data;
+                d3.select("#chart").datum(window.excimerData).call(window.excimerChart);
+            });
+        } else {
+            d3.select("#chart").datum(window.excimerData).call(window.excimerChart);
+        }
+    }
+
+    function setLoading(yn) {
+        document.getElementById('loading').style.display = yn ? 'block' : 'none';
+    }
 
     function search() {
-      var term = document.getElementById("term").value;
-      chart.search(term);
+        if (window.excimerChart !== undefined) {
+            var term = document.getElementById("term").value;
+            window.excimerChart.search(term);
+        }
     }
 
     function clear() {
-      document.getElementById('term').value = '';
-      chart.clear();
+        if (window.excimerChart !== undefined) {
+            document.getElementById('term').value = '';
+            window.excimerChart.clear();
+        }
     }
 
     function resetZoom() {
-      chart.resetZoom();
+        if (window.excimerChart !== undefined) {
+            window.excimerChart.resetZoom();
+        }
     }
     </script>
 
