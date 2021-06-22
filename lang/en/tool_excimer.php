@@ -23,4 +23,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Excimer Sampling Profiler';
+$string['pluginname'] = 'Excimer sampling profiler';
+$string['excimerenable'] = 'Enable profiler';
+$string['excimerexpiry_s'] = 'Log expiry (days)';
+$string['excimerperiod_ms'] = 'Sampling period (milliseconds)';
+$string['excimerrequest_ms'] = 'Minimum request duration (milliseconds)';
+$string['excimeruri_contains'] = 'URI must contain';
+$string['excimeruri_not_contains'] = 'URI must NOT contain';
+$string['excimeruri_patterns_help'] = 'One pattern per line; * for wilcards';

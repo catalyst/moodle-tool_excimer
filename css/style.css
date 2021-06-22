@@ -1,0 +1,12 @@
+#loading {
+  text-align: center;
+  font-size: 2rem;
+  color: #0f6fc5;
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}

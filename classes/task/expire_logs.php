@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
  
 /**
- * D3.js flamegraph data in JSON format.
+ * Delete logs that have expired
  *
  * @package   tool_excimer
  * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
@@ -23,26 +23,25 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_excimer\task;
+
 use tool_excimer\excimer_log;
 
-require_once(__DIR__ . '/../../../config.php');
+/**
+ * Delete logs that are past date...
+ *
+ */
+class expire_logs extends \core\task\scheduled_task {
 
-require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
-require_once($CFG->libdir.'/adminlib.php');
+    public function execute() {
 
-require_login(null, false);
+        if (!get_config('tool_monitor', 'excimerenable')) {
+            return;  //  <-- disabled
+        }
 
-$paramDay = optional_param('day', null, PARAM_INT);
-$paramHour = $paramDay !== null
-    ? optional_param('hour', null, PARAM_INT)
-    : null;
+        $expiry = (int)get_config('tool_excimer', 'excimerexpiry_s');
+        $cutoff = time() - $expiry;
+        excimer_log::delete_before_epoch_time($cutoff);
+    }
 
-if ($paramDay === null) {
-    return json_encode(['error' => 500]);
 }
-
-$tree = excimer_log::tree_data($paramDay, $paramHour);
-header('Content-Type: application/json; charset: utf-8');
-echo json_encode($tree);
-
-die();

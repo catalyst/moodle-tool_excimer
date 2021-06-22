@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_excimer\excimer_log;
+
 require_once('../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -37,6 +39,7 @@ require_login(null, false);
 //
 //  $PAGE->requires->js('/admin/tool/excimer/amd/build/bundle.js');
 $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
+$PAGE->requires->css('/admin/tool/excimer/css/style.css');
 
 $pluginName = get_string('pluginname', 'tool_excimer');
 
@@ -54,40 +57,44 @@ $paramHour = $paramDay !== null ? optional_param('hour', null, PARAM_INT) : null
 
 if ($paramDay === null) {
 
-    $count = tool_excimer_count_unique_paths();
+    $count = excimer_log::count_unique_paths();
     $s = $count === 1 ? '' : 's';
 
-    $summary = tool_excimer_summary(); 
+    $summary = excimer_log::summarize(); 
 
     echo $OUTPUT->header();
 
 ?>
 
-<h3 class="text-muted"><?= $count ?> distinct graph path<?= $s ?></h3>
+<h3 class="text-muted">Summary &gt; <?= $count ?> distinct graph path<?= $s ?></h3>
 
-<p>[NC 2021-06-17] Proof of concept. Displaying the HTML equivalent of a flame graph. Note we have average timings on every node of the tree, not just totals.</p>
+<p>[NC 2021-06-17] Proof of concept. Note we have average timings on every node of the tree, not just totals.</p>
 
 <?php 
 
-    echo '<table>';
+    echo '<table class="table table-sm w-auto table-bordered">';
     echo '<thead>';
-    echo '<th></th>';
+    echo '<th class="header"></th>';
     foreach (range(0, 23) as $hour) {
-        echo "<th>$hour</th>";
+        echo "<th style=\"text-align: center;\">$hour</th>";
     }
+    echo '<th class="header" style="text-align: right;">&Sigma;</th>';
     echo '</thead>';
     echo '<tbody>';
     foreach ($summary as $day => $totalsByHour) {
+        $dayLabel = join('-', [substr($day, 0, 4), substr($day, 4, 2), substr($day, 6, 2)]);
         echo '<tr>';
-        echo "<th><a href=\"?day=$day\">$day</a></th>";
+        echo "<th class=\"header\"><a href=\"?day=$day\">$dayLabel</a></th>";
         foreach (range(0, 23) as $hour) {
             $total = $totalsByHour[$hour] ?? 0; 
             if ($total > 0) {
-                echo "<td><a href=\"?day=$day&hour=$hour\">&nbsp;$total&nbsp;</a></td>";
+                echo "<td class=\"cell\" style=\"text-align: center;\"><a href=\"?day=$day&hour=$hour\">&nbsp;$total&nbsp;</a></td>";
             } else {
-                echo "<td>&middot;</td>";
+                echo "<td class=\"cell\" style=\"text-align: center;\">&middot;</td>";
             }
         }
+        $sum = array_sum($totalsByHour);
+        echo "<td class=\"cell\" style=\"text-align: right;\">$sum</td>";
         echo '</tr>';
     }
     echo '</tbody>';
@@ -97,12 +104,10 @@ if ($paramDay === null) {
 
 } else {
 
-    //  Now handled by json.ph
-    //  $tree = tool_excimer_tree_data($paramDay, $paramHour);
+    //  Now handled by json.php
+    //  $tree = excimer_log::tree_data($paramDay, $paramHour);
 
     echo $OUTPUT->header();
-
-    echo "<p></p>";
 
 ?>
 
@@ -110,11 +115,11 @@ if ($paramDay === null) {
       <div class="pull-right">
         <form class="form-inline" id="form">
           <a class="btn" href="javascript: resetZoom();">Reset zoom</a>
-          <a class="btn" href="javascript: clear();">Clear</a>
           <div class="form-group">
             <input type="text" class="form-control" id="term">
           </div>
           <a class="btn btn-primary" href="javascript: search();">Search</a>
+          <a class="btn" href="javascript: clear();">Clear</a>
         </form>
       </div>
     </nav>
@@ -125,6 +130,10 @@ if ($paramDay === null) {
     </div>
     <hr/>
 
+    <div id="loading">
+        Loading...
+    </div>
+
     <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.0.6/dist/d3-flamegraph.min.js"></script>
     <script type="text/javascript">
@@ -133,6 +142,7 @@ if ($paramDay === null) {
     const chartWidth = chartElement.offsetWidth - 20;
     var chart = flamegraph().width(chartWidth).inverted(true);
     d3.json("json.php?<?= $_SERVER['QUERY_STRING'] ?>", function(error, data) {
+        document.getElementById('loading').remove();
         if (error) return console.warn(error);
         d3.select("#chart").datum(data).call(chart);
     });
@@ -161,75 +171,9 @@ if ($paramDay === null) {
 
 <?php 
 
-    /**
-     * HTML tree if needed for debugging.
-     *
-    function ol($ul) {
-        echo "<ol>";
-        foreach ($ul as $li) {
-            echo "<li>" . $li['name'] . " (" . $li['value'] . ")</li>";
-            if (isset($li['children'])) {
-                echo ol($li['children']);
-            }
-        }
-        echo "</ol>";
-    }
-
-    ol($tree);
-     *
-     */
-
     echo $OUTPUT->footer();
 
 }
-
-/**
- * Not showing the D3 infrastructure for now; comment in as needed.
- *
-<div class="container">
-  <div class="header clearfix">
-    <nav>
-      <div class="pull-right">
-        <form class="form-inline" id="form">
-          <a class="btn" href="javascript: resetZoom();">Reset zoom</a>
-          <a class="btn" href="javascript: clear();">Clear</a>
-          <div class="form-group">
-            <input type="text" class="form-control" id="term">
-          </div>
-          <a class="btn btn-primary" href="javascript: search();">Search</a>
-        </form>
-      </div>
-    </nav>
-    <h3 class="text-muted"><?= $count ?> record<?= $s ?></h3>
-  </div>
-  <div id="chart">
-  </div>
-  <hr>
-  <div id="details">
-  </div>
-</div>
- *
- */
-
-//  Not showing the table for now; comment in as needed.
-//
-//  $logs = tool_excimer_get_log_data();
-//  $table = new html_table();
-//  $table->id = 'log-table';
-//  //  $table->head = array(
-    //  //  get_string('domain', 'tool_httpsreplace'),
-    //  //  get_string('count', 'tool_httpsreplace'),
-//  //  );
-//  $data = array();
-//  foreach ($logs as $line) {
-    //  $cleanGraphPath = format_text($line->graphpath, FORMAT_PLAIN);
-    //  $data[] = [(int)$line->total, '@', (float)$line->elapsed / (int)$line->total, $cleanGraphPath];
-//  }
-//  $table->data = $data;
-//  echo html_writer::table($table);
-
-//  For debugging $tree.
-//  echo "<pre>" . json_encode($tree, JSON_PRETTY_PRINT) . "</pre>";
 
 //  Not using D3 bundled module for now.
 //

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20210616" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20210622" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="tool_excimer" COMMENT="Table to store excimer log entries for hourly/daily flamegraphs">
+    <TABLE NAME="tool_excimer" COMMENT="Table to store excimer log entries for excimer flamegraphs">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="day" TYPE="int" LENGTH="8" NOTNULL="true" SEQUENCE="false" COMMENT="e.g. 20210610 for 10 Jun 2021"/>
@@ -17,6 +17,10 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="dayhourindex" UNIQUE="false" FIELDS="day, hour"/>
+        <INDEX NAME="graphpathmd5index" UNIQUE="false" FIELDS="graphpathmd5"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>
