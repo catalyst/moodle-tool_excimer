@@ -122,9 +122,9 @@ if ($paramDay === null) {
       </form>
     </nav>
 
-    <h3 class="text-muted vertical-padding"><a href="?">Summary</a>&nbsp;&gt;&nbsp;<?= ($paramDay) ?>&nbsp;/&nbsp;<?= json_encode($paramHour) ?></h3>
+    <h3 class="vertical-padding text-muted" style="padding-top: 0.2rem;"><a href="?">Summary</a>&nbsp;&gt;&nbsp;<?= ($paramDay) ?>&nbsp;/&nbsp;<?= json_encode($paramHour) ?></h3>
 
-    <div id="details" style="min-height: 1.5rem;">
+    <div id="details" style="min-height: 1.5rem; clear: both;">
     </div>
 
     <div id="loading">
@@ -163,11 +163,20 @@ if ($paramDay === null) {
                 setLoading(false);
                 if (error) return console.warn(error);
                 window.excimerData = data;
-                d3.select("#chart").datum(window.excimerData).call(window.excimerChart);
+                draw();
             });
         } else {
-            d3.select("#chart").datum(window.excimerData).call(window.excimerChart);
+            draw();
         }
+    }
+
+    function draw() {
+        var svg = document.querySelector('#chart svg');
+        if (svg !== null) {
+            svg.remove();
+        }
+        //  Append SVG:
+        d3.select("#chart").datum(window.excimerData).call(window.excimerChart);
     }
 
     function setLoading(yn) {
