@@ -57,7 +57,10 @@ function tool_excimer_after_config() {
 
         $prof = new ExcimerProfiler();
         $prof->setPeriod($sampleperiod);
-        $prof->setFlushCallback(fn($log) => tool_excimer_spool($log), EXCIMER_LOG_LIMIT);
+        $spool = function($log) {
+            return tool_excimer_spool($log);
+        };
+        $prof->setFlushCallback($spool, EXCIMER_LOG_LIMIT);
         $prof->start();
 
         $started = microtime($ms = true);

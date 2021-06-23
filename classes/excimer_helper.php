@@ -40,7 +40,10 @@ class excimer_helper {
      */
     public static function get_graph_path(ExcimerLogEntry $entry) {
         $trace = $entry->getTrace();
-        $stack = array_map(fn($call) => self::format_call($call), $trace);
+        $formatting = function($call) {
+            return self::format_call($call);
+        };
+        $stack = array_map($formatting, $trace);
         return join('|', array_reverse($stack));
     }
 

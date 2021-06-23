@@ -172,8 +172,10 @@ class excimer_log {
         $logs = self::get_log_data($day, $hour);
         $tree = self::build_tree($logs);
         $data = self::format_json($tree); // Ready for D3 json.
-
-        $total = array_sum(array_map(fn($node) => (int)$node['value'], $data));
+        $getvalues = function($item) {
+            return (int)$item['value'];
+        };
+        $total = array_sum(array_map($getvalues, $data));
         return (object)[
             'name' => 'root',
             'value' => $total,
