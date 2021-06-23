@@ -6,7 +6,14 @@ This is a Moodle admin plugin that adds the Excimer sampling profiler.
 
 ### PHP Extension
 
-(Unless using `apt install php-excimer`...)
+#### Using apt
+
+```
+sudo apt install php-excimer
+
+#### Using PECL
+
+```
 
 ```
 pecl install excimer
