@@ -33,6 +33,10 @@ use tool_excimer\excimer_log;
  */
 class expire_logs extends \core\task\scheduled_task {
 
+    public function get_name() {
+        return 'tool_excimer: Expire logs';
+    }
+
     public function execute() {
 
         if (!get_config('tool_excimer', 'excimerenable')) {
