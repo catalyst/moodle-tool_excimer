@@ -43,29 +43,21 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox(
         'tool_excimer/excimerenable',
         new lang_string('excimerenable', 'tool_excimer'),
-        '',
-        1
-    ));
+        '', 1));
 
     $settings->add(new admin_setting_configduration(
         'tool_excimer/excimerexpiry_s',
         new lang_string('excimerexpiry_s', 'tool_excimer'),
-        '',
-        7 * 24 * 3600
-    ));
+        '', WEEKSECS));
 
     $settings->add(new admin_setting_configtext(
         'tool_excimer/excimersample_ms',
         new lang_string('excimerperiod_ms', 'tool_excimer'),
-        '',
-        '100'
-    ));
+        '', '100', PARAM_INT));
 
     $settings->add(new admin_setting_configtext(
         'tool_excimer/excimertrigger_ms',
         new lang_string('excimerrequest_ms', 'tool_excimer'),
-        '',
-        '100'
-    ));
+        '', '100', PARAM_INT));
 
 }
