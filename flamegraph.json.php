@@ -30,7 +30,7 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-require_login(null, false);
+admin_externalpage_setup('tool_excimer_report');
 
 $paramday = optional_param('day', null, PARAM_INT);
 $paramhour = $paramday !== null
@@ -44,5 +44,3 @@ if ($paramday === null) {
 $tree = excimer_log::tree_data($paramday, $paramhour);
 header('Content-Type: application/json; charset: utf-8');
 echo json_encode($tree);
-
-die();

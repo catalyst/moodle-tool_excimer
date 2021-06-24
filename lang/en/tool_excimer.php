@@ -26,6 +26,7 @@
 $string['pluginname'] = 'Excimer sampling profiler';
 $string['excimerenable'] = 'Enable profiler';
 $string['excimerexpiry_s'] = 'Log expiry (days)';
+$string['excimertask_expire_logs'] = 'Expire excimer logs';
 $string['excimerperiod_ms'] = 'Sampling period (milliseconds)';
 $string['excimerrequest_ms'] = 'Minimum request duration (milliseconds)';
 $string['excimeruri_contains'] = 'URI must contain';

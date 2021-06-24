@@ -279,9 +279,10 @@ class excimer_log {
 
         $DB->delete_records_select(
             $table = 'tool_excimer',
-            $where = 'day < :expiry_day OR (day = :expiry_day AND hour < :expiry_hour)',
+            $where = 'day < :expiry_day1 OR (day = :expiry_day2 AND hour < :expiry_hour)',
             $params = [
-                'expiry_day' => $expiryday,
+                'expiry_day1' => $expiryday,
+                'expiry_day2' => $expiryday,
                 'expiry_hour' => $expiryhour,
             ]
         );

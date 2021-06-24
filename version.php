@@ -23,12 +23,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2021061600;   // Plugin released 8th June 2021.
-$plugin->requires = 2019052006;  // Our lowest supported Moodle (3.7.6).
-// $plugin->supported = TODO;    // Available as of Moodle 3.9.0 or later.
-// $plugin->incompatible = ;     // Available as of Moodle 3.9.0 or later.
+$plugin->version = 2021062400;
+$plugin->release = 2021062400;
+
+$plugin->requires = 2019052006;    // Our lowest supported Moodle (3.7.6).
+
+// TODO $plugin->supported = ;     // Available as of Moodle 3.9.0 or later.
+// TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
+
 $plugin->component = 'tool_excimer';
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = 'v3.7-r1';
 
 $plugin->dependencies = [];

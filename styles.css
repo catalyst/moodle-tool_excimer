@@ -1,0 +1,14 @@
+/* tool_excimer styles */
+
+.path-admin-tool-excimer-index #loading {
+    text-align: center;
+    font-size: 2rem;
+    color: #0f6fc5;
+    animation: path-admin-tool-excimer-blinker 1s linear infinite;
+}
+
+@keyframes path-admin-tool-excimer-blinker {
+    50% {
+        opacity: 0;
+    }
+}
