@@ -3,7 +3,7 @@
 ## What is this plugin?
 
 This is a Moodle admin plugin that provides developers with insights into not
-only what pages in your site are sly, but why. It uses the the Excimer sampling
+only what pages in your site are slow, but why. It uses the the Excimer sampling
 php profiler to so.
 
 It is complementary to the profiler in core which uses Tideways. The key downside
