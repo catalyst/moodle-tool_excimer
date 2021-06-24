@@ -62,8 +62,6 @@ if ($paramday === null) {
 
 <h3 class="text-muted">Summary &gt; <?php echo $count ?> distinct graph path<?php echo $s ?></h3>
 
-<p>[NC 2021-06-17] Proof of concept. Note we have average timings on every node of the tree, not just totals.</p>
-
     <?php
 
     echo '<table class="table table-sm w-auto table-bordered">';
@@ -101,6 +99,11 @@ if ($paramday === null) {
 } else {
 
     echo $OUTPUT->header();
+
+    $request = new moodle_url($url, [
+        'day' => $paramday,
+        'hour' => $paramhour,
+    ]);
 
 ?>
 
@@ -154,7 +157,7 @@ if ($paramday === null) {
 
         if (window.excimerData === undefined) {
             setLoading(true);
-            d3.json("flamegraph.json.php?<?php echo $_SERVER['QUERY_STRING'] ?>", function(error, data) {
+            d3.json('flamegraph.json.php?<?php echo $request->get_query_string() ?>', function(error, data) {
                 setLoading(false);
                 if (error) return console.warn(error);
                 window.excimerData = data;
