@@ -58,5 +58,28 @@ Then login as admin (it should detect the extension), and click through the upgr
 
 ## Configuration
 
+## Support
 
+If you have issues please log them in github here
+
+https://github.com/catalyst/moodle-tool-excimer/issues
+
+Please note our time is limited, so if you need urgent support or want to
+sponsor a new feature then please contact Catalyst IT Australia:
+
+https://www.catalyst-au.net/contact-us
+
+
+## Credits
+
+Thanks in particular to the to the Wikimedia Foundation for building the awseome Excimer profiler:
+
+https://github.com/wikimedia/php-excimer/
+
+
+This plugin was developed by Catalyst IT Australia:
+
+https://www.catalyst-au.net/
+
+<img alt="Catalyst IT" src="https://cdn.rawgit.com/CatalystIT-AU/moodle-auth_saml2/master/pix/catalyst-logo.svg" width="400">
 
