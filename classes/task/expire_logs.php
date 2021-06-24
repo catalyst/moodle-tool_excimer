@@ -34,15 +34,13 @@ use tool_excimer\excimer_log;
 class expire_logs extends \core\task\scheduled_task {
 
     public function get_name() {
-        return get_string('excimertask_expire_logs', 'tool_excimer';
+        return get_string('excimertask_expire_logs', 'tool_excimer');
     }
 
     public function execute() {
-
         if (!get_config('tool_excimer', 'excimerenable')) {
             return;
         }
-
         $expiry = (int)get_config('tool_excimer', 'excimerexpiry_s');
         $cutoff = time() - $expiry;
         excimer_log::delete_before_epoch_time($cutoff);

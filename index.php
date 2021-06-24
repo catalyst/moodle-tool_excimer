@@ -29,14 +29,11 @@ require_once('../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-// TODO [NC 2021-06-17] Lock down to admin user.
-//
-require_login(null, false);
+admin_externalpage_setup('tool_excimer_report');
 
-// TODO: Just proof-of-concept now; add to third-party libraries.
+// TODO: Just proof-of-concept now; add to third-party libraries or JS bundle later.
 
 $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
-$PAGE->requires->css('/admin/tool/excimer/css/style.css');
 
 $pluginname = get_string('pluginname', 'tool_excimer');
 
@@ -157,7 +154,7 @@ if ($paramday === null) {
 
         if (window.excimerData === undefined) {
             setLoading(true);
-            d3.json("json.php?<?php echo $_SERVER['QUERY_STRING'] ?>", function(error, data) {
+            d3.json("flamegraph.json.php?<?php echo $_SERVER['QUERY_STRING'] ?>", function(error, data) {
                 setLoading(false);
                 if (error) return console.warn(error);
                 window.excimerData = data;

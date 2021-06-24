@@ -27,12 +27,13 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
 
-    $ADMIN->add('tools', new admin_externalpage(
-        'toolexcimer',
+    $report = new admin_externalpage(
+        'tool_excimer_report',
         get_string('pluginname', 'tool_excimer'),
-        "$CFG->wwwroot/$CFG->admin/tool/excimer/index.php",
+        new moodle_url('/admin/tool/excimer/index.php'),
         'moodle/role:manage'
-    ));
+    );
+    $ADMIN->add('reports', $report);
 
     $settings = new admin_settingpage(
         'tool_excimer',
