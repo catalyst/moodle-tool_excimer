@@ -33,6 +33,5 @@ $plugin->requires = 2019052006;    // Our lowest supported Moodle (3.7.6).
 
 $plugin->component = 'tool_excimer';
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = 'v3.7-r1';
 
 $plugin->dependencies = [];
