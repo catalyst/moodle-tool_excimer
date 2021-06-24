@@ -25,7 +25,7 @@ path was executed or not.
 
 This plugin does also not aim to be a full Application performance management(APM)
 solution such as New Relic. But if you don't have or cannot afford an APM this
-plugin should be another great tool to in your tool box.
+plugin should be another great tool to have in your tool box.
 
 
 ## Installation
