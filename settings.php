@@ -31,7 +31,7 @@ if ($hassiteconfig) {
         'tool_excimer_report',
         get_string('pluginname', 'tool_excimer'),
         new moodle_url('/admin/tool/excimer/index.php'),
-        'moodle/role:manage'
+        'moodle/site:config'
     );
     $ADMIN->add('reports', $report);
 
