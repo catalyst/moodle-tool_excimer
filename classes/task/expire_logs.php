@@ -25,7 +25,7 @@
 
 namespace tool_excimer\task;
 
-use tool_excimer\excimer_log;
+use tool_excimer\excimer_call;
 
 /**
  * Delete logs that are past date...
@@ -43,7 +43,7 @@ class expire_logs extends \core\task\scheduled_task {
         }
         $expiry = (int)get_config('tool_excimer', 'excimerexpiry_s');
         $cutoff = time() - $expiry;
-        excimer_log::delete_before_epoch_time($cutoff);
+        excimer_call::delete_before_epoch_time($cutoff);
     }
 
 }

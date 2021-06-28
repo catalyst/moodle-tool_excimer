@@ -23,7 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\excimer_log;
+use tool_excimer\excimer_call;
+use tool_excimer\excimer_profile;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,7 +34,7 @@ const EXCIMER_TRIGGER = 0.01; // Default in seconds; used if config is out of se
 
 // Global var to store logs as they are generated; add entries here for now.
 
-$excimerlogentries = [];
+$excimerlogs = [];
 
 
 /**
@@ -78,10 +79,8 @@ function tool_excimer_after_config() {
  * @return void
  */
 function tool_excimer_spool(ExcimerLog $log) {
-    global $excimerlogentries;
-    foreach ($log as $entry) {
-        $excimerlogentries[] = $entry;
-    }
+    global $excimerlogs;
+    $excimerlogs[] = $log;
 }
 
 /**
@@ -97,21 +96,16 @@ function tool_excimer_spool(ExcimerLog $log) {
  * @return void
  */
 function tool_excimer_shutdown(ExcimerProfiler $prof, $started) {
-    global $excimerlogentries;
-
-    $stopped  = microtime($ms = true);
-    $elapsedms = ($stopped - $started) * 1000;
-
-    $triggerms = (int)get_config('tool_excimer', 'excimertrigger_ms');
-    $hassensiblerange = $triggerms > 0 && $triggerms < 600000;  // 10 mins max
-    $triggervalue = $hassensiblerange ? $triggerms : EXCIMER_TRIGGER;
-
-    if ($elapsedms > $triggervalue) {
+    global $excimerlogs;
+    $isenabled = (bool)get_config('tool_excimer', 'excimerenable');
+    if ($isenabled) {
+        $stopped  = microtime($ms = true);
         $prof->stop();
         $prof->flush();
-        if (is_iterable($excimerlogentries)) {
-            foreach ($excimerlogentries as $entry) {
-                excimer_log::save_entry($entry);
+        $id = excimer_profile::conditional_save($started, $stopped);
+        if (is_iterable($excimerlogs)) {
+            foreach ($excimerlogs as $log) {
+                excimer_call::save_log_entries($log, $started, $id);
             }
         }
     }

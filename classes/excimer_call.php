@@ -16,77 +16,65 @@
 
 namespace tool_excimer;
 
+use ExcimerLog;
 use ExcimerLogEntry;
 use tool_excimer\excimer_helper;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Manage excimer_log table
+ * Manage excimer_call table
  *
  * @package   tool_excimer
  * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class excimer_log {
+class excimer_call {
 
     /**
      * Save Excimer log to DB.
      *
-     * moodle=# \d mdl_tool_excimer;
-                                       Table "public.mdl_tool_excimer"
-        Column    |         Type          |                           Modifiers
-    --------------+-----------------------+---------------------------------------------------------------
-     id           | bigint                | not null default nextval('mdl_tool_excimer_id_seq'::regclass)
-     day          | integer               | not null
-     hour         | smallint              | not null
-     graphpath    | text                  | not null
-     graphpathmd5 | character varying(32) | not null default ''::character varying
-     elapsed      | numeric(12,6)         | not null
-     total        | bigint                | not null
-    Indexes:
-        "mdl_toolexci_id_pk" PRIMARY KEY, btree (id)
+
+CREATE TABLE mdl_tool_excimer (
+
+    id              BIGSERIAL,
+    day             INTEGER         NOT NULL,
+    hour            SMALLINT        NOT NULL,
+    graphpath       TEXT            NOT NULL,
+    graphpathmd5    VARCHAR(32)     NOT NULL DEFAULT '',
+    elapsed         NUMERIC(12,6)   NOT NULL,
+    total           BIGINT          NOT NULL,
+    profileid       BIGINT,
+);
+
+     *
+     * @param ExcimerLog $log The iterable list of entries to be inserted
+     * @param int $created The time this request was initiated (same as profile, if any)
+     * @param int $profileid The profile ID (if any)
      *
      */
-    public static function save_entry(ExcimerLogEntry $entry) {
-
+    public static function save_log_entries(ExcimerLog $log, $created, $profileid=null) {
         global $DB;
-
-        $table = 'tool_excimer';
-
-        $day = (int)date('Ymd');
-        $hour = (int)date('H');
-        $graphpath = excimer_helper::get_graph_path($entry);
-        $graphpathmd5 = md5($graphpath);
-        $elapsed = $entry->getTimestamp();
-        $total = $entry->getEventCount();
-
-        $matching = [
-            'day' => $day,
-            'hour' => $hour,
-            'graphpathmd5' => $graphpathmd5,
-        ];
-
-        // SLOW; FIXME: Will be more efficient on some data to process wholly
-        // in memory and save as a single bulk insert at the end.
-        //
-        $record = $DB->get_record($table, $matching);
-        if (is_object($record)) {
-            $record->total = (int)$record->total + (int)$total;
-            $record->elapsed = (float)$record->elapsed + (float)$elapsed;
-            $DB->update_record($table, $record);
-        } else {
-            $record = (object) [
+        $records = [];
+        foreach ($log as $entry) {
+            $day = (int)date('Ymd', $created);
+            $hour = (int)date('H', $created);
+            $graphpath = excimer_helper::get_graph_path($entry);
+            $graphpathmd5 = md5($graphpath);
+            $elapsed = $entry->getTimestamp();
+            $total = $entry->getEventCount();
+            $records[] = (object) [
                 'day' => $day,
                 'hour' => $hour,
                 'graphpath' => $graphpath,
                 'graphpathmd5' => $graphpathmd5,
                 'elapsed' => $elapsed,
                 'total' => $total,
+                'profileid' => $profileid,
             ];
-            $DB->insert_record($table, $record);
-        }
+        };
+        $DB->insert_records('tool_excimer_call', $records);
     }
 
     /**
@@ -98,7 +86,7 @@ class excimer_log {
         global $DB;
         $sql = "
             SELECT day, hour, SUM(total)
-              FROM {tool_excimer}
+              FROM {tool_excimer_call}
           GROUP BY day, hour
           ORDER BY day, hour
         ";
@@ -123,8 +111,28 @@ class excimer_log {
      */
     public static function count_unique_paths() {
         global $DB;
-        $sql = "SELECT COUNT(DISTINCT graphpathmd5) FROM {tool_excimer}";
+        $sql = "SELECT COUNT(DISTINCT graphpathmd5) FROM {tool_excimer_call}";
         return $DB->get_field_sql($sql);
+    }
+    /**
+     * Select log data by profileid
+     *
+     * @param int $profileid
+     * @return iterable Result set for query
+     */
+    public static function get_profile_data($profileid) {
+        global $DB;
+        $safeprofileid = (int)$profileid;
+        $sql = "
+              SELECT  graphpath,
+                      SUM(total) AS total,
+                      SUM(elapsed) AS elapsed
+                FROM  {tool_excimer_call}
+               WHERE  profileid = $safeprofileid
+            GROUP BY  graphpath
+            ORDER BY  graphpath
+        ";
+        return $DB->get_recordset_sql($sql);
     }
 
     /**
@@ -134,7 +142,7 @@ class excimer_log {
      * @param int $hour e.g. 20
      * @return iterable Result set for query
      */
-    public static function get_log_data($day=null, $hour=null) {
+    public static function get_time_based_data($day=null, $hour=null) {
         global $DB;
 
         $safeday = (int)$day;
@@ -149,28 +157,29 @@ class excimer_log {
         $condition = join(' AND ', $clauses);
 
         $sql = "
-              SELECT graphpath, SUM(total) AS total, SUM(elapsed) AS elapsed
-                FROM {tool_excimer}
-               WHERE $condition
-            GROUP BY graphpath
-            ORDER BY graphpath
+              SELECT  graphpath,
+                      SUM(total) AS total,
+                      SUM(elapsed) AS elapsed
+                FROM  {tool_excimer_call}
+               WHERE  $condition
+            GROUP BY  graphpath
+            ORDER BY  graphpath
         ";
 
         return $DB->get_recordset_sql($sql);
     }
 
     /**
-     * Turn graphpaths from excimer_log entries into D3 format recursive JSON
+     * Turn graphpaths from excimer_call entries into D3 format recursive JSON
      * for flame graphs.
      *
      * @param int $day e.g. 20210621
      * @param int $hour e.g. 20
      * @return string JSON {'name': 'root', 'value': value', 'children': [...]}
      */
-    public static function tree_data($day=null, $hour=null) {
+    public static function tree_data($calls) {
 
-        $logs = self::get_log_data($day, $hour);
-        $tree = self::build_tree($logs);
+        $tree = self::build_tree($calls);
         $data = self::format_json($tree); // Ready for D3 json.
         $getvalues = function($item) {
             return (int)$item['value'];
@@ -278,7 +287,7 @@ class excimer_log {
         $expiryhour = date('H', $expirytime);
 
         $DB->delete_records_select(
-            $table = 'tool_excimer',
+            $table = 'tool_excimer_call',
             $where = 'day < :expiry_day1 OR (day = :expiry_day2 AND hour < :expiry_hour)',
             $params = [
                 'expiry_day1' => $expiryday,

@@ -1,6 +1,6 @@
 /* tool_excimer styles */
 
-.path-admin-tool-excimer-index #loading {
+#page-admin-tool-excimer-index #loading {
     text-align: center;
     font-size: 2rem;
     color: #0f6fc5;
