@@ -1,5 +1,7 @@
 # moodle-tool_excimer
 
+NOTE: This plugin currently in early stage development and is NOT production ready yet, stay tuned!
+
 ## What is this plugin?
 
 This is a Moodle admin plugin that provides developers with insights into not
