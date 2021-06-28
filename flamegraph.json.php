@@ -38,7 +38,7 @@ $paramhour = $paramday !== null
     ? optional_param('hour', null, PARAM_INT)
     : null;
 
-if ($paramday === null || $paramprofile === null) {
+if ($paramday === null && $paramprofile === null) {
     return json_encode(['error' => 500]);
 } else if ($paramday !== null) {
     $data = excimer_call::get_time_based_data($paramday, $paramhour);

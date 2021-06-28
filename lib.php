@@ -96,16 +96,20 @@ function tool_excimer_spool(ExcimerLog $log) {
  * @return void
  */
 function tool_excimer_shutdown(ExcimerProfiler $prof, $started) {
-    global $excimerlogs;
+    global $DB, $excimerlogs;
     $isenabled = (bool)get_config('tool_excimer', 'excimerenable');
     if ($isenabled) {
-        $stopped  = microtime($ms = true);
-        $prof->stop();
-        $prof->flush();
-        $id = excimer_profile::conditional_save($started, $stopped);
-        if (is_iterable($excimerlogs)) {
-            foreach ($excimerlogs as $log) {
-                excimer_call::save_log_entries($log, $started, $id);
+        // Running uninstall_package in CLI will error here unless we check.
+        $tableexists = $DB->get_manager()->table_exists('tool_excimer_call');
+        if ($tableexists) {
+            $stopped  = microtime($ms = true);
+            $prof->stop();
+            $prof->flush();
+            $id = excimer_profile::conditional_save($started, $stopped);
+            if (is_iterable($excimerlogs)) {
+                foreach ($excimerlogs as $log) {
+                    excimer_call::save_log_entries($log, $started, $id);
+                }
             }
         }
     }

@@ -55,10 +55,10 @@ class excimer_profile {
         $request = $_SERVER['PHP_SELF'] ?? 'UNKNOWN';
 
         if (self::is_cli()) {
-            // Web request: split CRON tasks later.
-            return;
-            //  $type = 'cli';
-            //  $parameters = join(' ', array_slice($argv, 1));
+            // Our setup lacks $argv even though register_argc_argv is On; use
+            // $_SERVER['argv'] instead.
+            $type = 'cli';
+            $parameters = join(' ', array_slice($_SERVER['argv'], 1));
         } else {
             // Web request: split API calls later.
             $type = 'web';
@@ -71,8 +71,9 @@ class excimer_profile {
         // Was the script too slow?
         $duration = round($stopped - $started, 6);
         $minduration = round((int)get_config('tool_excimer', 'excimertrigger_ms') / 1000, 6);
+        $s = 's';
         if ($duration > $minduration) {
-            $explanations[] = "Slower than $minduration\s ($duration\s)";
+            $explanations[] = "Slower than $minduration$s ($duration$s)";
         }
 
         // Add extra checks here...
@@ -109,9 +110,9 @@ class excimer_profile {
     /**
      * Listing of latest profile data
      *
-     * @return array e.g. [20210621 => [20 => 3451, ...], ...]
+     * @return iterable
      */
-    public static function listing($type='all', $limit=500) {
+    public static function listing() {
         global $DB;
         $sql = "
             SELECT *
