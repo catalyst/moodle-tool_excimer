@@ -24,6 +24,8 @@
  */
 
 $string['pluginname'] = 'Excimer sampling profiler';
+
+// Admin.
 $string['excimerenable'] = 'Enable profiler';
 $string['excimerexpiry_s'] = 'Log expiry (days)';
 $string['excimertask_expire_logs'] = 'Expire excimer logs';
@@ -32,3 +34,16 @@ $string['excimerrequest_ms'] = 'Minimum request duration (milliseconds)';
 $string['excimeruri_contains'] = 'URI must contain';
 $string['excimeruri_not_contains'] = 'URI must NOT contain';
 $string['excimeruri_patterns_help'] = 'One pattern per line; * for wilcards';
+
+// Profile table.
+$string['excimerfield_id'] = 'ID';
+$string['excimerfield_type'] = 'Type';
+$string['excimerfield_created'] = 'Created';
+$string['excimerfield_explanation'] = 'Explanation';
+
+// Terminology.
+$string['excimerterm_profile'] = 'Profile';
+
+// Profile types.
+$string['excimertype_web'] = 'Web';
+$string['excimertype_cli'] = 'CLI';

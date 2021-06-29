@@ -23,11 +23,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\excimer_log;
+use tool_excimer\excimer_call;
+use tool_excimer\excimer_profile;
 
 require_once('../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir.'/tablelib.php');
 
 admin_externalpage_setup('tool_excimer_report');
 
@@ -48,62 +50,26 @@ $PAGE->set_heading($pluginname);
 
 $paramday = optional_param('day', null, PARAM_INT);
 $paramhour = $paramday !== null ? optional_param('hour', null, PARAM_INT) : null;
+$paramprofile = optional_param('profile', null, PARAM_INT);
 
-if ($paramday === null) {
-
-    $count = excimer_log::count_unique_paths();
-    $s = $count === 1 ? '' : 's';
-
-    $summary = excimer_log::summarize();
-
-    echo $OUTPUT->header();
-
-?>
-
-<h3 class="text-muted">Summary &gt; <?php echo $count ?> distinct graph path<?php echo $s ?></h3>
-
-    <?php
-
-    echo '<table class="table table-sm w-auto table-bordered">';
-    echo '<thead>';
-    echo '<th class="header"></th>';
-    foreach (range(0, 23) as $hour) {
-        echo "<th style=\"text-align: center;\">$hour</th>";
-    }
-    echo '<th class="header" style="text-align: right;">&Sigma;</th>';
-    echo '</thead>';
-    echo '<tbody>';
-    foreach ($summary as $day => $totalsbyhour) {
-        $daylabel = join('-', [substr($day, 0, 4), substr($day, 4, 2), substr($day, 6, 2)]);
-        echo '<tr>';
-        echo "<th class=\"header\"><a href=\"?day=$day\">$daylabel</a></th>";
-        foreach (range(0, 23) as $hour) {
-            $total = $totalsbyhour[$hour] ?? 0;
-            if ($total > 0) {
-                echo "<td class=\"cell\" style=\"text-align: center;\">";
-                echo "<a href=\"?day=$day&hour=$hour\">&nbsp;$total&nbsp;</a>";
-                echo "</td>";
-            } else {
-                echo "<td class=\"cell\" style=\"text-align: center;\">&middot;</td>";
-            }
-        }
-        $sum = array_sum($totalsbyhour);
-        echo "<td class=\"cell\" style=\"text-align: right;\">$sum</td>";
-        echo '</tr>';
-    }
-    echo '</tbody>';
-    echo '</table>';
-
-    echo $OUTPUT->footer();
-
-} else {
-
-    echo $OUTPUT->header();
-
-    $request = new moodle_url($url, [
+$params = [];
+if ($paramday !== null) {
+    $params = [
         'day' => $paramday,
         'hour' => $paramhour,
-    ]);
+    ];
+    $title = "$paramday / " . json_encode($paramhour);
+} else if ($paramprofile !== null) {
+    $params = [
+        'profile' => $paramprofile,
+    ];
+    $title = get_string('excimerterm_profile', 'tool_excimer') . " #" . (int)$paramprofile;
+}
+$request = new moodle_url($url, $params);
+
+if (count($params) > 0) {
+
+    echo $OUTPUT->header();
 
 ?>
 
@@ -119,7 +85,7 @@ if ($paramday === null) {
     </nav>
 
     <h3 class="vertical-padding text-muted" style="padding-top: 0.2rem;">
-        <a href="?">Summary</a>&nbsp;&gt;&nbsp;<?php echo ($paramday) ?>&nbsp;/&nbsp;<?php echo json_encode($paramhour) ?>
+        <a href="?">Summary</a>&nbsp;&gt;&nbsp;<?php echo $title ?>
     </h3>
 
     <div id="details" style="min-height: 1.5rem; clear: both;">
@@ -157,7 +123,7 @@ if ($paramday === null) {
 
         if (window.excimerData === undefined) {
             setLoading(true);
-            d3.json('flamegraph.json.php?<?php echo $request->get_query_string() ?>', function(error, data) {
+            d3.json('flamegraph.json.php?<?php echo $request->get_query_string($escaped = false) ?>', function(error, data) {
                 setLoading(false);
                 if (error) return console.warn(error);
                 window.excimerData = data;
@@ -203,6 +169,68 @@ if ($paramday === null) {
     </script>
 
     <?php
+
+    echo $OUTPUT->footer();
+
+} else {
+
+    $count = excimer_call::count_unique_paths();
+    $s = $count === 1 ? '' : 's';
+    $summary = excimer_call::summarize();
+
+    echo $OUTPUT->header();
+
+
+    echo '<h3 class="text-muted">Summary &gt; ';
+    echo "$count distinct graph path$s";
+    echo '</h3>';
+
+    echo '<table class="table table-sm w-auto table-bordered">';
+    echo '<thead>';
+    echo '<th class="header"></th>';
+    foreach (range(0, 23) as $hour) {
+        echo "<th style=\"text-align: center;\">$hour</th>";
+    }
+    echo '<th class="header" style="text-align: right;">&Sigma;</th>';
+    echo '</thead>';
+    echo '<tbody>';
+    foreach ($summary as $day => $totalsbyhour) {
+        $daylabel = join('-', [substr($day, 0, 4), substr($day, 4, 2), substr($day, 6, 2)]);
+        echo '<tr>';
+        echo "<th class=\"header\"><a href=\"?day=$day\">$daylabel</a></th>";
+        foreach (range(0, 23) as $hour) {
+            $total = $totalsbyhour[$hour] ?? 0;
+            if ($total > 0) {
+                echo "<td class=\"cell\" style=\"text-align: center;\">";
+                echo "<a href=\"?day=$day&hour=$hour\">&nbsp;$total&nbsp;</a>";
+                echo "</td>";
+            } else {
+                echo "<td class=\"cell\" style=\"text-align: center;\">&middot;</td>";
+            }
+        }
+        $sum = array_sum($totalsbyhour);
+        echo "<td class=\"cell\" style=\"text-align: right;\">$sum</td>";
+        echo '</tr>';
+    }
+    echo '</tbody>';
+    echo '</table>';
+
+    $n = excimer_profile::count_profiles();
+    $listing = excimer_profile::listing();
+
+    echo "<h3>Profiles captured: $n</h3>";
+    echo '<table class="table table-sm w-auto table-bordered">';
+    foreach ($listing as $profile) {
+        echo '<tr>';
+        echo '<td>' . (int)$profile->id . '</td>';
+        echo '<td>' . s($profile->type) . '</td>';
+        echo '<td>' . date('Y-m-d H:i:s', $profile->created) . '</td>';
+        echo '<td><a href="?profile=' . (int)$profile->id . '">' . s($profile->explanation) . '</a></td>';
+        echo '<td>' .s($profile->request) . '</td>';
+        echo '<td>' .s($profile->parameters) . '</td>';
+        echo '</tr>';
+    }
+    echo '</table>';
 
     echo $OUTPUT->footer();
 
