@@ -17,6 +17,9 @@ is a critical tool if you can reproduce an issue, but cannot be used to say why
 something was slow retrospecively last Friday out of hours and you only found out
 a few days later.
 
+![image](https://user-images.githubusercontent.com/46659321/122533874-59b15400-d065-11eb-833c-cd6d00ffbf1c.png)
+
+
 ## What this plugin is not
 
 This plugin does not aim to replace the core Tideways based profiler, they are complimentary.
