@@ -67,7 +67,7 @@ Then login as admin (it should detect the extension), and click through the upgr
 
 If you have issues please log them in github here
 
-https://github.com/catalyst/moodle-tool-excimer/issues
+https://github.com/catalyst/moodle-tool_excimer/issues
 
 Please note our time is limited, so if you need urgent support or want to
 sponsor a new feature then please contact Catalyst IT Australia:
