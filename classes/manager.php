@@ -70,16 +70,6 @@ class manager {
     }
 
     /**
-     * Gets a single profile, including data.
-     * @param $id
-     * @return object
-     */
-    public static function getprofile($id): object {
-        global $DB;
-        return $DB->get_record('tool_excimer_profiles', ['id' => $id],'*', MUST_EXIST);
-    }
-
-    /**
      * Initialises the profiler and also sets up the shutdown callback.
      */
     public static function init(): void {
@@ -96,62 +86,12 @@ class manager {
 
         // Call self::saveprofile whenever the logs get flushed.
         $spool = function(\ExcimerLog $log) use ($started) {
-            manager::saveprofile($log, $started);
+            profile::save($log, $started);
         };
         $prof->setFlushCallback($spool, self::EXCIMER_LOG_LIMIT);
         $prof->start();
 
         // Stop the profiler as a part of the shutdown sequence.
         \core_shutdown_manager::register_function(function() use ($prof) { $prof->stop(); $prof->flush(); });
-    }
-
-    /**
-     * Gets the request type (web, cli, ...) and the parameters of the request.
-     *
-     * @return array A tuple [type, parameters].
-     */
-    // TODO strip out FLAMEME parameter?
-
-    function gettypeandparams() {
-        if (php_sapi_name() == 'cli') {
-            // Our setup lacks $argv even though register_argc_argv is On; use
-            // $_SERVER['argv'] instead.
-            $type = 'cli';
-            $parameters = join(' ', array_slice($_SERVER['argv'], 1));
-        } else {
-            // Web request: split API calls later.
-            $type = 'web';
-            $parameters = $_SERVER['QUERY_STRING'];
-        }
-
-        return [$type, $parameters];
-    }
-
-    /**
-     * Saves a snaphot of the logs into the database.
-     *
-     * @param \ExcimerLog $log
-     * @param float $started
-     */
-    public static function saveprofile(\ExcimerLog $log, float $started): void {
-        global $DB;
-        $stopped  = microtime(true);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        $flamedatad3 = json_encode(converter::process($flamedata));
-        list($type, $parameters) = self::gettypeandparams();
-
-        $id = $DB->insert_record('tool_excimer_profiles', [
-            'type' => $type,
-            'method' => $_SERVER['REQUEST_METHOD'] ?? '',
-            'created' => (int)$started,
-            'duration' => $stopped - $started,
-            'request' => $_SERVER['PHP_SELF'] ?? 'UNKNOWN',
-            'parameters' => $parameters,
-            'responsecode' => http_response_code(),
-            'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-            'explanation' => '', // TODO support this
-            'flamedata' => $flamedata,
-            'flamedatad3' => $flamedatad3
-        ]);
     }
 }
