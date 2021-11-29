@@ -44,7 +44,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox(
         'tool_excimer/excimerenable',
         new lang_string('excimerenable', 'tool_excimer'),
-        '', 1));
+        '', 0));
 
     $settings->add(new admin_setting_configduration(
         'tool_excimer/excimerexpiry_s',

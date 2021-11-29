@@ -25,6 +25,8 @@
 
 use tool_excimer\excimer_call;
 use tool_excimer\excimer_profile;
+use tool_excimer\manager;
+use tool_excimer\profile_table;
 
 require_once('../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
@@ -48,26 +50,9 @@ $PAGE->set_title($pluginname);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
 
-$paramday = optional_param('day', null, PARAM_INT);
-$paramhour = $paramday !== null ? optional_param('hour', null, PARAM_INT) : null;
-$paramprofile = optional_param('profile', null, PARAM_INT);
+$profileid = optional_param('profileid', null, PARAM_INT);
 
-$params = [];
-if ($paramday !== null) {
-    $params = [
-        'day' => $paramday,
-        'hour' => $paramhour,
-    ];
-    $title = "$paramday / " . json_encode($paramhour);
-} else if ($paramprofile !== null) {
-    $params = [
-        'profile' => $paramprofile,
-    ];
-    $title = get_string('excimerterm_profile', 'tool_excimer') . " #" . (int)$paramprofile;
-}
-$request = new moodle_url($url, $params);
-
-if (count($params) > 0) {
+if (isset($profileid)) {
 
     echo $OUTPUT->header();
 
@@ -83,10 +68,6 @@ if (count($params) > 0) {
         <a class="btn" href="javascript: clear();">Clear</a>
       </form>
     </nav>
-
-    <h3 class="vertical-padding text-muted" style="padding-top: 0.2rem;">
-        <a href="?">Summary</a>&nbsp;&gt;&nbsp;<?php echo $title ?>
-    </h3>
 
     <div id="details" style="min-height: 1.5rem; clear: both;">
     </div>
@@ -123,7 +104,7 @@ if (count($params) > 0) {
 
         if (window.excimerData === undefined) {
             setLoading(true);
-            d3.json('flamegraph.json.php?<?php echo $request->get_query_string($escaped = false) ?>', function(error, data) {
+            d3.json('flamegraph.json.php?profile=<?php echo $profileid ?>', function(error, data) {
                 setLoading(false);
                 if (error) return console.warn(error);
                 window.excimerData = data;
@@ -174,64 +155,45 @@ if (count($params) > 0) {
 
 } else {
 
-    $count = excimer_call::count_unique_paths();
-    $s = $count === 1 ? '' : 's';
-    $summary = excimer_call::summarize();
 
-    echo $OUTPUT->header();
+    // TODO support downloading.
 
+    $table = new profile_table('uniqueid');
+    $table->is_downloading(false, 'profile', 'profile record');
 
-    echo '<h3 class="text-muted">Summary &gt; ';
-    echo "$count distinct graph path$s";
-    echo '</h3>';
-
-    echo '<table class="table table-sm w-auto table-bordered">';
-    echo '<thead>';
-    echo '<th class="header"></th>';
-    foreach (range(0, 23) as $hour) {
-        echo "<th style=\"text-align: center;\">$hour</th>";
+    if (!$table->is_downloading()) {
+        // Only print headers if not asked to download data
+        // Print the page header
+        // TODO get strings from string table.
+        $PAGE->set_title('Excimer Profiles');
+        $PAGE->set_heading('Excimer Profiles');
+        $PAGE->navbar->add('Excimer Profiles', $url);
+        echo $OUTPUT->header();
     }
-    echo '<th class="header" style="text-align: right;">&Sigma;</th>';
-    echo '</thead>';
-    echo '<tbody>';
-    foreach ($summary as $day => $totalsbyhour) {
-        $daylabel = join('-', [substr($day, 0, 4), substr($day, 4, 2), substr($day, 6, 2)]);
-        echo '<tr>';
-        echo "<th class=\"header\"><a href=\"?day=$day\">$daylabel</a></th>";
-        foreach (range(0, 23) as $hour) {
-            $total = $totalsbyhour[$hour] ?? 0;
-            if ($total > 0) {
-                echo "<td class=\"cell\" style=\"text-align: center;\">";
-                echo "<a href=\"?day=$day&hour=$hour\">&nbsp;$total&nbsp;</a>";
-                echo "</td>";
-            } else {
-                echo "<td class=\"cell\" style=\"text-align: center;\">&middot;</td>";
-            }
-        }
-        $sum = array_sum($totalsbyhour);
-        echo "<td class=\"cell\" style=\"text-align: right;\">$sum</td>";
-        echo '</tr>';
+
+    $columns = [
+        'id',
+        'created',
+        'request'
+    ];
+
+    $headers = [
+        "ID",
+        "Created",
+        "Request"
+    ];
+
+    // Work out the sql for the table.
+    $table->set_sql('id, request, created', '{tool_excimer_flamegraph}', '1=1');
+    $table->define_columns($columns);
+    $table->define_headers($headers);
+
+
+    $table->define_baseurl($url);
+
+    $table->out(40, true);
+
+    if (!$table->is_downloading()) {
+        echo $OUTPUT->footer();
     }
-    echo '</tbody>';
-    echo '</table>';
-
-    $n = excimer_profile::count_profiles();
-    $listing = excimer_profile::listing();
-
-    echo "<h3>Profiles captured: $n</h3>";
-    echo '<table class="table table-sm w-auto table-bordered">';
-    foreach ($listing as $profile) {
-        echo '<tr>';
-        echo '<td>' . (int)$profile->id . '</td>';
-        echo '<td>' . s($profile->type) . '</td>';
-        echo '<td>' . date('Y-m-d H:i:s', $profile->created) . '</td>';
-        echo '<td><a href="?profile=' . (int)$profile->id . '">' . s($profile->explanation) . '</a></td>';
-        echo '<td>' .s($profile->request) . '</td>';
-        echo '<td>' .s($profile->parameters) . '</td>';
-        echo '</tr>';
-    }
-    echo '</table>';
-
-    echo $OUTPUT->footer();
-
 }
