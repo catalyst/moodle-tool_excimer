@@ -1,9 +1,31 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace tool_excimer;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Primary controller class for handling Excimer profiling.
+ *
+ * @package   tool_excimer
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2021, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class manager {
 
     const EXCIMER_LOG_LIMIT = 10000;
@@ -41,7 +63,7 @@ class manager {
         global $DB;
         $sql = "
             SELECT id, request, created
-              FROM {tool_excimer_flamegraph}
+              FROM {tool_excimer_profiles}
           ORDER BY created DESC
         ";
         return $DB->get_recordset_sql($sql);
@@ -54,7 +76,7 @@ class manager {
      */
     public static function getprofile($id): object {
         global $DB;
-        return $DB->get_record('tool_excimer_flamegraph', ['id' => $id],'*', MUST_EXIST);
+        return $DB->get_record('tool_excimer_profiles', ['id' => $id],'*', MUST_EXIST);
     }
 
     /**
@@ -84,6 +106,28 @@ class manager {
     }
 
     /**
+     * Gets the request type (web, cli, ...) and the parameters of the request.
+     *
+     * @return array A tuple [type, parameters].
+     */
+    // TODO strip out FLAMEME parameter?
+
+    function gettypeandparams() {
+        if (php_sapi_name() == 'cli') {
+            // Our setup lacks $argv even though register_argc_argv is On; use
+            // $_SERVER['argv'] instead.
+            $type = 'cli';
+            $parameters = join(' ', array_slice($_SERVER['argv'], 1));
+        } else {
+            // Web request: split API calls later.
+            $type = 'web';
+            $parameters = $_SERVER['QUERY_STRING'];
+        }
+
+        return [$type, $parameters];
+    }
+
+    /**
      * Saves a snaphot of the logs into the database.
      *
      * @param \ExcimerLog $log
@@ -94,9 +138,18 @@ class manager {
         $stopped  = microtime(true);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
-        $id = $DB->insert_record('tool_excimer_flamegraph', [
-            'request' => $_SERVER['PHP_SELF'] ?? 'UNKNOWN',
+        list($type, $parameters) = self::gettypeandparams();
+
+        $id = $DB->insert_record('tool_excimer_profiles', [
+            'type' => $type,
+            'method' => $_SERVER['REQUEST_METHOD'] ?? '',
             'created' => (int)$started,
+            'duration' => $stopped - $started,
+            'request' => $_SERVER['PHP_SELF'] ?? 'UNKNOWN',
+            'parameters' => $parameters,
+            'responsecode' => http_response_code(),
+            'referer' => $_SERVER['HTTP_REFERER'] ?? '',
+            'explanation' => '', // TODO support this
             'flamedata' => $flamedata,
             'flamedatad3' => $flamedatad3
         ]);

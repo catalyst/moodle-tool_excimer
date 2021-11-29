@@ -18,13 +18,11 @@
  * D3.js flamegraph of excimer profiling data.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
+ * @author    Nigel Chapman <nigelchapman@catalyst-au.net>, Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\excimer_call;
-use tool_excimer\excimer_profile;
 use tool_excimer\manager;
 
 defined('MOODLE_INTERNAL') || die();
@@ -41,10 +39,8 @@ function tool_excimer_after_config() {
 
     // Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
     // TODO Do we want to check if in upgrade/install etc.
-    static $prof;  // Stay in scope.
 
     if (manager::isprofileon()) {
         manager::init();
     }
 }
-

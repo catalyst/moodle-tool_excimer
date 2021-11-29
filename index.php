@@ -164,34 +164,41 @@ if (isset($profileid)) {
     if (!$table->is_downloading()) {
         // Only print headers if not asked to download data
         // Print the page header
-        // TODO get strings from string table.
-        $PAGE->set_title('Excimer Profiles');
-        $PAGE->set_heading('Excimer Profiles');
-        $PAGE->navbar->add('Excimer Profiles', $url);
+        $PAGE->set_title($pluginname);
+        $PAGE->set_heading($pluginname);
         echo $OUTPUT->header();
     }
 
     $columns = [
         'id',
+        'type',
         'created',
-        'request'
+        'duration',
+        'request',
+        'parameters',
+        'responsecode',
+        'referer'
     ];
 
     $headers = [
-        "ID",
-        "Created",
-        "Request"
+        get_string('excimerfield_id', 'tool_excimer'),
+        get_string('excimerfield_type', 'tool_excimer'),
+        get_string('excimerfield_created', 'tool_excimer'),
+        get_string('excimerfield_duration', 'tool_excimer'),
+        get_string('excimerfield_request', 'tool_excimer'),
+        get_string('excimerfield_parameters', 'tool_excimer'),
+        get_string('excimerfield_responsecode', 'tool_excimer'),
+        get_string('excimerfield_referer', 'tool_excimer'),
     ];
 
     // Work out the sql for the table.
-    $table->set_sql('id, request, created', '{tool_excimer_flamegraph}', '1=1');
+    $table->set_sql('id, type, request, created, duration, parameters, responsecode, referer', '{tool_excimer_profiles}', '1=1');
     $table->define_columns($columns);
     $table->define_headers($headers);
 
-
     $table->define_baseurl($url);
 
-    $table->out(40, true);
+    $table->out(40, true); // TODO replace with a value from settings.
 
     if (!$table->is_downloading()) {
         echo $OUTPUT->footer();

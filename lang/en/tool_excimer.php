@@ -39,7 +39,12 @@ $string['excimeruri_patterns_help'] = 'One pattern per line; * for wilcards';
 $string['excimerfield_id'] = 'ID';
 $string['excimerfield_type'] = 'Type';
 $string['excimerfield_created'] = 'Created';
+$string['excimerfield_duration'] = 'Duration';
+$string['excimerfield_request'] = 'Request';
 $string['excimerfield_explanation'] = 'Explanation';
+$string['excimerfield_parameters'] = 'Parameters';
+$string['excimerfield_responsecode'] = 'Response Code';
+$string['excimerfield_referer'] = 'Referer';
 
 // Terminology.
 $string['excimerterm_profile'] = 'Profile';
@@ -47,3 +52,6 @@ $string['excimerterm_profile'] = 'Profile';
 // Profile types.
 $string['excimertype_web'] = 'Web';
 $string['excimertype_cli'] = 'CLI';
+
+// Time format used in profile table
+$string['excimertimeformat'] = 'jS M Y H:i:s';
