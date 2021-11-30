@@ -1,39 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20210625" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20211130" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="tool_excimer_call" COMMENT="Table to store excimer log entries for excimer flamegraphs">
+    <TABLE NAME="tool_excimer_profiles" COMMENT="Store request-level data for the excimer sampling profiler">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="day" TYPE="int" LENGTH="8" NOTNULL="true" SEQUENCE="false" COMMENT="e.g. 20210610 for 10 Jun 2021"/>
-        <FIELD NAME="hour" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="e.g. 20 for 8PM to 9PM"/>
-        <FIELD NAME="graphpath" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Graph path, semi-colon-separated"/>
-        <FIELD NAME="graphpathmd5" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false" COMMENT="Field for efficient comparison of graphpaths"/>
-        <FIELD NAME="elapsed" TYPE="number" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="6" COMMENT="Time in seconds since ExcimerProfiler started"/>
-        <FIELD NAME="profileid" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Optional link to profile table (where profile is collected)"/>
-        <FIELD NAME="total" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Number of times that the call happened during this request"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="dayhourindex" UNIQUE="false" FIELDS="day, hour"/>
-        <INDEX NAME="graphpathmd5index" UNIQUE="false" FIELDS="graphpathmd5"/>
-        <INDEX NAME="profileindex" UNIQUE="false" FIELDS="profileid" COMMENT="Enable fast joins on profileid"/>
-      </INDEXES>
-    </TABLE>
-    <TABLE NAME="tool_excimer_profile" COMMENT="Store request-level data for the excimer sampling profiler">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="type" TYPE="char" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="www, cli, api, crn"/>
+        <FIELD NAME="type" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Script type (www, cli, ajax, ws)"/>
+        <FIELD NAME="method" TYPE="char" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="HTTP method, if relevant"/>
         <FIELD NAME="created" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="time in epoch seconds"/>
         <FIELD NAME="duration" TYPE="number" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="6" COMMENT="time between excimer startup and shutdown calls"/>
         <FIELD NAME="request" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL, command, or similar identifying string"/>
         <FIELD NAME="parameters" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Request variables or command arguments"/>
+        <FIELD NAME="sessionid" TYPE="char" LENGTH="256" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Session ID"/>
+        <FIELD NAME="cookies" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Are any cookies set?"/>
+        <FIELD NAME="buffering" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Is buffering set?"/>
         <FIELD NAME="responsecode" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="HTTP response code, or 0/1 for command line"/>
+        <FIELD NAME="referer" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Refering URL, if any"/>
         <FIELD NAME="explanation" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Brief reason for collecting this profile"/>
+        <FIELD NAME="flamedata" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The data as a blob, compatible with flamegraph.pl"/>
+        <FIELD NAME="flamedatad3" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON structure compatible with d3-flame-graph."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

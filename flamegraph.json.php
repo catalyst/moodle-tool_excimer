@@ -23,31 +23,17 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\excimer_call;
+use tool_excimer\profile;
 
 require_once(__DIR__ . '/../../../config.php');
 
-require_once($CFG->dirroot.'/admin/tool/excimer/lib.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 admin_externalpage_setup('tool_excimer_report');
 
-$paramprofile = optional_param('profile', null, PARAM_INT);
-$paramday = optional_param('day', null, PARAM_INT);
-$paramhour = $paramday !== null
-    ? optional_param('hour', null, PARAM_INT)
-    : null;
+$profileid = required_param('profileid', PARAM_INT);
 
-if ($paramday === null && $paramprofile === null) {
-    return json_encode(['error' => 500]);
-} else if ($paramday !== null) {
-    $data = excimer_call::get_time_based_data($paramday, $paramhour);
-} else if ($paramprofile !== null) {
-    $data = excimer_call::get_profile_data($paramprofile);
-} else {
-    $data = []; // Not possible.
-}
+$record = profile::getprofile($profileid);
 
 header('Content-Type: application/json; charset: utf-8');
-$tree = excimer_call::tree_data($data);
-echo json_encode($tree);
+echo $record->flamedatad3;

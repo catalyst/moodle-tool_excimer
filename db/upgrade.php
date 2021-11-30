@@ -15,32 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * D3.js flamegraph of excimer profiling data.
+ * Strings for availability conditions options.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>, Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\manager;
+defined('MOODLE_INTERNAL') || die;
 
-defined('MOODLE_INTERNAL') || die();
+function xmldb_tool_excimer_upgrade($oldversion) {
+    global $CFG, $DB;
 
-/**
- * Hook to be run after initial site config.
- *
- * This allows the plugin to selectively activate the ExcimerProfiler while
- * having access to the database. It means that the initialisation of the
- * request up to this point will not be captured by the profiler. This
- * eliminates the need for an auto_prepend_file/auto_append_file.
- */
-function tool_excimer_after_config() {
+    $dbman = $DB->get_manager();
 
-    // Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
-    // TODO Do we want to check if in upgrade/install etc.
+    // Automatically generated Moodle v3.11.0 release upgrade line.
+    // Put any upgrade step following this.
 
-    if (manager::isprofileon()) {
-        manager::init();
-    }
+    return true;
 }
