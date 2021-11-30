@@ -23,8 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\excimer_call;
-use tool_excimer\manager;
+use tool_excimer\profile;
 
 require_once(__DIR__ . '/../../../config.php');
 
@@ -32,9 +31,9 @@ require_once($CFG->libdir.'/adminlib.php');
 
 admin_externalpage_setup('tool_excimer_report');
 
-$profileid = required_param('profile', PARAM_INT);
+$profileid = required_param('profileid', PARAM_INT);
 
-$record = manager::getprofile($profileid);
+$record = profile::getprofile($profileid);
 
 header('Content-Type: application/json; charset: utf-8');
 echo $record->flamedatad3;

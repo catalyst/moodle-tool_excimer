@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile_table extends \table_sql {
     function col_id($record) {
-        return "<a href='?profileid=$record->id'>$record->id</a>";
+        return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->id</a>";
     }
 
     function col_request($record) {
