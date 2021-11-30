@@ -45,8 +45,8 @@ $table = new profile_table('uniqueid');
 $table->is_downloading(false, 'profile', 'profile record');
 
 if (!$table->is_downloading()) {
-    // Only print headers if not asked to download data
-    // Print the page header
+    // Only print headers if not asked to download data.
+    // Print the page header.
     $PAGE->set_title($pluginname);
     $PAGE->set_pagelayout('admin');
     $PAGE->set_heading($pluginname);
@@ -54,22 +54,20 @@ if (!$table->is_downloading()) {
 }
 
 $columns = [
-    'id',
+    'request',
     'type',
     'created',
     'duration',
-    'request',
     'parameters',
     'responsecode',
     'referer'
 ];
 
 $headers = [
-    get_string('excimerfield_id', 'tool_excimer'),
+    get_string('excimerfield_request', 'tool_excimer'),
     get_string('excimerfield_type', 'tool_excimer'),
     get_string('excimerfield_created', 'tool_excimer'),
     get_string('excimerfield_duration', 'tool_excimer'),
-    get_string('excimerfield_request', 'tool_excimer'),
     get_string('excimerfield_parameters', 'tool_excimer'),
     get_string('excimerfield_responsecode', 'tool_excimer'),
     get_string('excimerfield_referer', 'tool_excimer'),

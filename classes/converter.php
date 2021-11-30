@@ -35,7 +35,7 @@ class converter {
      * @param string $rootname Name for the root node. Defaults o 'root'.
      * @return array The data in an array compatible with d3-flame-graph.
      */
-    static function process(string $data, string $rootname = 'root'): array {
+    public static function process(string $data, string $rootname = 'root'): array {
         $table = [];
         $lines = explode("\n", $data);
         $total = 0;
@@ -68,8 +68,7 @@ class converter {
             if (count($trace)) {
                 self::processtail($table[$idx]['children'], $trace, $num);
             }
-        }
-        else {
+        } else {
             $table[$idx] = [ "value" => $num, "children" => [] ];
             if (count($trace)) {
                 self::processtail($table[$idx]['children'], $trace, $num);

@@ -25,6 +25,7 @@
 
 use tool_excimer\manager;
 use tool_excimer\profile;
+use tool_excimer\helper;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -46,15 +47,20 @@ $pluginname = get_string('pluginname', 'tool_excimer');
 
 $url = new moodle_url("/admin/tool/excimer/index.php");
 
+$profile = profile::getprofile($profileid);
+
+$PAGE->navbar->add($profile->request);
 $PAGE->set_title($pluginname);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
 
 $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
 
-$data = [
-    'dataurl' => '/admin/tool/excimer/flamegraph.json.php?profileid=' . $profileid,
-];
+$data = (array) $profile;
+$data['duration'] = format_time($data['duration']);
+$data['scripttypeasstring'] = function($text, $render) {
+    return helper::scripttypeasstring((int)$render($text));
+};
 
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('tool_excimer/flamegraph', $data);

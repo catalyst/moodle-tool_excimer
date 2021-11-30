@@ -27,15 +27,56 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile_table extends \table_sql {
-    function col_id($record) {
-        return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->id</a>";
+
+    /**
+     * Display value for 'type' column entries
+     *
+     * @param object $record
+     * @return string
+     * @throws \coding_exception
+     */
+    public function col_type(object $record): string {
+        return helper::scripttypeasstring($record->type);
     }
 
-    function col_request($record) {
-        return $record->request;
+    /**
+     * Display value for 'request' column entries
+     *
+     * @param object $record
+     * @return string
+     */
+    public function col_request(object $record): string {
+        return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->request</a>";
     }
 
-    function col_created($record) {
+    /**
+     * Display value for 'duration' column entries
+     *
+     * @param object $record
+     * @return string
+     */
+    public function col_duration(object $record): string {
+        return format_time($record->duration);
+    }
+
+    /**
+     * Display value for 'created' column entries
+     *
+     * @param object $record
+     * @return string
+     * @throws \coding_exception
+     */
+    public function col_created(object $record): string {
         return date(get_string('excimertimeformat', 'tool_excimer'), $record->created);
+    }
+
+    /**
+     * Display value for 'parameters' column entries
+     *
+     * @param object $record
+     * @return string
+     */
+    public function col_parameters(object $record): string {
+        return htmlentities($record->parameters);
     }
 }

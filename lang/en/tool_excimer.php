@@ -44,14 +44,19 @@ $string['excimerfield_request'] = 'Request';
 $string['excimerfield_explanation'] = 'Explanation';
 $string['excimerfield_parameters'] = 'Parameters';
 $string['excimerfield_responsecode'] = 'Response Code';
+$string['excimerfield_sessionid'] = 'Session ID';
 $string['excimerfield_referer'] = 'Referer';
+$string['excimerfield_cookies'] = 'Cookies Enabled';
+$string['excimerfield_buffering'] = 'Buffering Enabled';
 
 // Terminology.
 $string['excimerterm_profile'] = 'Profile';
 
-// Profile types.
+// Script types.
 $string['excimertype_web'] = 'Web';
 $string['excimertype_cli'] = 'CLI';
+$string['excimertype_ajax'] = 'Ajax';
+$string['excimertype_ws'] = 'Service';
 
-// Time format used in profile table
+// Time format used in profile table.
 $string['excimertimeformat'] = 'jS M Y H:i:s';

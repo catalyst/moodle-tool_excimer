@@ -38,7 +38,7 @@ class manager {
      * @param $flag Name of the flag
      * @return bool if the flag is set or not.
      */
-    static function isflagset(string $flag): bool {
+    public static function isflagset(string $flag): bool {
         return !empty(getenv($flag)) ||
                 isset($_COOKIE[$flag]) ||
                 isset($_POST[$flag]) ||
@@ -50,7 +50,7 @@ class manager {
      *
      * @return bool
      */
-    static function isprofileon(): bool {
+    public static function isprofileon(): bool {
         return self::isflagset('FLAMEME') || (bool)get_config('tool_excimer', 'excimerenable');
     }
 
@@ -92,6 +92,10 @@ class manager {
         $prof->start();
 
         // Stop the profiler as a part of the shutdown sequence.
-        \core_shutdown_manager::register_function(function() use ($prof) { $prof->stop(); $prof->flush(); });
+        \core_shutdown_manager::register_function(
+            function() use ($prof) {
+                $prof->stop(); $prof->flush();
+            }
+        );
     }
 }

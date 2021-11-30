@@ -26,13 +26,79 @@
     * none
 
     Context variables required for this template:
-    * dataurl - url to download the data from
+    * id - The id of the profile
+    * request - The request url (without parameters)
+    * sessionid - The session ID
+    * type - The script type
+    * created - Unix timestamp of profile creation
+    * duration - Profile duration in seconds.
+    * parameters - Parameter string
+    * resposnecode - HTTP response code
+    * cookies - Is cookies enabled?
+    * buffering - Is buffering enabled?
 
     Example context (json):
     {
-        "dataurl" : "/admin/tool/excimer/flamegraph.json.php?profileid=3"
+        "id" : 3,
+        "request" : "/my/index.php",
+        "sessionid" : "9842....",
+        "type" : 2,
+        "created" : 1638244603,
+        "duration" : 0.153,
+        "paramters" : "time=day&duration=week",
+        "resposnecode" : 200,
+        "cookies" : 1,
+        "buffering" : 1,
     }
 }}
+
+<h4>Profile Details</h4>
+<div id="profile-stats">
+    <table class="table table-sm table-bordered">
+        <tr>
+            <th>{{#str}} excimerfield_request, tool_excimer {{/str}}</th>
+            <td>{{request}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_sessionid, tool_excimer {{/str}}</th>
+            <td>{{#shortentext}} 11, {{sessionid}} {{/shortentext}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_type, tool_excimer {{/str}}</th>
+            <td>{{#scripttypeasstring}}{{type}}{{/scripttypeasstring}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_created, tool_excimer {{/str}}</th>
+            <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_duration, tool_excimer {{/str}}</th>
+            <td>{{duration}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_parameters, tool_excimer {{/str}}</th>
+            <td>{{parameters}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_responsecode, tool_excimer {{/str}}</th>
+            <td>{{responsecode}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_referer, tool_excimer {{/str}}</th>
+            <td>{{referer}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_cookies, tool_excimer {{/str}}</th>
+            <td>{{#cookies}} {{#str}} yes, core_customfield {{/str}} {{/cookies}}{{^cookies}}{{#str}} no, core_customfield {{/str}}{{/cookies}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_buffering, tool_excimer {{/str}}</th>
+            <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
+        </tr>
+    </table>
+</div>
+
+<h4>Profile Flame Graph</h4>
 
 <div id="details" style="min-height: 1.5rem; clear: both;">
 </div>
@@ -58,8 +124,8 @@ document.getElementById("form").addEventListener("submit", function(event){
 
 function init() {
 
-    var chart = document.getElementById('chart');
-    var details = document.getElementById("details");
+    let chart = document.getElementById('chart');
+    let details = document.getElementById("details");
 
     const chartWidth = Math.max(chart.offsetWidth - 15, 500);
 
@@ -69,7 +135,7 @@ function init() {
 
     if (window.excimerData === undefined) {
         setLoading(true);
-        d3.json('{{dataurl}}', function(error, data) {
+        d3.json('/admin/tool/excimer/flamegraph.json.php?profileid={{id}}', function(error, data) {
             setLoading(false);
             if (error) return console.warn(error);
             window.excimerData = data;
@@ -81,7 +147,7 @@ function init() {
 }
 
 function draw() {
-    var svg = document.querySelector('#chart svg');
+    let svg = document.querySelector('#chart svg');
     if (svg !== null) {
         svg.remove();
     }
@@ -95,7 +161,7 @@ function setLoading(yn) {
 
 function search() {
     if (window.excimerChart !== undefined) {
-        var term = document.getElementById("term").value;
+        let term = document.getElementById("term").value;
         window.excimerChart.search(term);
     }
 }
