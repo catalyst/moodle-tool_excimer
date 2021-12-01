@@ -26,14 +26,20 @@
 $string['pluginname'] = 'Excimer sampling profiler';
 
 // Admin.
-$string['excimerenable'] = 'Enable profiler';
+$string['excimeranableauto'] = 'Enable auto profiling';
+$string['excimeranableauto_desc'] = 'Any page will be automatically profiled if they exceed the miniumum duration.';
 $string['excimerexpiry_s'] = 'Log expiry (days)';
+$string['excimerexpiry_s_desc'] = 'Remove profiles after this long.';
+$string['excimernum_slowest'] = 'Number of auto saves';
+$string['excimernum_slowest_desc'] = 'Only the N slowest profiles will be kept.';
 $string['excimertask_expire_logs'] = 'Expire excimer logs';
 $string['excimerperiod_ms'] = 'Sampling period (milliseconds)';
+$string['excimerperiod_ms_desc'] = 'Frequency of sampling.';
 $string['excimerrequest_ms'] = 'Minimum request duration (milliseconds)';
+$string['excimerrequest_ms_desc'] = 'Record a profile only if it runs at least this long.';
 $string['excimeruri_contains'] = 'URI must contain';
 $string['excimeruri_not_contains'] = 'URI must NOT contain';
-$string['excimeruri_patterns_help'] = 'One pattern per line; * for wilcards';
+$string['excimeruri_patterns_help'] = 'One pattern per line; * for wildcards';
 
 // Profile table.
 $string['excimerfield_id'] = 'ID';
@@ -58,5 +64,7 @@ $string['excimertype_cli'] = 'CLI';
 $string['excimertype_ajax'] = 'Ajax';
 $string['excimertype_ws'] = 'Service';
 
-// Time format used in profile table.
-$string['excimertimeformat'] = 'jS M Y H:i:s';
+// Log methods.
+$string['excimerlogmethod_manual'] = 'Manual';
+$string['excimerlogmethod_auto'] = 'Auto';
+

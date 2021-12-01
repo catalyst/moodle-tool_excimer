@@ -40,7 +40,7 @@ function tool_excimer_after_config() {
     // Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
     // TODO Do we want to check if in upgrade/install etc.
 
-    if (manager::isprofileon()) {
+    if (manager::is_profiling()) {
         manager::init();
     }
 }

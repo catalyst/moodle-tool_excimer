@@ -28,6 +28,10 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile_table extends \table_sql {
 
+    public function col_logmethod(object $record): string {
+        return helper::log_method_display($record->logmethod);
+    }
+
     /**
      * Display value for 'type' column entries
      *
@@ -35,8 +39,8 @@ class profile_table extends \table_sql {
      * @return string
      * @throws \coding_exception
      */
-    public function col_type(object $record): string {
-        return helper::scripttypeasstring($record->type);
+    public function col_scripttype(object $record): string {
+        return helper::script_type_display($record->scripttype);
     }
 
     /**
@@ -46,7 +50,11 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(object $record): string {
-        return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->request</a>";
+        if ($this->is_downloading()) {
+            return $record->request;
+        } else {
+            return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->request</a>";
+        }
     }
 
     /**
@@ -67,7 +75,7 @@ class profile_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return date(get_string('excimertimeformat', 'tool_excimer'), $record->created);
+        return userdate($record->created, get_string('strftimedatetimeshort', 'langconfig'));
     }
 
     /**

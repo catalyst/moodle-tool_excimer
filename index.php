@@ -29,6 +29,8 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
+$download = optional_param('download', '', PARAM_ALPHA);
+
 $context = context_system::instance();
 $url = new moodle_url("/admin/tool/excimer/index.php");
 
@@ -41,12 +43,10 @@ $pluginname = get_string('pluginname', 'tool_excimer');
 
 // TODO support downloading.
 
-$table = new profile_table('uniqueid');
-$table->is_downloading(false, 'profile', 'profile record');
+$table = new profile_table('profile_table');
+$table->is_downloading($download, 'profile', 'profile_record');
 
 if (!$table->is_downloading()) {
-    // Only print headers if not asked to download data.
-    // Print the page header.
     $PAGE->set_title($pluginname);
     $PAGE->set_pagelayout('admin');
     $PAGE->set_heading($pluginname);
@@ -55,7 +55,8 @@ if (!$table->is_downloading()) {
 
 $columns = [
     'request',
-    'type',
+    'logmethod',
+    'scripttype',
     'created',
     'duration',
     'parameters',
@@ -65,6 +66,7 @@ $columns = [
 
 $headers = [
     get_string('excimerfield_request', 'tool_excimer'),
+    'Log method',
     get_string('excimerfield_type', 'tool_excimer'),
     get_string('excimerfield_created', 'tool_excimer'),
     get_string('excimerfield_duration', 'tool_excimer'),
@@ -74,7 +76,11 @@ $headers = [
 ];
 
 // Work out the sql for the table.
-$table->set_sql('id, type, request, created, duration, parameters, responsecode, referer', '{tool_excimer_profiles}', '1=1');
+$table->set_sql(
+    'id, logmethod, scripttype, request, created, duration, parameters, responsecode, referer',
+    '{tool_excimer_profiles}',
+    '1=1'
+);
 $table->define_columns($columns);
 $table->define_headers($headers);
 
