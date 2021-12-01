@@ -220,4 +220,31 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $tocheck = profile::get_fastest_auto_profile();
         $this->assertEquals($sortedtimes[3], $tocheck->duration);
     }
+
+    public function test_purge_old_profiles(): void {
+        global $DB;
+        $log = self::quick_log(10);
+        $times = [ 12345, 23456, 34567, 45678 ];
+        $cutoff1 = 30000;
+        $cutoff2 = 20000;
+        $cutoff3 = 40000;
+
+        $this->assertEquals(0, profile::get_num_profiles());
+        $expectedcount = 0;
+        foreach ($times as $time) {
+            profile::save($log, manager::REASON_MANUAL, $time, 0.2);
+            $this->assertEquals(++$expectedcount, profile::get_num_profiles());
+        }
+
+        profile::purge_profiles_before_epoch_time($cutoff1);
+        $this->assertEquals(2, profile::get_num_profiles());
+        profile::purge_profiles_before_epoch_time($cutoff2);
+        $this->assertEquals(2, profile::get_num_profiles());
+        profile::purge_profiles_before_epoch_time($cutoff3);
+        $this->assertEquals(1, profile::get_num_profiles());
+        profile::purge_profiles_before_epoch_time($cutoff1);
+        $this->assertEquals(1, profile::get_num_profiles());
+        $record = $DB->get_record("tool_excimer_profiles", []);
+        $this->assertEquals($times[3], $record->created);
+    }
 }
