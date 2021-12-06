@@ -211,7 +211,6 @@ class profile {
     /**
      * Delete profiles created earlier than a given time.
      *
-     * @authpr Nigel Chapman <nigelchapman@catalyst-au.net>
      * @param int $cutoff Epoch seconds
      * @return void
      */
