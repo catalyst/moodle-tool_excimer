@@ -65,6 +65,36 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         return $prof->flush();
     }
 
+    public function test_is_profiling() {
+        set_config('excimermaxstored', 5, 'tool_excimer');
+
+        $this->assertFalse(manager::is_profiling());
+        $_GET[manager::MANUAL_PARAM_NAME] = 1;
+        $this->assertTrue(manager::is_profiling());
+        unset($_GET[manager::MANUAL_PARAM_NAME]);
+        $this->assertFalse(manager::is_profiling());
+        set_config('excimeranableauto', 1, 'tool_excimer');
+        $this->assertTrue(manager::is_profiling());
+        set_config('excimeranableauto', 0, 'tool_excimer');
+        $this->assertFalse(manager::is_profiling());
+
+        set_config('excimeranableauto', 1, 'tool_excimer');
+        $log = self::quick_log(10);
+        $created = 56;
+        $duration = 0.123;
+
+        profile::save($log, manager::REASON_MANUAL, $created, $duration);
+        $this->assertTrue(manager::is_profiling());
+        profile::save($log, manager::REASON_MANUAL, $created, $duration);
+        $this->assertTrue(manager::is_profiling());
+        profile::save($log, manager::REASON_MANUAL, $created, $duration);
+        $this->assertTrue(manager::is_profiling());
+        profile::save($log, manager::REASON_MANUAL, $created, $duration);
+        $this->assertTrue(manager::is_profiling());
+        profile::save($log, manager::REASON_MANUAL, $created, $duration);
+        $this->assertFalse(manager::is_profiling());
+    }
+
     /**
      * Tests the functionality to keep only the N slowest profiles.
      *

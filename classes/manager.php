@@ -58,8 +58,12 @@ class manager {
      * @throws \dml_exception
      */
     public static function is_profiling(): bool {
-        return self::is_flag_set(self::MANUAL_PARAM_NAME) ||
-                (get_config('tool_excimer', 'excimeranableauto'));
+        return (
+            self::is_flag_set(self::MANUAL_PARAM_NAME) ||
+            (bool)get_config('tool_excimer', 'excimeranableauto')
+        ) && (
+            profile::get_num_profiles() < (int)get_config('tool_excimer', 'excimermaxstored')
+        );
     }
 
     /**

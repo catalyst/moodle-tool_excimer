@@ -50,6 +50,14 @@ if ($hassiteconfig) {
             get_string('excimergeneral_settings_desc', 'tool_excimer'),
         ));
 
+        $settings->add(new admin_setting_configtext(
+            'tool_excimer/excimermaxstored',
+            get_string('excimermaxstored', 'tool_excimer'),
+            get_string('excimermaxstored_desc', 'tool_excimer'),
+            '100',
+            PARAM_INT
+        ));
+
         $settings->add(
             new admin_setting_configtext(
                 'tool_excimer/excimersample_ms',
