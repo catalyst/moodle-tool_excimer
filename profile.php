@@ -58,8 +58,11 @@ $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
 
 $data = (array) $profile;
 $data['duration'] = format_time($data['duration']);
-$data['scripttypeasstring'] = function($text, $render) {
-    return helper::scripttypeasstring((int)$render($text));
+$data['script_type_display'] = function($text, $render) {
+    return helper::script_type_display((int)$render($text));
+};
+$data['reason_display'] = function($text, $render) {
+    return helper::reason_display((int)$render($text));
 };
 
 echo $OUTPUT->header();

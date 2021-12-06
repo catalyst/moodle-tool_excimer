@@ -37,7 +37,11 @@ class converter {
      */
     public static function process(string $data, string $rootname = 'root'): array {
         $table = [];
-        $lines = explode("\n", $data);
+        if ($data === "") {
+            $lines = [];
+        } else {
+            $lines = explode("\n", $data);
+        }
         $total = 0;
         foreach ($lines as $line) {
             list($trace, $num) = explode(" ", $line);
@@ -64,14 +68,14 @@ class converter {
         assert(count($trace) > 0);
         $idx = array_shift($trace);
         if (isset($table[$idx])) {
-            $table[$idx]['value'] += $num;
+            $table[$idx][0] += $num;
             if (count($trace)) {
-                self::processtail($table[$idx]['children'], $trace, $num);
+                self::processtail($table[$idx][1], $trace, $num);
             }
         } else {
-            $table[$idx] = [ "value" => $num, "children" => [] ];
+            $table[$idx] = [ $num, [] ];
             if (count($trace)) {
-                self::processtail($table[$idx]['children'], $trace, $num);
+                self::processtail($table[$idx][1], $trace, $num);
             }
         }
     }
@@ -87,10 +91,10 @@ class converter {
         foreach ($table as $key => $val) {
             $node = [
                 'name' => $key,
-                'value' => $val['value'],
+                'value' => $val[0],
             ];
-            if (isset($val['children'])) {
-                $node['children'] = self::reprocess($val['children']);
+            if (isset($val[1])) {
+                $node['children'] = self::reprocess($val[1]);
             }
             $nodes[] = $node;
         }

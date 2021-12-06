@@ -29,14 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 class helper {
 
     /**
-     * Returns a printable string for a calltype value.
+     * Returns a printable string for a script type value.
      *
-     * @param int $calltype
+     * @param int $type
      * @return string
      * @throws \coding_exception
      */
-    public static function scripttypeasstring(int $calltype): string {
-        switch ($calltype) {
+    public static function script_type_display(int $type): string {
+        switch ($type) {
             case profile::SCRIPTTYPE_WEB:
                 return get_string('excimertype_web', 'tool_excimer');
             case profile::SCRIPTTYPE_CLI:
@@ -45,6 +45,26 @@ class helper {
                 return get_string('excimertype_ajax', 'tool_excimer');
             case profile::SCRIPTTYPE_WS:
                 return get_string('excimertype_ws', 'tool_excimer');
+            default:
+                return (string) $type;
+        }
+    }
+
+    /**
+     * Returns a printable string for the profiling reason.
+     *
+     * @param int $reason
+     * @return string
+     * @throws \coding_exception
+     */
+    public static function reason_display(int $reason): string {
+        switch ($reason) {
+            case manager::REASON_MANUAL:
+                return get_string('excimerreason_manual', 'tool_excimer');
+            case manager::REASON_AUTO:
+                return get_string('excimerreason_auto', 'tool_excimer');
+            default:
+                return (string) $reason;
         }
     }
 }

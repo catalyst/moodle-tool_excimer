@@ -29,28 +29,46 @@ defined('MOODLE_INTERNAL') || die();
 class profile_table extends \table_sql {
 
     /**
-     * Display value for 'type' column entries
+     * Display values for 'reason' column entries.
      *
      * @param object $record
      * @return string
      * @throws \coding_exception
      */
-    public function col_type(object $record): string {
-        return helper::scripttypeasstring($record->type);
+    public function col_reason(object $record): string {
+        return helper::reason_display($record->reason);
     }
 
     /**
-     * Display value for 'request' column entries
+     * Display value for 'type' column entries.
+     *
+     * @param object $record
+     * @return string
+     * @throws \coding_exception
+     */
+    public function col_scripttype(object $record): string {
+        return helper::script_type_display($record->scripttype);
+    }
+
+    /**
+     * Display value for 'request' column entries.
      *
      * @param object $record
      * @return string
      */
     public function col_request(object $record): string {
-        return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->request</a>";
+        if ($this->is_downloading()) {
+            return $record->request;
+        } else {
+            return \html_writer::link(
+                new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
+                $record->request
+            );
+        }
     }
 
     /**
-     * Display value for 'duration' column entries
+     * Display value for 'duration' column entries.
      *
      * @param object $record
      * @return string
@@ -60,18 +78,18 @@ class profile_table extends \table_sql {
     }
 
     /**
-     * Display value for 'created' column entries
+     * Display value for 'created' column entries.
      *
      * @param object $record
      * @return string
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return date(get_string('excimertimeformat', 'tool_excimer'), $record->created);
+        return userdate($record->created, get_string('strftimedatetimeshort', 'langconfig'));
     }
 
     /**
-     * Display value for 'parameters' column entries
+     * Display value for 'parameters' column entries.
      *
      * @param object $record
      * @return string

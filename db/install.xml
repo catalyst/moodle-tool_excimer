@@ -7,18 +7,18 @@
     <TABLE NAME="tool_excimer_profiles" COMMENT="Store request-level data for the excimer sampling profiler">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="type" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Script type (www, cli, ajax, ws)"/>
+        <FIELD NAME="reason" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Reason the profile was done (manual, auto etc)"/>
+        <FIELD NAME="scripttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Script type (www, cli, ajax, ws)"/>
         <FIELD NAME="method" TYPE="char" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="HTTP method, if relevant"/>
         <FIELD NAME="created" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="time in epoch seconds"/>
         <FIELD NAME="duration" TYPE="number" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="6" COMMENT="time between excimer startup and shutdown calls"/>
         <FIELD NAME="request" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL, command, or similar identifying string"/>
         <FIELD NAME="parameters" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Request variables or command arguments"/>
-        <FIELD NAME="sessionid" TYPE="char" LENGTH="256" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Session ID"/>
+        <FIELD NAME="sessionid" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Session ID"/>
         <FIELD NAME="cookies" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Are any cookies set?"/>
         <FIELD NAME="buffering" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Is buffering set?"/>
         <FIELD NAME="responsecode" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="HTTP response code, or 0/1 for command line"/>
         <FIELD NAME="referer" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Refering URL, if any"/>
-        <FIELD NAME="explanation" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Brief reason for collecting this profile"/>
         <FIELD NAME="flamedata" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The data as a blob, compatible with flamegraph.pl"/>
         <FIELD NAME="flamedatad3" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON structure compatible with d3-flame-graph."/>
       </FIELDS>

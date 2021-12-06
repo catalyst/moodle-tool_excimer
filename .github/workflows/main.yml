@@ -22,7 +22,7 @@ jobs:
           - 5432:5432
 
       mariadb:
-        image: mariadb:10
+        image: mariadb:10.5
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -69,7 +69,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: pgsql, mysqli, zip, gd, xmlrpc, soap
+          extensions: pgsql, mysqli, zip, gd, xmlrpc, soap, excimer
           coverage: none
 
       - name: Initialise moodle-plugin-ci

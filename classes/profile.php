@@ -35,7 +35,7 @@ class profile {
 
     const DENYLIST = [
         'sesskey',
-        'FLAMEME'
+        manager::MANUAL_PARAM_NAME
     ];
 
     /**
@@ -97,16 +97,54 @@ class profile {
     }
 
     /**
-     * Gets the script type of th request.
+     * @return int
+     * @throws \dml_exception
+     */
+    public static function get_num_auto_profiles(): int {
+        global $DB;
+        return $DB->get_field_sql(
+            "SELECT count(*) FROM {tool_excimer_profiles} WHERE reason = ?",
+            [ manager::REASON_AUTO ]
+        );
+    }
+
+    /**
+     * @return object
+     * @throws \dml_exception
+     */
+    public static function get_fastest_auto_profile(): object {
+        global $DB;
+        $sql = "SELECT id, duration
+                  FROM {tool_excimer_profiles}
+                 WHERE reason = ?
+              ORDER BY duration ASC limit 1";
+        return $DB->get_record_sql($sql, [ manager::REASON_AUTO ]);
+    }
+
+    /**
+     * @param int $numtopurge
+     * @throws \dml_exception
+     */
+    public static function purge_fastest_auto_profiles(int $numtopurge): void {
+        global $DB;
+
+        $ids = array_keys($DB->get_records('tool_excimer_profiles',
+                ['reason' => manager::REASON_AUTO ], 'duration ASC', 'id', 0, $numtopurge));
+        $inclause = $DB->get_in_or_equal($ids);
+        $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
+    }
+
+    /**
+     * Gets the script type of the request.
      *
      * @return int
      */
-    private static function getscripttype(): int {
-        if (defined(CLI_SCRIPT)) {
+    private static function get_script_type(): int {
+        if (defined('CLI_SCRIPT') && CLI_SCRIPT) {
             return self::SCRIPTTYPE_CLI;
-        } else if (defined(AJAX_SCRIPT)) {
+        } else if (defined('AJAX_SCRIPT') && AJAX_SCRIPT) {
             return self::SCRIPTTYPE_AJAX;
-        } else if (defined(WS_SERVER)) {
+        } else if (defined('WS_SERVER') && WS_SERVER) {
             return self::SCRIPTTYPE_WS;
         }
         return self::SCRIPTTYPE_WEB;
@@ -119,7 +157,7 @@ class profile {
      * @return string For non-cli requests, the parameters are returned in a url query string.
      *               For cli requests, the arguments are returned in a space sseparated list.
      */
-    private static function getparameters(int $type): string {
+    private static function get_parameters(int $type): string {
         if ($type == self::SCRIPTTYPE_CLI) {
             return implode(' ', array_slice($_SERVER['argv'], 1));
         } else {
@@ -130,33 +168,35 @@ class profile {
     }
 
     /**
-     * Saves a snaphot of the logs into the database.
+     * Saves a snaphot of the profile into the database.
      *
-     * @param \ExcimerLog $log
-     * @param float $started
-     * @return int The database ID of the inserted profile.
+     * @param \ExcimerLog $log The profile data.
+     * @param int $reason Why the profile is being saved.
+     * @param int $created Timestamp of when the profile was started.
+     * @param float $duration The total time of the profiling, in seconds.
+     * @return int The ID of the database entry.
+     *
+     * @throws \dml_exception
      */
-    public static function save(\ExcimerLog $log, float $started): int {
+    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
         global $DB;
-        $stopped  = microtime(true);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
-        $type = self::getscripttype();
-        $parameters = self::getparameters($type);
-
+        $type = self::get_script_type();
+        $parameters = self::get_parameters($type);
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => session_id(),
-            'type' => $type,
+            'reason' => $reason,
+            'scripttype' => $type,
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',
-            'created' => (int)$started,
-            'duration' => $stopped - $started,
+            'created' => $created,
+            'duration' => $duration,
             'request' => $_SERVER['PHP_SELF'] ?? 'UNKNOWN',
             'parameters' => $parameters,
             'cookies' => !defined(NO_MOODLE_COOKIES),
             'buffering' => !defined(NO_OUTPUT_BUFFERING),
             'responsecode' => http_response_code(),
             'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-            'explanation' => '', // TODO support this.
             'flamedata' => $flamedata,
             'flamedatad3' => $flamedatad3
         ]);

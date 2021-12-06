@@ -42,7 +42,7 @@
         "id" : 3,
         "request" : "/my/index.php",
         "sessionid" : "9842....",
-        "type" : 2,
+        "scripttype" : 2,
         "created" : 1638244603,
         "duration" : 0.153,
         "paramters" : "time=day&duration=week",
@@ -64,8 +64,12 @@
             <td>{{#shortentext}} 11, {{sessionid}} {{/shortentext}}</td>
         </tr>
         <tr>
+            <th>{{#str}} excimerfield_reason, tool_excimer {{/str}}</th>
+            <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
+        </tr>
+        <tr>
             <th>{{#str}} excimerfield_type, tool_excimer {{/str}}</th>
-            <td>{{#scripttypeasstring}}{{type}}{{/scripttypeasstring}}</td>
+            <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
         </tr>
         <tr>
             <th>{{#str}} excimerfield_created, tool_excimer {{/str}}</th>

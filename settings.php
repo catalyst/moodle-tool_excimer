@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_excimer\manager;
+
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
@@ -41,24 +43,66 @@ if ($hassiteconfig) {
     );
     $ADMIN->add('tools', $settings);
 
-    $settings->add(new admin_setting_configcheckbox(
-        'tool_excimer/excimerenable',
-        new lang_string('excimerenable', 'tool_excimer'),
-        '', 0));
+    if ($ADMIN->fulltree) {
+        $settings->add(new admin_setting_heading(
+            'tool_excimer/general',
+            get_string('excimergeneral_settings', 'tool_excimer'),
+            get_string('excimergeneral_settings_desc', 'tool_excimer'),
+        ));
 
-    $settings->add(new admin_setting_configduration(
-        'tool_excimer/excimerexpiry_s',
-        new lang_string('excimerexpiry_s', 'tool_excimer'),
-        '', WEEKSECS));
+        $settings->add(
+            new admin_setting_configtext(
+                'tool_excimer/excimersample_ms',
+                get_string('excimerperiod_ms', 'tool_excimer'),
+                get_string('excimerperiod_ms_desc', 'tool_excimer'),
+                '100',
+                PARAM_INT
+            )
+        );
 
-    $settings->add(new admin_setting_configtext(
-        'tool_excimer/excimersample_ms',
-        new lang_string('excimerperiod_ms', 'tool_excimer'),
-        '', '100', PARAM_INT));
+        $settings->add(
+            new admin_setting_configduration(
+                'tool_excimer/excimerexpiry_s',
+                get_string('excimerexpiry_s', 'tool_excimer'),
+                get_string('excimerexpiry_s_desc', 'tool_excimer'),
+                WEEKSECS
+            )
+        );
 
-    $settings->add(new admin_setting_configtext(
-        'tool_excimer/excimertrigger_ms',
-        new lang_string('excimerrequest_ms', 'tool_excimer'),
-        '', '100', PARAM_INT));
+        $settings->add(new admin_setting_heading(
+            'tool_excimer/auto',
+            get_string('excimerauto_settings', 'tool_excimer'),
+            get_string('excimerauto_settings_desc', 'tool_excimer'),
+        ));
 
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'tool_excimer/excimeranableauto',
+                get_string('excimeranableauto', 'tool_excimer'),
+                get_string('excimeranableauto_desc', 'tool_excimer'),
+                0,
+            )
+        );
+
+        $settings->add(
+            new admin_setting_configtext(
+                'tool_excimer/excimertrigger_ms',
+                get_string('excimerrequest_ms', 'tool_excimer'),
+                get_string('excimerrequest_ms_desc', 'tool_excimer'),
+                '100',
+                PARAM_INT
+            )
+        );
+
+        $setting =
+        new admin_setting_configtext(
+            'tool_excimer/excimernum_slowest',
+            get_string('excimernum_slowest', 'tool_excimer'),
+            get_string('excimernum_slowest_desc', 'tool_excimer'),
+            '5',
+            PARAM_INT
+        );
+        $setting->set_updatedcallback('tool_excimer\manager::on_num_slow_setting_change');
+        $settings->add($setting);
+    }
 }
