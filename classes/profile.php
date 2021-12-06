@@ -96,6 +96,11 @@ class profile {
         return '';
     }
 
+    public static function get_num_profiles(): int {
+        global $DB;
+        return $DB->count_records('tool_excimer_profiles', []);
+    }
+
     /**
      * @return int
      * @throws \dml_exception
@@ -200,5 +205,22 @@ class profile {
             'flamedata' => $flamedata,
             'flamedatad3' => $flamedatad3
         ]);
+    }
+
+
+    /**
+     * Delete profiles created earlier than a given time.
+     *
+     * @param int $cutoff Epoch seconds
+     * @return void
+     */
+    public static function purge_profiles_before_epoch_time(int $cutoff): void {
+        global $DB;
+
+        $DB->delete_records_select(
+            'tool_excimer_profiles',
+            'created < :cutoff',
+            [ 'cutoff' => $cutoff ]
+        );
     }
 }
