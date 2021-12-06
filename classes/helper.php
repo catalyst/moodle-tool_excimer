@@ -51,20 +51,20 @@ class helper {
     }
 
     /**
-     * Returns a printable string for the logging method.
+     * Returns a printable string for the profiling reason.
      *
-     * @param int $method
+     * @param int $reason
      * @return string
      * @throws \coding_exception
      */
-    public static function log_method_display(int $method): string {
-        switch ($method) {
-            case manager::LOGMETHOD_MANUAL:
-                return get_string('excimerlogmethod_manual', 'tool_excimer');
-            case manager::LOGMETHOD_AUTO:
-                return get_string('excimerlogmethod_auto', 'tool_excimer');
+    public static function reason_display(int $reason): string {
+        switch ($reason) {
+            case manager::REASON_MANUAL:
+                return get_string('excimerreason_manual', 'tool_excimer');
+            case manager::REASON_AUTO:
+                return get_string('excimerreason_auto', 'tool_excimer');
             default:
-                return (string) $method;
+                return (string) $reason;
         }
     }
 }

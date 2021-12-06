@@ -41,8 +41,6 @@ admin_externalpage_setup('tool_excimer_report');
 
 $pluginname = get_string('pluginname', 'tool_excimer');
 
-// TODO support downloading.
-
 $table = new profile_table('profile_table');
 $table->is_downloading($download, 'profile', 'profile_record');
 
@@ -55,7 +53,7 @@ if (!$table->is_downloading()) {
 
 $columns = [
     'request',
-    'logmethod',
+    'reason',
     'scripttype',
     'created',
     'duration',
@@ -66,7 +64,7 @@ $columns = [
 
 $headers = [
     get_string('excimerfield_request', 'tool_excimer'),
-    'Log method',
+    get_string('excimerfield_reason', 'tool_excimer'),
     get_string('excimerfield_type', 'tool_excimer'),
     get_string('excimerfield_created', 'tool_excimer'),
     get_string('excimerfield_duration', 'tool_excimer'),
@@ -77,7 +75,7 @@ $headers = [
 
 // Work out the sql for the table.
 $table->set_sql(
-    'id, logmethod, scripttype, request, created, duration, parameters, responsecode, referer',
+    'id, reason, scripttype, request, created, duration, parameters, responsecode, referer',
     '{tool_excimer_profiles}',
     '1=1'
 );

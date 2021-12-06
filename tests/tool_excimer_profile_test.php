@@ -77,7 +77,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         set_config('excimertrigger_ms', 0, 'tool_excimer');
 
         // Manual saves should have no impact, so chuck a few in o see if it gumms up the works.
-        profile::save(self::quick_log(10), manager::LOGMETHOD_MANUAL, 12345, 2.345);
+        profile::save(self::quick_log(10), manager::REASON_MANUAL, 12345, 2.345);
 
         // Test number of profiles never exceed max allowed.
         for ($i = 1; $i < $numtokeep + 2; ++$i) {
@@ -88,7 +88,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
             $this->assertEquals($expectednum, profile::get_num_auto_profiles());
         }
 
-        profile::save(self::quick_log(10), manager::LOGMETHOD_MANUAL, 2345, 2.456);
+        profile::save(self::quick_log(10), manager::REASON_MANUAL, 2345, 2.456);
 
         // Test run that is faster than what's on there.
         $fastest = profile::get_fastest_auto_profile();
@@ -98,7 +98,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($fastest->duration, profile::get_fastest_auto_profile()->duration);
         $this->assertEquals($numtokeep, profile::get_num_auto_profiles());
 
-        profile::save(self::quick_log(10), manager::LOGMETHOD_MANUAL, 65432, 0.0012);
+        profile::save(self::quick_log(10), manager::REASON_MANUAL, 65432, 0.0012);
 
         // Test run that is slower than what's on there.
         $fastest = profile::get_fastest_auto_profile();
@@ -120,15 +120,15 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $log = self::quick_log(150);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
-        $logmethod = manager::LOGMETHOD_AUTO;
+        $reason = manager::REASON_AUTO;
         $created = 56;
         $duration = 0.123;
 
-        $id = profile::save($log, $logmethod, $created, $duration);
+        $id = profile::save($log, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
-        $this->assertEquals($logmethod, $record->logmethod);
+        $this->assertEquals($reason, $record->reason);
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
         $this->assertEquals($created, $record->created);
         $this->assertEquals($duration, $record->duration);
@@ -138,15 +138,15 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $log = self::quick_log(1500);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
-        $logmethod = manager::LOGMETHOD_AUTO;
+        $reason = manager::REASON_AUTO;
         $created = 120;
         $duration = 0.456;
 
-        $id = profile::save($log, $logmethod, $created, $duration);
+        $id = profile::save($log, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
-        $this->assertEquals($logmethod, $record->logmethod);
+        $this->assertEquals($reason, $record->reason);
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
         $this->assertEquals($created, $record->created);
         $this->assertEquals($duration, $record->duration);
@@ -165,8 +165,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $duration = 0.123;
 
         for ($i = 1; $i < 6; ++$i) {
-            profile::save($log, manager::LOGMETHOD_AUTO, $created, $duration);
-            profile::save($log, manager::LOGMETHOD_MANUAL, $created, $duration);
+            profile::save($log, manager::REASON_AUTO, $created, $duration);
+            profile::save($log, manager::REASON_MANUAL, $created, $duration);
             $this->assertEquals($i, profile::get_num_auto_profiles());
         }
     }
@@ -183,9 +183,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $fastmanual = 0.003;
 
         foreach ($times as $time) {
-            profile::save($log, manager::LOGMETHOD_AUTO, 12345, $time);
+            profile::save($log, manager::REASON_AUTO, 12345, $time);
         }
-        profile::save($log, manager::LOGMETHOD_MANUAL, 12345, $fastmanual);
+        profile::save($log, manager::REASON_MANUAL, 12345, $fastmanual);
 
         $tocheck = profile::get_fastest_auto_profile();
         $this->assertEquals($fastest, $tocheck->duration);
@@ -205,9 +205,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $fastmanual = 0.003;
 
         foreach ($times as $time) {
-            profile::save($log, manager::LOGMETHOD_AUTO, 12345, $time);
+            profile::save($log, manager::REASON_AUTO, 12345, $time);
         }
-        $manualid = profile::save($log, manager::LOGMETHOD_MANUAL, 12345, $fastmanual);
+        $manualid = profile::save($log, manager::REASON_MANUAL, 12345, $fastmanual);
 
         $tocheck = profile::get_fastest_auto_profile();
         $this->assertEquals($sortedtimes[0], $tocheck->duration);

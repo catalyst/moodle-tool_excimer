@@ -7,7 +7,7 @@
     <TABLE NAME="tool_excimer_profiles" COMMENT="Store request-level data for the excimer sampling profiler">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="logmethod" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Logging method (manual, auto etc)"/>
+        <FIELD NAME="reason" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Reason the profile was done (manual, auto etc)"/>
         <FIELD NAME="scripttype" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Script type (www, cli, ajax, ws)"/>
         <FIELD NAME="method" TYPE="char" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="HTTP method, if relevant"/>
         <FIELD NAME="created" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="time in epoch seconds"/>

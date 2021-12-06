@@ -30,8 +30,9 @@ class manager {
 
     const MANUAL_PARAM_NAME = 'FLAMEME';
 
-    const LOGMETHOD_MANUAL = 0;
-    const LOGMETHOD_AUTO = 1;
+    // Reason for profiling.
+    const REASON_MANUAL = 0;
+    const REASON_AUTO = 1;
 
     const EXCIMER_LOG_LIMIT = 10000;
     const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
@@ -121,10 +122,10 @@ class manager {
         $duration = $stopped - $started;
 
         if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
-            $logmethod = self::LOGMETHOD_MANUAL;
+            $reason = self::REASON_MANUAL;
             $dowesave = true;
         } else {
-            $logmethod = self::LOGMETHOD_AUTO;
+            $reason = self::REASON_AUTO;
             $dowesave = ($duration * 1000) >= (int) get_config('tool_excimer', 'excimertrigger_ms');
             if ($dowesave) {
                 $numrecorded = profile::get_num_auto_profiles();
@@ -138,7 +139,7 @@ class manager {
             }
         }
         if ($dowesave) {
-            profile::save($log, $logmethod, (int) $started, $duration);
+            profile::save($log, $reason, (int) $started, $duration);
         }
     }
 

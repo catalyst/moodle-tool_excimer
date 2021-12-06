@@ -26,11 +26,15 @@
 $string['pluginname'] = 'Excimer sampling profiler';
 
 // Admin.
+$string['excimergeneral_settings'] = 'General settings';
+$string['excimergeneral_settings_desc'] = 'Settings related to all profiles';
+$string['excimerauto_settings'] = 'Auto profiling settings';
+$string['excimerauto_settings_desc'] = 'Settings related to automatic profiling';
 $string['excimeranableauto'] = 'Enable auto profiling';
 $string['excimeranableauto_desc'] = 'Any page will be automatically profiled if they exceed the miniumum duration.';
 $string['excimerexpiry_s'] = 'Log expiry (days)';
 $string['excimerexpiry_s_desc'] = 'Remove profiles after this long.';
-$string['excimernum_slowest'] = 'Number of auto saves';
+$string['excimernum_slowest'] = 'Number of saves';
 $string['excimernum_slowest_desc'] = 'Only the N slowest profiles will be kept.';
 $string['excimertask_expire_logs'] = 'Expire excimer logs';
 $string['excimerperiod_ms'] = 'Sampling period (milliseconds)';
@@ -44,6 +48,7 @@ $string['excimeruri_patterns_help'] = 'One pattern per line; * for wildcards';
 // Profile table.
 $string['excimerfield_id'] = 'ID';
 $string['excimerfield_type'] = 'Type';
+$string['excimerfield_reason'] = 'Reason';
 $string['excimerfield_created'] = 'Created';
 $string['excimerfield_duration'] = 'Duration';
 $string['excimerfield_request'] = 'Request';
@@ -65,6 +70,6 @@ $string['excimertype_ajax'] = 'Ajax';
 $string['excimertype_ws'] = 'Service';
 
 // Log methods.
-$string['excimerlogmethod_manual'] = 'Manual';
-$string['excimerlogmethod_auto'] = 'Auto';
+$string['excimerreason_manual'] = 'Manual';
+$string['excimerreason_auto'] = 'Auto';
 

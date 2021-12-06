@@ -28,12 +28,19 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile_table extends \table_sql {
 
-    public function col_logmethod(object $record): string {
-        return helper::log_method_display($record->logmethod);
+    /**
+     * Display values for 'reason' column entries.
+     *
+     * @param object $record
+     * @return string
+     * @throws \coding_exception
+     */
+    public function col_reason(object $record): string {
+        return helper::reason_display($record->reason);
     }
 
     /**
-     * Display value for 'type' column entries
+     * Display value for 'type' column entries.
      *
      * @param object $record
      * @return string
@@ -44,7 +51,7 @@ class profile_table extends \table_sql {
     }
 
     /**
-     * Display value for 'request' column entries
+     * Display value for 'request' column entries.
      *
      * @param object $record
      * @return string
@@ -53,12 +60,15 @@ class profile_table extends \table_sql {
         if ($this->is_downloading()) {
             return $record->request;
         } else {
-            return "<a href='/admin/tool/excimer/profile.php?id=$record->id'>$record->request</a>";
+            return \html_writer::link(
+                new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
+                $record->request
+            );
         }
     }
 
     /**
-     * Display value for 'duration' column entries
+     * Display value for 'duration' column entries.
      *
      * @param object $record
      * @return string
@@ -68,7 +78,7 @@ class profile_table extends \table_sql {
     }
 
     /**
-     * Display value for 'created' column entries
+     * Display value for 'created' column entries.
      *
      * @param object $record
      * @return string
@@ -79,7 +89,7 @@ class profile_table extends \table_sql {
     }
 
     /**
-     * Display value for 'parameters' column entries
+     * Display value for 'parameters' column entries.
      *
      * @param object $record
      * @return string

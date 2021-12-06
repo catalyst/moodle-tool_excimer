@@ -61,8 +61,8 @@ $data['duration'] = format_time($data['duration']);
 $data['script_type_display'] = function($text, $render) {
     return helper::script_type_display((int)$render($text));
 };
-$data['log_method_display'] = function($text, $render) {
-    return helper::log_method_display((int)$render($text));
+$data['reason_display'] = function($text, $render) {
+    return helper::reason_display((int)$render($text));
 };
 
 echo $OUTPUT->header();

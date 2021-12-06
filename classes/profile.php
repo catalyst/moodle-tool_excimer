@@ -103,8 +103,8 @@ class profile {
     public static function get_num_auto_profiles(): int {
         global $DB;
         return $DB->get_field_sql(
-            "SELECT count(*) FROM {tool_excimer_profiles} WHERE logmethod = ?",
-            [ manager::LOGMETHOD_AUTO ]
+            "SELECT count(*) FROM {tool_excimer_profiles} WHERE reason = ?",
+            [ manager::REASON_AUTO ]
         );
     }
 
@@ -116,9 +116,9 @@ class profile {
         global $DB;
         $sql = "SELECT id, duration
                   FROM {tool_excimer_profiles}
-                 WHERE logmethod = ?
+                 WHERE reason = ?
               ORDER BY duration ASC limit 1";
-        return $DB->get_record_sql($sql, [ manager::LOGMETHOD_AUTO ]);
+        return $DB->get_record_sql($sql, [ manager::REASON_AUTO ]);
     }
 
     /**
@@ -129,7 +129,7 @@ class profile {
         global $DB;
 
         $ids = array_keys($DB->get_records('tool_excimer_profiles',
-                ['logmethod' => manager::LOGMETHOD_AUTO ], 'duration ASC', 'id', 0, $numtopurge));
+                ['reason' => manager::REASON_AUTO ], 'duration ASC', 'id', 0, $numtopurge));
         $inclause = $DB->get_in_or_equal($ids);
         $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
     }
@@ -168,15 +168,17 @@ class profile {
     }
 
     /**
-     * Saves a snaphot of the logs into the database.
+     * Saves a snaphot of the profile into the database.
      *
-     * @param \ExcimerLog $log
-     * @param int $created
-     * @param float $duration
-     * @return int The database ID of the inserted profile.
+     * @param \ExcimerLog $log The profile data.
+     * @param int $reason Why the profile is being saved.
+     * @param int $created Timestamp of when the profile was started.
+     * @param float $duration The total time of the profiling, in seconds.
+     * @return int The ID of the database entry.
+     *
      * @throws \dml_exception
      */
-    public static function save(\ExcimerLog $log, int $logmethod, int $created, float $duration): int {
+    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
         global $DB;
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
@@ -184,7 +186,7 @@ class profile {
         $parameters = self::get_parameters($type);
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => session_id(),
-            'logmethod' => $logmethod,
+            'reason' => $reason,
             'scripttype' => $type,
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',
             'created' => $created,
