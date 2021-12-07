@@ -60,12 +60,13 @@ class manager {
      * @return bool True if we have flame all set.
      */
     protected static function is_flame_all(): bool {
+        global $SESSION;
         if (self::is_flag_set(self::FLAME_OFF_PARAM_NAME)) {
-            unset($_SESSION[self::FLAME_ON_PARAM_NAME]);
+            unset($SESSION->toolexcimerflameall);
         } else if (self::is_flag_set(self::FLAME_ON_PARAM_NAME)) {
-            $_SESSION[self::FLAME_ON_PARAM_NAME] = 1;
+            $SESSION->toolexcimerflameall = true;
         }
-        return isset($_SESSION[self::FLAME_ON_PARAM_NAME]);
+        return isset($SESSION->toolexcimerflameall);
     }
 
     /**
@@ -136,13 +137,15 @@ class manager {
      * @throws \dml_exception
      */
     public static function on_flush(\ExcimerLog $log, float $started): void {
+        global $SESSION;
+
         $stopped = microtime(true);
         $duration = $stopped - $started;
 
         if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
             $reason = self::REASON_MANUAL;
             $dowesave = true;
-        } else if (isset($_SESSION[self::FLAME_ON_PARAM_NAME])) {
+        } else if (isset($SESSION->toolexcimerflameall)) {
             $reason = self::REASON_FLAMEALL;
             $dowesave = true;
         } else {
