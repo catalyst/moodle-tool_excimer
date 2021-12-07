@@ -63,6 +63,8 @@ class helper {
                 return get_string('excimerreason_manual', 'tool_excimer');
             case manager::REASON_AUTO:
                 return get_string('excimerreason_auto', 'tool_excimer');
+            case manager::REASON_FLAMEALL:
+                return get_string('excimerreason_flameall', 'tool_excimer');
             default:
                 return (string) $reason;
         }

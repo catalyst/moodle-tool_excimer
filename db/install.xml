@@ -15,6 +15,7 @@
         <FIELD NAME="request" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL, command, or similar identifying string"/>
         <FIELD NAME="parameters" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Request variables or command arguments"/>
         <FIELD NAME="sessionid" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Session ID"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="User ID"/>
         <FIELD NAME="cookies" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Are any cookies set?"/>
         <FIELD NAME="buffering" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Is buffering set?"/>
         <FIELD NAME="responsecode" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="HTTP response code, or 0/1 for command line"/>

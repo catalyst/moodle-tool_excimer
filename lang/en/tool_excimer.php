@@ -72,4 +72,5 @@ $string['excimertype_ws'] = 'Service';
 // Log methods.
 $string['excimerreason_manual'] = 'Manual';
 $string['excimerreason_auto'] = 'Auto';
+$string['excimerreason_flameall'] = 'Flame All';
 

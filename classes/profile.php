@@ -35,7 +35,9 @@ class profile {
 
     const DENYLIST = [
         'sesskey',
-        manager::MANUAL_PARAM_NAME
+        manager::MANUAL_PARAM_NAME,
+        manager::FLAME_ON_PARAM_NAME,
+        manager::FLAME_OFF_PARAM_NAME
     ];
 
     /**
@@ -184,7 +186,7 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
-        global $DB;
+        global $DB, $USER;
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
         $type = self::get_script_type();
@@ -193,6 +195,7 @@ class profile {
             'sessionid' => session_id(),
             'reason' => $reason,
             'scripttype' => $type,
+            'userid' => $USER ? $USER->id : 0,
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',
             'created' => $created,
             'duration' => $duration,
