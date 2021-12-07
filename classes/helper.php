@@ -38,13 +38,13 @@ class helper {
     public static function script_type_display(int $type): string {
         switch ($type) {
             case profile::SCRIPTTYPE_WEB:
-                return get_string('excimertype_web', 'tool_excimer');
+                return get_string('scripttype_web', 'tool_excimer');
             case profile::SCRIPTTYPE_CLI:
-                return get_string('excimertype_cli', 'tool_excimer');
+                return get_string('scripttype_cli', 'tool_excimer');
             case profile::SCRIPTTYPE_AJAX:
-                return get_string('excimertype_ajax', 'tool_excimer');
+                return get_string('scripttype_ajax', 'tool_excimer');
             case profile::SCRIPTTYPE_WS:
-                return get_string('excimertype_ws', 'tool_excimer');
+                return get_string('scripttype_ws', 'tool_excimer');
             default:
                 return (string) $type;
         }
@@ -60,11 +60,11 @@ class helper {
     public static function reason_display(int $reason): string {
         switch ($reason) {
             case manager::REASON_MANUAL:
-                return get_string('excimerreason_manual', 'tool_excimer');
+                return get_string('reason_manual', 'tool_excimer');
             case manager::REASON_AUTO:
-                return get_string('excimerreason_auto', 'tool_excimer');
+                return get_string('reason_auto', 'tool_excimer');
             case manager::REASON_FLAMEALL:
-                return get_string('excimerreason_flameall', 'tool_excimer');
+                return get_string('reason_flameall', 'tool_excimer');
             default:
                 return (string) $reason;
         }

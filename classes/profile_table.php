@@ -45,7 +45,7 @@ class profile_table extends \table_sql {
 
         $headers = [];
         foreach (self::COLUMNS as $column) {
-            $headers[] = get_string('excimerfield_' . $column, 'tool_excimer');
+            $headers[] = get_string('field_' . $column, 'tool_excimer');
         }
 
         $this->set_sql(
