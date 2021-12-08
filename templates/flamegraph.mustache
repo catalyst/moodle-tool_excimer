@@ -61,52 +61,52 @@
 <div id="profile-stats">
     <table class="table table-sm table-bordered">
         <tr>
-            <th>{{#str}} excimerfield_request, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_request, tool_excimer {{/str}}</th>
             <td>{{request}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_sessionid, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
             <td>{{sessionid}}...</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_reason, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_reason, tool_excimer {{/str}}</th>
             <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_scripttype, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_scripttype, tool_excimer {{/str}}</th>
             <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_created, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_created, tool_excimer {{/str}}</th>
             <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_duration, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
             <td>{{duration}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_parameters, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_parameters, tool_excimer {{/str}}</th>
             <td>{{parameters}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_user, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_user, tool_excimer {{/str}}</th>
             <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
                 {{^userlink}}{{fullname}}{{/userlink}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_responsecode, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_responsecode, tool_excimer {{/str}}</th>
             <td>{{responsecode}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_referer, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_referer, tool_excimer {{/str}}</th>
             <td>{{referer}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_cookies, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_cookies, tool_excimer {{/str}}</th>
             <td>{{#cookies}} {{#str}} yes, core_customfield {{/str}} {{/cookies}}{{^cookies}}{{#str}} no, core_customfield {{/str}}{{/cookies}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_buffering, tool_excimer {{/str}}</th>
+            <th>{{#str}} field_buffering, tool_excimer {{/str}}</th>
             <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
         </tr>
     </table>

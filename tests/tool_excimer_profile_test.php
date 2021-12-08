@@ -72,9 +72,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_n_slowest_kept(): void {
         $numtokeep = 5;
-        set_config('excimernum_slowest', $numtokeep, 'tool_excimer');
-        set_config('excimeranableauto', 1, 'tool_excimer');
-        set_config('excimertrigger_ms', 0, 'tool_excimer');
+        set_config('num_slowest', $numtokeep, 'tool_excimer');
+        set_config('enable_auto', 1, 'tool_excimer');
+        set_config('trigger_ms', 0, 'tool_excimer');
 
         // Manual saves should have no impact, so chuck a few in o see if it gumms up the works.
         profile::save(self::quick_log(10), manager::REASON_MANUAL, 12345, 2.345);
@@ -279,10 +279,10 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         unset($_GET[manager::FLAME_OFF_PARAM_NAME]);
         $this->assertFalse(manager::is_profiling());
 
-        set_config('excimeranableauto', 1, 'tool_excimer');
+        set_config('enable_auto', 1, 'tool_excimer');
         $this->assertTrue(manager::is_profiling());
 
-        set_config('excimeranableauto', 0, 'tool_excimer');
+        set_config('enable_auto', 0, 'tool_excimer');
         $this->assertFalse(manager::is_profiling());
     }
 }

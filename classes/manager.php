@@ -78,7 +78,7 @@ class manager {
     public static function is_profiling(): bool {
         return  self::is_flame_all() ||
                 self::is_flag_set(self::MANUAL_PARAM_NAME) ||
-                (get_config('tool_excimer', 'excimeranableauto'));
+                (get_config('tool_excimer', 'enable_auto'));
     }
 
     /**
@@ -102,7 +102,7 @@ class manager {
      * @throws \dml_exception
      */
     public static function init(): void {
-        $samplems = (int)get_config('tool_excimer', 'excimersample_ms');
+        $samplems = (int)get_config('tool_excimer', 'sample_ms');
         $hassensiblerange = $samplems > 10 && $samplems < 10000;
         $sampleperiod = $hassensiblerange ? round($samplems / 1000, 3) : self::EXCIMER_PERIOD;
 
@@ -150,10 +150,10 @@ class manager {
             $dowesave = true;
         } else {
             $reason = self::REASON_AUTO;
-            $dowesave = ($duration * 1000) >= (int) get_config('tool_excimer', 'excimertrigger_ms');
+            $dowesave = ($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms');
             if ($dowesave) {
                 $numrecorded = profile::get_num_auto_profiles();
-                if ($numrecorded >= (int) get_config('tool_excimer', 'excimernum_slowest')) {
+                if ($numrecorded >= (int) get_config('tool_excimer', 'num_slowest')) {
                     if ($duration <= profile::get_fastest_auto_profile()->duration) {
                         $dowesave = false;
                     } else {
@@ -168,13 +168,13 @@ class manager {
     }
 
     /**
-     *  Callback for when the 'excimernum_slowest' setting is changed.
+     *  Callback for when the 'num_slowest' setting is changed.
      *
      * @param string $name
      * @throws \dml_exception
      */
     public static function on_num_slow_setting_change(string $name) {
-        $numtokeep = (int) get_config('tool_excimer', 'excimernum_slowest');
+        $numtokeep = (int) get_config('tool_excimer', 'num_slowest');
         $numkept = profile::get_num_auto_profiles();
         if ($numtokeep < $numkept) {
             profile::purge_fastest_auto_profiles($numkept - $numtokeep);

@@ -34,11 +34,11 @@ use tool_excimer\profile;
 class expire_logs extends \core\task\scheduled_task {
 
     public function get_name() {
-        return get_string('excimertask_expire_logs', 'tool_excimer');
+        return get_string('task_expire_logs', 'tool_excimer');
     }
 
     public function execute() {
-        $expiry = (int)get_config('tool_excimer', 'excimerexpiry_s');
+        $expiry = (int)get_config('tool_excimer', 'expiry_s');
         $cutoff = time() - $expiry;
         profile::purge_profiles_before_epoch_time($cutoff);
     }
