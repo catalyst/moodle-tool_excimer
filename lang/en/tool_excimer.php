@@ -47,9 +47,10 @@ $string['excimeruri_patterns_help'] = 'One pattern per line; * for wildcards';
 
 // Profile table.
 $string['excimerfield_id'] = 'ID';
-$string['excimerfield_type'] = 'Type';
+$string['excimerfield_scripttype'] = 'Type';
 $string['excimerfield_reason'] = 'Reason';
 $string['excimerfield_created'] = 'Created';
+$string['excimerfield_user'] = 'User';
 $string['excimerfield_duration'] = 'Duration';
 $string['excimerfield_request'] = 'Request';
 $string['excimerfield_explanation'] = 'Explanation';

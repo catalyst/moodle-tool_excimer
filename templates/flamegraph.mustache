@@ -29,6 +29,7 @@
     * id - The id of the profile
     * request - The request url (without parameters)
     * sessionid - The session ID
+    * userid - ID of the user who loaded the page
     * type - The script type
     * created - Unix timestamp of profile creation
     * duration - Profile duration in seconds.
@@ -36,6 +37,7 @@
     * resposnecode - HTTP response code
     * cookies - Is cookies enabled?
     * buffering - Is buffering enabled?
+    * fullname - full nane of user represented by userid.
 
     Example context (json):
     {
@@ -49,6 +51,7 @@
         "resposnecode" : 200,
         "cookies" : 1,
         "buffering" : 1,
+        "fullname" : "Admin User"
     }
 }}
 
@@ -68,7 +71,7 @@
             <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
         </tr>
         <tr>
-            <th>{{#str}} excimerfield_type, tool_excimer {{/str}}</th>
+            <th>{{#str}} excimerfield_scripttype, tool_excimer {{/str}}</th>
             <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
         </tr>
         <tr>
@@ -82,6 +85,10 @@
         <tr>
             <th>{{#str}} excimerfield_parameters, tool_excimer {{/str}}</th>
             <td>{{parameters}}</td>
+        </tr>
+        <tr>
+            <th>{{#str}} excimerfield_user, tool_excimer {{/str}}</th>
+            <td>{{fullname}}</td>
         </tr>
         <tr>
             <th>{{#str}} excimerfield_responsecode, tool_excimer {{/str}}</th>

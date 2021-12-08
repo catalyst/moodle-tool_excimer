@@ -28,6 +28,36 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile_table extends \table_sql {
 
+    const COLUMNS = [
+        'request',
+        'reason',
+        'scripttype',
+        'created',
+        'duration',
+        'parameters',
+        'user',
+        'responsecode',
+        'referer'
+    ];
+
+    public function __construct($uniqueid) {
+        parent::__construct($uniqueid);
+
+        $headers = [];
+        foreach (self::COLUMNS as $column) {
+            $headers[] = get_string('excimerfield_' . $column, 'tool_excimer');
+        }
+
+        $this->set_sql(
+            '{tool_excimer_profiles}.id as id, reason, scripttype, request, created, duration, parameters, responsecode,
+                     referer, userid, lang, firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, alternatename',
+            '{tool_excimer_profiles} LEFT JOIN {user} on ({tool_excimer_profiles}.userid = {user}.id)',
+            '1=1'
+        );
+        $this->define_columns(self::COLUMNS);
+        $this->define_headers($headers);
+    }
+
     /**
      * Display values for 'reason' column entries.
      *
@@ -96,5 +126,19 @@ class profile_table extends \table_sql {
      */
     public function col_parameters(object $record): string {
         return htmlentities($record->parameters);
+    }
+
+    /**
+     * Displays the full name of the user.
+     *
+     * @param object $record
+     * @return string
+     */
+    public function col_user(object $record): string {
+        if ($record->userid == 0) {
+            return '-';
+        } else {
+            return fullname($record);
+        }
     }
 }
