@@ -138,7 +138,12 @@ class profile_table extends \table_sql {
         if ($record->userid == 0) {
             return '-';
         } else {
-            return fullname($record);
+            $fullname = fullname($record);
+            if ($this->is_downloading()) {
+                return $fullname;
+            } else {
+                return \html_writer::link('/user/profile.php?id=' . $record->userid, $fullname);
+            }
         }
     }
 }
