@@ -221,6 +221,11 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($sortedtimes[3], $tocheck->duration);
     }
 
+    /**
+     * Tests the expiry of profiles.
+     *
+     * @throws dml_exception
+     */
     public function test_purge_old_profiles(): void {
         global $DB;
         $log = self::quick_log(10);
@@ -246,5 +251,38 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals(1, profile::get_num_profiles());
         $record = $DB->get_record("tool_excimer_profiles", []);
         $this->assertEquals($times[3], $record->created);
+    }
+
+    /**
+     * Test the is_profiling test.
+     *
+     * @throws dml_exception
+     */
+    public function test_is_profiling(): void {
+        $this->assertFalse(manager::is_profiling());
+
+        $_GET[manager::MANUAL_PARAM_NAME] = 1;
+        $this->assertTrue(manager::is_profiling());
+
+        unset($_GET[manager::MANUAL_PARAM_NAME]);
+        $this->assertFalse(manager::is_profiling());
+
+        $_GET[manager::FLAME_ON_PARAM_NAME] = 1;
+        $this->assertTrue(manager::is_profiling());
+
+        unset($_GET[manager::FLAME_ON_PARAM_NAME]);
+        $this->assertTrue(manager::is_profiling());
+
+        $_GET[manager::FLAME_OFF_PARAM_NAME] = 1;
+        $this->assertFalse(manager::is_profiling());
+
+        unset($_GET[manager::FLAME_OFF_PARAM_NAME]);
+        $this->assertFalse(manager::is_profiling());
+
+        set_config('excimeranableauto', 1, 'tool_excimer');
+        $this->assertTrue(manager::is_profiling());
+
+        set_config('excimeranableauto', 0, 'tool_excimer');
+        $this->assertFalse(manager::is_profiling());
     }
 }

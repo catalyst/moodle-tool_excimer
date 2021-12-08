@@ -51,36 +51,6 @@ if (!$table->is_downloading()) {
     echo $OUTPUT->header();
 }
 
-$columns = [
-    'request',
-    'reason',
-    'scripttype',
-    'created',
-    'duration',
-    'parameters',
-    'responsecode',
-    'referer'
-];
-
-$headers = [
-    get_string('excimerfield_request', 'tool_excimer'),
-    get_string('excimerfield_reason', 'tool_excimer'),
-    get_string('excimerfield_type', 'tool_excimer'),
-    get_string('excimerfield_created', 'tool_excimer'),
-    get_string('excimerfield_duration', 'tool_excimer'),
-    get_string('excimerfield_parameters', 'tool_excimer'),
-    get_string('excimerfield_responsecode', 'tool_excimer'),
-    get_string('excimerfield_referer', 'tool_excimer'),
-];
-
-// Work out the sql for the table.
-$table->set_sql(
-    'id, reason, scripttype, request, created, duration, parameters, responsecode, referer',
-    '{tool_excimer_profiles}',
-    '1=1'
-);
-$table->define_columns($columns);
-$table->define_headers($headers);
 
 $table->define_baseurl($url);
 

@@ -56,6 +56,8 @@ $PAGE->set_heading($pluginname);
 
 $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
 
+$user = $DB->get_record('user', ['id' => $profile->userid]);
+
 $data = (array) $profile;
 $data['duration'] = format_time($data['duration']);
 $data['script_type_display'] = function($text, $render) {
@@ -64,6 +66,14 @@ $data['script_type_display'] = function($text, $render) {
 $data['reason_display'] = function($text, $render) {
     return helper::reason_display((int)$render($text));
 };
+
+if ($user) {
+    $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
+    $data['fullname'] = fullname($user);
+} else {
+    $data['userlink'] = null;
+    $data['fullname'] = '-';
+}
 
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('tool_excimer/flamegraph', $data);

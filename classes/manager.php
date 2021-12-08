@@ -29,10 +29,13 @@ defined('MOODLE_INTERNAL') || die();
 class manager {
 
     const MANUAL_PARAM_NAME = 'FLAMEME';
+    const FLAME_ON_PARAM_NAME = 'FLAMEALL';
+    const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
 
     // Reason for profiling.
     const REASON_MANUAL = 0;
     const REASON_AUTO = 1;
+    const REASON_FLAMEALL = 2;
 
     const EXCIMER_LOG_LIMIT = 10000;
     const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
@@ -52,13 +55,29 @@ class manager {
     }
 
     /**
+     * Checks flame on/off flags and sets the session value.
+     *
+     * @return bool True if we have flame all set.
+     */
+    protected static function is_flame_all(): bool {
+        global $SESSION;
+        if (self::is_flag_set(self::FLAME_OFF_PARAM_NAME)) {
+            unset($SESSION->toolexcimerflameall);
+        } else if (self::is_flag_set(self::FLAME_ON_PARAM_NAME)) {
+            $SESSION->toolexcimerflameall = true;
+        }
+        return isset($SESSION->toolexcimerflameall);
+    }
+
+    /**
      * Returns true if the profiler is currently set to be used.
      *
      * @return bool
      * @throws \dml_exception
      */
     public static function is_profiling(): bool {
-        return self::is_flag_set(self::MANUAL_PARAM_NAME) ||
+        return  self::is_flame_all() ||
+                self::is_flag_set(self::MANUAL_PARAM_NAME) ||
                 (get_config('tool_excimer', 'excimeranableauto'));
     }
 
@@ -118,11 +137,16 @@ class manager {
      * @throws \dml_exception
      */
     public static function on_flush(\ExcimerLog $log, float $started): void {
+        global $SESSION;
+
         $stopped = microtime(true);
         $duration = $stopped - $started;
 
         if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
             $reason = self::REASON_MANUAL;
+            $dowesave = true;
+        } else if (isset($SESSION->toolexcimerflameall)) {
+            $reason = self::REASON_FLAMEALL;
             $dowesave = true;
         } else {
             $reason = self::REASON_AUTO;
