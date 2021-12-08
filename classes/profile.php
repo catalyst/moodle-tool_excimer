@@ -192,7 +192,7 @@ class profile {
         $type = self::get_script_type();
         $parameters = self::get_parameters($type);
         return $DB->insert_record('tool_excimer_profiles', [
-            'sessionid' => session_id(),
+            'sessionid' => substr(session_id(), 0, 10),
             'reason' => $reason,
             'scripttype' => $type,
             'userid' => $USER ? $USER->id : 0,
