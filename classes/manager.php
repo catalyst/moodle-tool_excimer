@@ -151,24 +151,20 @@ class manager {
         } else {
             $reason = self::REASON_AUTO;
             $dowesave = ($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms');
-            if ($dowesave) {
-                $numrecorded = profile::get_num_auto_profiles();
-                if ($numrecorded >= (int) get_config('tool_excimer', 'num_slowest')) {
-                    if ($duration <= profile::get_fastest_auto_profile()->duration) {
-                        $dowesave = false;
-                    } else {
-                        profile::purge_fastest_auto_profiles(1);
-                    }
-                }
-            }
         }
+
         if ($dowesave) {
             profile::save($log, $reason, (int) $started, $duration);
+
+            // TODO remove this to make this the task's responsibility.
+            profile::purge_fastest_by_page((int) get_config('tool_excimer', 'num_slowest_by_page'));
+            profile::purge_fastest((int) get_config('tool_excimer', 'num_slowest'));
         }
     }
 
     /**
      *  Callback for when the 'num_slowest' setting is changed.
+     *  TODO Once purging is done by cron, deprecate this function.
      *
      * @param string $name
      * @throws \dml_exception

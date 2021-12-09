@@ -99,10 +99,20 @@ if ($hassiteconfig) {
             'tool_excimer/num_slowest',
             get_string('num_slowest', 'tool_excimer'),
             get_string('num_slowest_desc', 'tool_excimer'),
-            '5',
+            '100',
             PARAM_INT
         );
         $setting->set_updatedcallback('tool_excimer\manager::on_num_slow_setting_change');
         $settings->add($setting);
+
+        $settings->add(
+                new admin_setting_configtext(
+                        'tool_excimer/num_slowest_by_page',
+                        get_string('num_slowest_by_page', 'tool_excimer'),
+                        get_string('num_slowest_by_page_desc', 'tool_excimer'),
+                        '5',
+                        PARAM_INT
+                )
+        );
     }
 }

@@ -20,6 +20,14 @@ use tool_excimer\profile;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Tests the profile storage.
+ *
+ * @package   tool_excimer
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2021, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class tool_excimer_profile_testcase extends advanced_testcase {
 
     /**
@@ -71,42 +79,103 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      * @throws dml_exception
      */
     public function test_n_slowest_kept(): void {
-        $numtokeep = 5;
-        set_config('num_slowest', $numtokeep, 'tool_excimer');
-        set_config('enable_auto', 1, 'tool_excimer');
-        set_config('trigger_ms', 0, 'tool_excimer');
+        global $DB;
 
-        // Manual saves should have no impact, so chuck a few in o see if it gumms up the works.
-        profile::save(self::quick_log(10), manager::REASON_MANUAL, 12345, 2.345);
+        $log = self::quick_log(10);
 
-        // Test number of profiles never exceed max allowed.
-        for ($i = 1; $i < $numtokeep + 2; ++$i) {
-            $expectednum = min($i, $numtokeep);
-            $started = microtime(true);
-            $log = $this->quick_log(5 * ($i + 100));
-            manager::on_flush($log, $started);
-            $this->assertEquals($expectednum, profile::get_num_auto_profiles());
+        $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22 ];
+        $sortedtimes = $times;
+        sort($sortedtimes);
+        $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+
+        $fastmanual = 0.003;
+
+        // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
+        profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
+        profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
+
+        foreach ($times as $time) {
+            profile::save($log, manager::REASON_AUTO, 12345, $time);
         }
 
-        profile::save(self::quick_log(10), manager::REASON_MANUAL, 2345, 2.456);
+        profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
 
-        // Test run that is faster than what's on there.
-        $fastest = profile::get_fastest_auto_profile();
-        $started = microtime(true);
-        $log = $this->quick_log(5 * 10); // Should be quicker than any of the above.
-        manager::on_flush($log, $started);
-        $this->assertEquals($fastest->duration, profile::get_fastest_auto_profile()->duration);
-        $this->assertEquals($numtokeep, profile::get_num_auto_profiles());
+        $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
-        profile::save(self::quick_log(10), manager::REASON_MANUAL, 65432, 0.0012);
+        // Should remove a few profiles.
+        $numtokeep = 8;
+        profile::purge_fastest($numtokeep);
+        $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
+        $sortedtimes = array_slice($sortedtimes, -$numtokeep);
+        $this->assertEquals($sortedtimes[0],
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_AUTO]));
 
-        // Test run that is slower than what's on there.
-        $fastest = profile::get_fastest_auto_profile();
-        $started = microtime(true);
-        $log = $this->quick_log(5 * 1000); // Should be slower than any of the above.
-        manager::on_flush($log, $started);
-        $this->assertGreaterThan($fastest->duration, profile::get_fastest_auto_profile()->duration);
-        $this->assertEquals($numtokeep, profile::get_num_auto_profiles());
+        // Should remove a few more profiles.
+        $numtokeep = 5;
+        profile::purge_fastest($numtokeep);
+        $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
+        $sortedtimes = array_slice($sortedtimes, -$numtokeep);
+        $this->assertEquals($sortedtimes[0],
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_AUTO]));
+
+        // Should remove no profiles.
+        $numtokeepnew = 9;
+        profile::purge_fastest($numtokeepnew);
+        $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals($sortedtimes[0],
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_AUTO]));
+    }
+
+    /**
+     * Tests the functionality to keep only the N slowest profiles for each page.
+     *
+     * @throws dml_exception
+     */
+    public function test_n_slowest_kept_per_page(): void {
+        global $DB;
+
+        $log = self::quick_log(10);
+
+        $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22, 0.111, 0.9 ];
+        $reqnames = [ 'a', 'b', 'c', 'a', 'd', 'a', 'a', 'c', 'd', 'c', 'c', 'c' ];
+        $sortedtimes = $times;
+        sort($sortedtimes);
+        $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+
+        // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
+        $_SERVER['PHP_SELF'] = 'a';
+        profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
+        $_SERVER['PHP_SELF'] = 'b';
+        profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
+
+        for ($i = 0; $i < count($times); ++$i) {
+            $_SERVER['PHP_SELF'] = $reqnames[$i];
+            profile::save($log, manager::REASON_AUTO, 12345, $times[$i]);
+        }
+
+        $_SERVER['PHP_SELF'] = 'c';
+        profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
+
+        $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
+
+        // Should remove a few profiles.
+        $numtokeep = 3;
+        $expectedreqcount = [ 'a' => 3, 'b' => 1, 'c' => 3, 'd' => 2 ];
+        $expectedfastest = [ 'a' => 0.456, 'b' => 0.234, 'c' => 0.123, 'd' => 0.14 ];
+        profile::purge_fastest_by_page($numtokeep);
+        $this->assertEquals(array_sum($expectedreqcount) + 3, $DB->count_records('tool_excimer_profiles'));
+        $records = $DB->get_records_sql(
+            "SELECT request, COUNT(*) AS c, MIN(duration) AS m
+               FROM {tool_excimer_profiles}
+              WHERE reason = ?
+           GROUP BY request",
+            [manager::REASON_AUTO]
+        );
+
+        foreach ($records as $i => $record) {
+            $this->assertEquals($expectedreqcount[$i], $record->c);
+            $this->assertEquals($expectedfastest[$i], $record->m);
+        }
     }
 
     /**
@@ -207,7 +276,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         foreach ($times as $time) {
             profile::save($log, manager::REASON_AUTO, 12345, $time);
         }
-        $manualid = profile::save($log, manager::REASON_MANUAL, 12345, $fastmanual);
+        profile::save($log, manager::REASON_MANUAL, 12345, $fastmanual);
 
         $tocheck = profile::get_fastest_auto_profile();
         $this->assertEquals($sortedtimes[0], $tocheck->duration);
