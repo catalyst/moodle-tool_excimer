@@ -104,6 +104,8 @@ class profile {
     }
 
     /**
+     * deprecated
+     *
      * @return int
      * @throws \dml_exception
      */
@@ -116,6 +118,8 @@ class profile {
     }
 
     /**
+     * deprecated
+     *
      * @return object
      * @throws \dml_exception
      */
@@ -129,6 +133,8 @@ class profile {
     }
 
     /**
+     * Deprecated. Use purge_fastest() instead.
+     *
      * @param int $numtopurge
      * @throws \dml_exception
      */
@@ -226,4 +232,43 @@ class profile {
             [ 'cutoff' => $cutoff ]
         );
     }
+
+    /**
+     * Removes auto profiles from the database so as to keep only the $numtokeep slowest for each script page.
+     *
+     * @param int $numtokeep Number of profiles per request to keep.
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function purge_fastest_by_page(int $numtokeep): void {
+        global $DB;
+
+        // TODO optimisation suggestions welcome.
+        $records = $DB->get_records_sql("select count(*) as num, request from mdl_tool_excimer_profiles where reason = ? group by request having count(*) > ?", [manager::REASON_AUTO, $numtokeep]);
+        foreach ($records as $record) {
+            $ids = array_keys($DB->get_records('tool_excimer_profiles',
+                    ['reason' => manager::REASON_AUTO, 'request' => $record->request ], 'duration ASC', 'id', 0, $record->num - $numtokeep));
+            $inclause = $DB->get_in_or_equal($ids);
+            $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
+        }
+    }
+
+    /**
+     * Removes auto profiles from the database so as to keep only the $numtokeep slowest. Typically run after purge_fastest_by_page.
+     *
+     * @param int $numtokeep Overall number of profiles to keep.
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function purge_fastest(int $numtokeep): void {
+        global $DB;
+        $numtopurge = $DB->count_records('tool_excimer_profiles', ['reason' => manager::REASON_AUTO ]) - $numtokeep;
+        if ($numtopurge > 0) {
+            $ids = array_keys($DB->get_records('tool_excimer_profiles',
+                    ['reason' => manager::REASON_AUTO ], 'duration ASC', 'id', 0, $numtopurge));
+            $inclause = $DB->get_in_or_equal($ids);
+            $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
+        }
+    }
+
 }

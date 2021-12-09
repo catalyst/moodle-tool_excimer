@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,10 +16,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Delete logs that have expired
+ * Delete excess logs to keep only the slowest.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,15 +28,14 @@ namespace tool_excimer\task;
 
 use tool_excimer\profile;
 
-class expire_logs extends \core\task\scheduled_task {
+class purge_fastest  extends \core\task\scheduled_task {
 
     public function get_name() {
-        return get_string('task_expire_logs', 'tool_excimer');
+        return get_string('task_purge_fastest', 'tool_excimer');
     }
 
     public function execute() {
-        $expiry = (int)get_config('tool_excimer', 'expiry_s');
-        $cutoff = time() - $expiry;
-        profile::purge_profiles_before_epoch_time($cutoff);
+        profile::purge_fastest_by_page((int) get_config('tool_excimer', 'num_slowest_by_page'));
+        profile::purge_fastest((int) get_config('tool_excimer', 'num_slowest'));
     }
 }

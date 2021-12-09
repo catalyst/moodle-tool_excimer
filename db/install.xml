@@ -29,6 +29,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="createdindex" UNIQUE="false" FIELDS="created"/>
+        <INDEX NAME="durationindex" UNIQUE="false" FIELDS="duration"/>
       </INDEXES>
     </TABLE>
   </TABLES>
