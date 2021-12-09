@@ -104,50 +104,6 @@ class profile {
     }
 
     /**
-     * deprecated
-     *
-     * @return int
-     * @throws \dml_exception
-     */
-    public static function get_num_auto_profiles(): int {
-        global $DB;
-        return $DB->get_field_sql(
-            "SELECT count(*) FROM {tool_excimer_profiles} WHERE reason = ?",
-            [ manager::REASON_AUTO ]
-        );
-    }
-
-    /**
-     * deprecated
-     *
-     * @return object
-     * @throws \dml_exception
-     */
-    public static function get_fastest_auto_profile(): object {
-        global $DB;
-        $sql = "SELECT id, duration
-                  FROM {tool_excimer_profiles}
-                 WHERE reason = ?
-              ORDER BY duration ASC limit 1";
-        return $DB->get_record_sql($sql, [ manager::REASON_AUTO ]);
-    }
-
-    /**
-     * Deprecated. Use purge_fastest() instead.
-     *
-     * @param int $numtopurge
-     * @throws \dml_exception
-     */
-    public static function purge_fastest_auto_profiles(int $numtopurge): void {
-        global $DB;
-
-        $ids = array_keys($DB->get_records('tool_excimer_profiles',
-                ['reason' => manager::REASON_AUTO ], 'duration ASC', 'id', 0, $numtopurge));
-        $inclause = $DB->get_in_or_equal($ids);
-        $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
-    }
-
-    /**
      * Gets the script type of the request.
      *
      * @return int
