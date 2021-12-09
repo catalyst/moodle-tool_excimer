@@ -16,6 +16,8 @@
 
 use tool_excimer\converter;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Tests the converter class.
  *

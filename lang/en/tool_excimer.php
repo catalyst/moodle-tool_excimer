@@ -42,9 +42,6 @@ $string['period_ms'] = 'Sampling period (milliseconds)';
 $string['period_ms_desc'] = 'Frequency of sampling.';
 $string['request_ms'] = 'Minimum request duration (milliseconds)';
 $string['request_ms_desc'] = 'Record a profile only if it runs at least this long.';
-$string['uri_contains'] = 'URI must contain';
-$string['uri_not_contains'] = 'URI must NOT contain';
-$string['uri_patterns_help'] = 'One pattern per line; * for wildcards';
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
 

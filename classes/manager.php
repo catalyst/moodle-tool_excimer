@@ -39,7 +39,6 @@ class manager {
 
     const EXCIMER_LOG_LIMIT = 10000;
     const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
-    const EXCIMER_TRIGGER = 0.01; // Default in seconds; used if config is out of sensible range.
 
     /**
      * Checks if the given flag is set
@@ -79,21 +78,6 @@ class manager {
         return  self::is_flame_all() ||
                 self::is_flag_set(self::MANUAL_PARAM_NAME) ||
                 (get_config('tool_excimer', 'enable_auto'));
-    }
-
-    /**
-     * Get the list of stored profiles. Does not return the data.
-     *
-     * @return array
-     */
-    public static function getprofiles(): object {
-        global $DB;
-        $sql = "
-            SELECT id, request, created
-              FROM {tool_excimer_profiles}
-          ORDER BY created DESC
-        ";
-        return $DB->get_recordset_sql($sql);
     }
 
     /**
@@ -155,25 +139,6 @@ class manager {
 
         if ($dowesave) {
             profile::save($log, $reason, (int) $started, $duration);
-
-            // TODO remove this to make this the task's responsibility.
-            profile::purge_fastest_by_page((int) get_config('tool_excimer', 'num_slowest_by_page'));
-            profile::purge_fastest((int) get_config('tool_excimer', 'num_slowest'));
-        }
-    }
-
-    /**
-     *  Callback for when the 'num_slowest' setting is changed.
-     *  TODO Once purging is done by cron, deprecate this function.
-     *
-     * @param string $name
-     * @throws \dml_exception
-     */
-    public static function on_num_slow_setting_change(string $name) {
-        $numtokeep = (int) get_config('tool_excimer', 'num_slowest');
-        $numkept = profile::get_num_auto_profiles();
-        if ($numtokeep < $numkept) {
-            profile::purge_fastest_auto_profiles($numkept - $numtokeep);
         }
     }
 }
