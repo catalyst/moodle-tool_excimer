@@ -90,7 +90,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
         $fastmanual = 0.003;
 
-        // Non-auto saves should have no impact, so chuck a few in o see if it gumms up the works.
+        // Non-auto saves should have no impact, so chuck a few in to see if it gumms up the works.
         profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
         profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
 
@@ -142,7 +142,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
 
-        // Non-auto saves should have no impact, so chuck a few in o see if it gumms up the works.
+        // Non-auto saves should have no impact, so chuck a few in to see if it gumms up the works.
         $_SERVER['PHP_SELF'] = 'a';
         profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
         $_SERVER['PHP_SELF'] = 'b';
@@ -157,8 +157,6 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
-
-        $x = $DB->get_records('tool_excimer_profiles');
 
         // Should remove a few profiles.
         $numtokeep = 3;
