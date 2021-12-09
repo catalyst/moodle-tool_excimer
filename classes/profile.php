@@ -244,10 +244,18 @@ class profile {
         global $DB;
 
         // TODO optimisation suggestions welcome.
-        $records = $DB->get_records_sql("select count(*) as num, request from mdl_tool_excimer_profiles where reason = ? group by request having count(*) > ?", [manager::REASON_AUTO, $numtokeep]);
+        $records = $DB->get_records_sql(
+            "SELECT COUNT(*) AS num, request
+               FROM {tool_excimer_profiles}
+              WHERE reason = ?
+           GROUP BY request
+             HAVING COUNT(*) > ?",
+            [manager::REASON_AUTO, $numtokeep]
+        );
         foreach ($records as $record) {
             $ids = array_keys($DB->get_records('tool_excimer_profiles',
-                    ['reason' => manager::REASON_AUTO, 'request' => $record->request ], 'duration ASC', 'id', 0, $record->num - $numtokeep));
+                    ['reason' => manager::REASON_AUTO, 'request' => $record->request ],
+                    'duration ASC', 'id', 0, $record->num - $numtokeep));
             $inclause = $DB->get_in_or_equal($ids);
             $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
         }
