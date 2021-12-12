@@ -25,7 +25,11 @@
 
 $string['pluginname'] = 'Excimer sampling profiler';
 
-// Admin.
+// Admin Tree.
+$string['report_slowest'] = 'Profile list - slowest';
+$string['report_recent'] = 'Profile list - recent';
+
+// Settings.
 $string['general_settings'] = 'General settings';
 $string['general_settings_desc'] = 'Settings related to all profiles';
 $string['auto_settings'] = 'Auto profiling settings';
@@ -44,6 +48,10 @@ $string['request_ms'] = 'Minimum request duration (milliseconds)';
 $string['request_ms_desc'] = 'Record a profile only if it runs at least this long.';
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
+
+// Tabs
+$string['recent'] = 'Recent';
+$string['slowest'] = 'Slowest';
 
 // Profile table.
 $string['field_id'] = 'ID';

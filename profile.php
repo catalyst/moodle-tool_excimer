@@ -39,7 +39,7 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url($url);
 
-admin_externalpage_setup('tool_excimer_report');
+admin_externalpage_setup('tool_excimer_report_slowest');
 
 $returnurl = new \moodle_url('/admin/tool/excimer/profile.php');
 

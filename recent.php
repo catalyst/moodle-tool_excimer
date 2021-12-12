@@ -15,47 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * D3.js flamegraph of excimer profiling data.
+ * Recent Excimer profiling data in a table.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use tool_excimer\profile_table;
+use tool_excimer\helper;
+use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-$download = optional_param('download', '', PARAM_ALPHA);
+$url = new moodle_url("/admin/tool/excimer/recent.php");
 
-$context = context_system::instance();
-$url = new moodle_url("/admin/tool/excimer/index.php");
-
-$PAGE->set_context($context);
-$PAGE->set_url($url);
-
-admin_externalpage_setup('tool_excimer_report');
-
-$pluginname = get_string('pluginname', 'tool_excimer');
-
-$table = new profile_table('profile_table');
-$table->is_downloading($download, 'profile', 'profile_record');
-
-if (!$table->is_downloading()) {
-    $PAGE->set_title($pluginname);
-    $PAGE->set_pagelayout('admin');
-    $PAGE->set_heading($pluginname);
-    echo $OUTPUT->header();
-}
-
-
-$table->define_baseurl($url);
-
-$table->out(40, true); // TODO replace with a value from settings.
-
-if (!$table->is_downloading()) {
-    echo $OUTPUT->footer();
-}
+profile_table_page::display('recent', $url);
