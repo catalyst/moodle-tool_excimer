@@ -15,24 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * D3.js flamegraph data in JSON format.
+ * Slowest Excimer profiling data in a table.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\profile;
+use tool_excimer\profile_table;
+use tool_excimer\helper;
+use tool_excimer\profile_table_page;
 
-require_once(__DIR__ . '/../../../config.php');
-
+require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_admin();
+require_once($CFG->libdir.'/tablelib.php');
 
-$profileid = required_param('profileid', PARAM_INT);
+admin_externalpage_setup('tool_excimer_report_slowest');
 
-$record = profile::getprofile($profileid);
+$url = new moodle_url("/admin/tool/excimer/slowest.php");
 
-header('Content-Type: application/json; charset: utf-8');
-echo $record->flamedatad3;
+profile_table_page::display('slowest', $url);
