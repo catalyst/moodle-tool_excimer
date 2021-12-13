@@ -34,10 +34,13 @@ class profile {
     const SCRIPTTYPE_WS = 3;
 
     const DENYLIST = [
-        'sesskey',
         manager::MANUAL_PARAM_NAME,
         manager::FLAME_ON_PARAM_NAME,
         manager::FLAME_OFF_PARAM_NAME
+    ];
+
+    const REDACTLIST = [
+        'sesskey',
     ];
 
     /**
@@ -47,13 +50,21 @@ class profile {
      * @return array
      */
     public static function stripparameters(array $parameters): array {
-        return array_filter(
+        $parameters = array_filter(
             $parameters,
             function($i) {
-                return !in_array($i, profile::DENYLIST);
+                return !in_array($i, self::DENYLIST);
             },
             ARRAY_FILTER_USE_KEY
         );
+
+        foreach ($parameters as $i => &$v) {
+            if (in_array($i, self::REDACTLIST)) {
+                $v = '';
+            }
+        }
+
+        return $parameters;
     }
 
     /**

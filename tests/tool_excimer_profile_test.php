@@ -287,4 +287,18 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         set_config('enable_auto', 0, 'tool_excimer');
         $this->assertFalse(manager::is_profiling());
     }
+
+    public function test_stripparamters(): void {
+        $param = [ 'a' => '1', 'b' => 2, 'c' => 3 ];
+        $paramexpect = $param;
+        $this->assertEquals($paramexpect, profile::stripparameters($param));
+
+        $param = [ 'a' => '1', 'sesskey' => 2, 'c' => 3 ];
+        $paramexpect = [ 'a' => '1', 'sesskey' => '', 'c' => 3 ];
+        $this->assertEquals($paramexpect, profile::stripparameters($param));
+
+        $param = [ 'a' => '1', 'sesskey' => 2, 'FLAMEME' => 3 ];
+        $paramexpect = [ 'a' => '1', 'sesskey' => '' ];
+        $this->assertEquals($paramexpect, profile::stripparameters($param));
+    }
 }
