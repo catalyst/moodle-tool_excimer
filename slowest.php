@@ -31,6 +31,8 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
+admin_externalpage_setup('tool_excimer_report_slowest');
+
 $url = new moodle_url("/admin/tool/excimer/slowest.php");
 
 profile_table_page::display('slowest', $url);

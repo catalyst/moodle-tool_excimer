@@ -49,7 +49,7 @@ $string['request_ms_desc'] = 'Record a profile only if it runs at least this lon
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
 
-// Tabs
+// Tabs.
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
 

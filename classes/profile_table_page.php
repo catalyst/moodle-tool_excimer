@@ -38,8 +38,6 @@ class profile_table_page {
 
         $context = \context_system::instance();
 
-        admin_externalpage_setup('tool_excimer_report_' . $report);
-
         $PAGE->set_context($context);
         $PAGE->set_url($url);
 
@@ -76,22 +74,18 @@ class profile_table_page {
      */
     public static function report_tabs(\moodle_url $url): array {
         $tabs = [
-                'tabs' => [
-                        [
-                                'link' => [[
-                                        'link'=> new \moodle_url('/admin/tool/excimer/slowest.php')
-                                ]],
-                                'title'=> get_string('report_slowest', 'tool_excimer'),
-                                'text'=> get_string('slowest', 'tool_excimer')
-                        ],
-                        [
-                                'link' => [ [
-                                        'link'=> new \moodle_url('/admin/tool/excimer/recent.php')
-                                ]],
-                                'title'=> get_string('report_recent', 'tool_excimer'),
-                                'text'=> get_string('recent', 'tool_excimer')
-                        ]
+            'tabs' => [
+                [
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
+                    'title' => get_string('report_slowest', 'tool_excimer'),
+                    'text' => get_string('slowest', 'tool_excimer')
+                ],
+                [
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/recent.php') ]],
+                    'title' => get_string('report_recent', 'tool_excimer'),
+                    'text' => get_string('recent', 'tool_excimer')
                 ]
+            ]
         ];
 
         foreach ($tabs['tabs'] as &$tab) {
