@@ -48,6 +48,7 @@ $string['request_ms'] = 'Minimum request duration (milliseconds)';
 $string['request_ms_desc'] = 'Record a profile only if it runs at least this long.';
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
+$string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue.';
 
 // Tabs.
 $string['recent'] = 'Recent';

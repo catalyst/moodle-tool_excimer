@@ -58,11 +58,14 @@ if ($hassiteconfig) {
     $ADMIN->add('tools', $settings);
 
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_heading(
-            'tool_excimer/general',
-            get_string('general_settings', 'tool_excimer'),
-            get_string('general_settings_desc', 'tool_excimer'),
-        ));
+        $warntext = '';
+        if (!class_exists('ExcimerProfiler')) {
+            $warntext  .= $OUTPUT->notification(get_string('noexcimerprofiler', 'tool_excimer'));
+        }
+        $warntext .= get_string('general_settings_desc', 'tool_excimer');
+        $config = \tool_objectfs\local\manager::get_objectfs_config();
+        $settings->add(new admin_setting_heading('tool_excimer/general',
+            new lang_string('general_settings', 'tool_excimer'), $warntext));
 
         $settings->add(
             new admin_setting_configtext(

@@ -36,11 +36,9 @@ defined('MOODLE_INTERNAL') || die();
  * eliminates the need for an auto_prepend_file/auto_append_file.
  */
 function tool_excimer_after_config() {
-
     // TODO Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
     // TODO Do we want to check if in upgrade/install etc.
-
-    if (manager::is_profiling()) {
+    if (class_exists('ExcimerProfiler') && manager::is_profiling()) {
         manager::init();
     }
 }
