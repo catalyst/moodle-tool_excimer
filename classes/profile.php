@@ -159,8 +159,12 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
-        global $DB, $USER, $SCRIPT;
+        global $DB, $USER, $CFG, $SCRIPT;
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
+
+        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
+        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
+
         $flamedatad3 = json_encode(converter::process($flamedata));
         $type = self::get_script_type();
         $parameters = self::get_parameters($type);
