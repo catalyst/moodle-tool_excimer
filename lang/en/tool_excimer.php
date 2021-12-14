@@ -68,6 +68,7 @@ $string['field_sessionid'] = 'Session ID';
 $string['field_referer'] = 'Referer';
 $string['field_cookies'] = 'Cookies Enabled';
 $string['field_buffering'] = 'Buffering Enabled';
+$string['field_delete'] = '';
 
 // Terminology.
 $string['term_profile'] = 'Profile';
@@ -83,3 +84,10 @@ $string['reason_manual'] = 'Manual';
 $string['reason_auto'] = 'Auto';
 $string['reason_flameall'] = 'Flame All';
 
+// Miscellaneous.
+$string['deleteall'] = 'Delete All';
+$string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
+$string['deleteprofile'] = 'Delete profile';
+$string['deleteprofilewarning'] = 'This will remove the profile. Continue?';
+$string['allprofiesdeleted'] = 'All profiles have been deleted';
+$string['profiedeleted'] = 'Profile Deleted';

@@ -37,7 +37,12 @@ class profile_table extends \table_sql {
         'parameters',
         'user',
         'responsecode',
-        'referer'
+        'referer',
+        'delete'
+    ];
+
+    const NOSORT_COLUMNS = [
+        'delete'
     ];
 
     public function __construct($uniqueid) {
@@ -46,6 +51,10 @@ class profile_table extends \table_sql {
         $headers = [];
         foreach (self::COLUMNS as $column) {
             $headers[] = get_string('field_' . $column, 'tool_excimer');
+        }
+
+        foreach (self::NOSORT_COLUMNS as $column) {
+            $this->no_sorting($column);
         }
 
         $this->set_sql(
@@ -145,5 +154,26 @@ class profile_table extends \table_sql {
                 return \html_writer::link('/user/profile.php?id=' . $record->userid, $fullname);
             }
         }
+    }
+
+    /**
+     * Display for the delete column
+     *
+     * @param object $record
+     * @return mixed
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public function col_delete(object $record) {
+        global $OUTPUT;
+        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', [ 'deleteid' => $record->id, 'sesskey' => sesskey() ]);
+        $link = new \action_link(
+                $deleteurl,
+                '',
+                new \confirm_action('Confirm?'),
+                null,
+                new \pix_icon('t/delete', get_string('deleteprofile', 'tool_excimer'))
+        );
+        return $OUTPUT->render($link);
     }
 }
