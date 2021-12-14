@@ -50,13 +50,12 @@ pecl install excimer
 docker-php-ext-enable excimer
 ```
 
-### Moodle Plugin 
+### Moodle Plugin
 
 From Moodle siteroot:
 
 ```
-cd admin/tool
-git clone git@github.com:catalyst/moodle-tool_excimer.git excimer
+git clone git@github.com:catalyst/moodle-tool_excimer.git admin/tool/excimer
 ```
 
 Then login as admin (it should detect the extension), and click through the upgrade process.
@@ -65,7 +64,7 @@ Then login as admin (it should detect the extension), and click through the upgr
 
 ## Support
 
-If you have issues please log them in github here
+If you have issues please log them in GitHub here
 
 https://github.com/catalyst/moodle-tool_excimer/issues
 
@@ -77,7 +76,7 @@ https://www.catalyst-au.net/contact-us
 
 ## Credits
 
-Thanks in particular to the to the Wikimedia Foundation for building the awseome Excimer profiler:
+Thanks in particular to the to the Wikimedia Foundation for building the awesome Excimer profiler:
 
 https://github.com/wikimedia/php-excimer/
 
