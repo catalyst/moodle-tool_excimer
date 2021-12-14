@@ -159,11 +159,15 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
-        global $DB, $USER;
+        global $DB, $USER, $SCRIPT;
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         $flamedatad3 = json_encode(converter::process($flamedata));
         $type = self::get_script_type();
         $parameters = self::get_parameters($type);
+
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : 'UNKNOWN';
+
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => substr(session_id(), 0, 10),
             'reason' => $reason,
@@ -172,7 +176,7 @@ class profile {
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',
             'created' => $created,
             'duration' => $duration,
-            'request' => $_SERVER['PHP_SELF'] ?? 'UNKNOWN',
+            'request' => $request,
             'parameters' => $parameters,
             'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
             'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
