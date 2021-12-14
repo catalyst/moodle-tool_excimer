@@ -33,6 +33,51 @@ solution such as New Relic. But if you don't have or cannot afford an APM this
 plugin should be another great tool to have in your tool box.
 
 
+## Design principles
+
+### 1) Do no harm
+
+This plugin is designed to be running constantly in production profiling everything and
+only storing things which are of interest in various ways. So it is critical that this
+plugin has an extremely low foot print, in all dimensions: CPU, memory, and with IO to
+the DB, file system and even caches. In the vast majority of requests when things are
+running smoothly it will discard the profile and it's overall impact should be close
+to zero. Even when it is storing and processing profiles, keep the impact as low as
+possible and defer things until needed if possible or worse case to a cron task.
+
+An extension of this is 'don't escalate', meaning if something fundamentally goes wrong
+at a low level inf level, then attempt to mitigate
+
+### 2) Don't make me think
+
+Rather that a low level tool which you have to drive, the intent of this plugin is to
+give clear actionable suggestions about specific changes to code to improve it. There
+may be many potential reasons why a particular request is 'interesting' in some way.
+
+This plugin aims to detect a range of opportunities to improve performance such as:
+
+* when a session lock is held too long without session changes
+* when a session may be a readonly candidate
+* when buffering might be better turned off
+* when http headers, or a partial body, should be sent earlier
+* and diagnoising slow pages retrospectively
+* slow cron tasks
+* and this list will evolve over time
+
+### 3) Auto tune configuration
+
+The idea is that this plugin starts with sensible defaults that should work for a
+wide range of environments and as it records details around your sites performance it
+adjusts to show you the most relevant things.
+
+### 4) It's always current
+
+If you had a bad event 6 months ago and things have been running fine, that information
+is less relevant that something last night which wasn't as extreme but still worth knowing
+about. As you make changes improvements to code it should be smart enough to prioritise
+what matters.
+
+
 ## Installation
 
 ### PHP Extension
