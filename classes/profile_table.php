@@ -38,11 +38,11 @@ class profile_table extends \table_sql {
         'user',
         'responsecode',
         'referer',
-        'delete'
+        'delete',
     ];
 
     const NOSORT_COLUMNS = [
-        'delete'
+        'delete',
     ];
 
     public function __construct($uniqueid) {
@@ -166,14 +166,10 @@ class profile_table extends \table_sql {
      */
     public function col_delete(object $record) {
         global $OUTPUT;
-        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', [ 'deleteid' => $record->id, 'sesskey' => sesskey() ]);
-        $link = new \action_link(
-                $deleteurl,
-                '',
-                new \confirm_action('Confirm?'),
-                null,
-                new \pix_icon('t/delete', get_string('deleteprofile', 'tool_excimer'))
-        );
+        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $record->id, 'sesskey' => sesskey()]);
+        $confirmaction = new \confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
+        $deleteicon = new \pix_icon('t/delete', get_string('deleteprofile', 'tool_excimer'));
+        $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);
         return $OUTPUT->render($link);
     }
 }

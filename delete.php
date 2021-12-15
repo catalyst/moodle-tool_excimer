@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\profile;
-
 /**
  * Delete profiles.
  *
@@ -31,25 +29,24 @@ require_once($CFG->libdir.'/adminlib.php');
 
 require_admin();
 
-$returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
-if ($returnurl == '') {
-    $returnurl = get_local_referer(false);
-}
+$returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALURL);
+$deleteall = optional_param('deleteall', 0, PARAM_BOOL);
+$deleteid = optional_param('deleteid', 0, PARAM_INT);
 
 if (confirm_sesskey()) {
-    $deleteall = optional_param('deleteall', 0, PARAM_BOOL);
 
+    // Delete all profiles.
     if ($deleteall) {
         $DB->delete_records('tool_excimer_profiles');
         redirect($returnurl, get_string('allprofiesdeleted', 'tool_excimer'));
     }
 
-    $deleteid = optional_param('deleteid', 0, PARAM_INT);
-
+    // Delete profile specified by an ID.
     if ($deleteid) {
-        $DB->delete_records('tool_excimer_profiles', [ 'id' => $deleteid ]);
+        $DB->delete_records('tool_excimer_profiles', ['id' => $deleteid]);
         redirect($returnurl, get_string('profiedeleted', 'tool_excimer'));
     }
 }
 
+// Universal graceful fallback.
 redirect($returnurl);

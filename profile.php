@@ -70,10 +70,9 @@ $data['script_type_display'] = function($text, $render) {
 $data['reason_display'] = function($text, $render) {
     return helper::reason_display((int)$render($text));
 };
-$data['delete_button_display'] = function($text, $render) use ($deletebutton) {
-    global $OUTPUT;
-    return $OUTPUT->render($deletebutton);
-};
+
+$data['delete_button'] = $OUTPUT->render($deletebutton);
+
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);

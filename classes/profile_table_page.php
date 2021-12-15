@@ -20,7 +20,7 @@ class profile_table_page {
 
     const SORT_COLUMN = [
         'slowest' => 'duration',
-        'recent' => 'created'
+        'recent' => 'created',
     ];
 
     /**
