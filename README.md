@@ -60,6 +60,12 @@ git clone git@github.com:catalyst/moodle-tool_excimer.git admin/tool/excimer
 
 Then login as admin (it should detect the extension), and click through the upgrade process.
 
+## Troubleshooting
+
+**ExcimerProfiler class does not exist**.
+If you use containers, and install the package via apt/PECL, you may see this error. When this happens, you may need to stop and start up the container again, as it sometimes does not load installed packages fully whilst running, and afterwards it should work.
+
+
 ## Configuration
 
 ## Support
