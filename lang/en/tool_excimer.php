@@ -32,9 +32,9 @@ $string['report_recent'] = 'Profile list - recent';
 // Settings.
 $string['here'] = 'here';
 $string['general_settings'] = 'General settings';
-$string['general_settings_desc'] = 'Settings related to all profiles';
+$string['general_settings_desc'] = 'Settings related to all profiles.';
 $string['auto_settings'] = 'Auto profiling settings';
-$string['auto_settings_desc'] = 'Settings related to automatic profiling';
+$string['auto_settings_desc'] = 'Settings related to automatic profiling.';
 $string['enable_auto'] = 'Enable auto profiling';
 $string['enable_auto_desc'] = 'Any page will be automatically profiled if they exceed the miniumum duration.';
 $string['expiry_s'] = 'Log expiry (days)';
@@ -70,6 +70,8 @@ $string['field_sessionid'] = 'Session ID';
 $string['field_referer'] = 'Referer';
 $string['field_cookies'] = 'Cookies Enabled';
 $string['field_buffering'] = 'Buffering Enabled';
+// Note: This is needed as the headers for the profile table are added in a loop.
+$string['field_actions'] = 'Actions';
 
 // Terminology.
 $string['term_profile'] = 'Profile';
@@ -85,3 +87,10 @@ $string['reason_manual'] = 'Manual';
 $string['reason_auto'] = 'Auto';
 $string['reason_flameall'] = 'Flame All';
 
+// Miscellaneous.
+$string['deleteall'] = 'Delete all';
+$string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
+$string['deleteprofile'] = 'Delete profile';
+$string['deleteprofilewarning'] = 'This will remove the profile. Continue?';
+$string['allprofiesdeleted'] = 'All profiles have been deleted.';
+$string['profiedeleted'] = 'Profile has been deleted.';

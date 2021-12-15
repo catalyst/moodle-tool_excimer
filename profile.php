@@ -41,7 +41,7 @@ $PAGE->set_url($url);
 
 admin_externalpage_setup('tool_excimer_report_slowest');
 
-$returnurl = new \moodle_url('/admin/tool/excimer/profile.php');
+$returnurl = get_local_referer(false);
 
 $pluginname = get_string('pluginname', 'tool_excimer');
 
@@ -58,6 +58,10 @@ $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
 
 $user = $DB->get_record('user', ['id' => $profile->userid]);
 
+$deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $profileid, 'returnurl' => $returnurl]);
+$deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool_excimer'));
+$deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
+
 $data = (array) $profile;
 $data['duration'] = format_time($data['duration']);
 $data['script_type_display'] = function($text, $render) {
@@ -66,6 +70,9 @@ $data['script_type_display'] = function($text, $render) {
 $data['reason_display'] = function($text, $render) {
     return helper::reason_display((int)$render($text));
 };
+
+$data['delete_button'] = $OUTPUT->render($deletebutton);
+
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);

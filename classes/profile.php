@@ -39,7 +39,7 @@ class profile {
     const DENYLIST = [
         manager::MANUAL_PARAM_NAME,
         manager::FLAME_ON_PARAM_NAME,
-        manager::FLAME_OFF_PARAM_NAME
+        manager::FLAME_OFF_PARAM_NAME,
     ];
 
     const REDACTLIST = [

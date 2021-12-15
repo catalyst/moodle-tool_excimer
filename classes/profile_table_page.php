@@ -20,7 +20,7 @@ class profile_table_page {
 
     const SORT_COLUMN = [
         'slowest' => 'duration',
-        'recent' => 'created'
+        'recent' => 'created',
     ];
 
     /**
@@ -56,6 +56,13 @@ class profile_table_page {
 
             $tabs = self::report_tabs($url);
             echo $OUTPUT->render_from_template('core/tabtree', $tabs);
+
+            if (profile::get_num_profiles() > 0) {
+                $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteall' => true]);
+                $deletebutton = new \single_button($deleteurl, get_string('deleteall', 'tool_excimer'));
+                $deletebutton->add_confirm_action(get_string('deleteallwarning', 'tool_excimer'));
+                echo $OUTPUT->render($deletebutton);
+            }
         }
 
         $table->out(40, true); // TODO replace with a value from settings.
@@ -95,5 +102,4 @@ class profile_table_page {
         }
         return $tabs;
     }
-
 }
