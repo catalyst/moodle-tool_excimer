@@ -28,6 +28,9 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile {
 
+    /** Request's fallback value for when the $SCRIPT is null */
+    const REQUEST_UNKNOWN = 'UNKNOWN';
+
     const SCRIPTTYPE_AJAX = 0;
     const SCRIPTTYPE_CLI = 1;
     const SCRIPTTYPE_WEB = 2;
@@ -170,7 +173,7 @@ class profile {
         $parameters = self::get_parameters($type);
 
         // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : 'UNKNOWN';
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
 
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => substr(session_id(), 0, 10),

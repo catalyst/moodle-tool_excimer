@@ -81,14 +81,12 @@ class tool_excimer_profile_testcase extends advanced_testcase {
     public function test_n_slowest_kept(): void {
         global $DB;
 
-        $log = self::quick_log(10);
+        $log = $this->quick_log(10);
 
         $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22 ];
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
-
-        $fastmanual = 0.003;
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
@@ -134,7 +132,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
     public function test_n_slowest_kept_per_page(): void {
         global $DB;
 
-        $log = self::quick_log(10);
+        $log = $this->quick_log(10);
 
         $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22, 0.111, 0.9 ];
         $reqnames = [ 'a', 'b', 'c', 'a', 'd', 'a', 'a', 'c', 'd', 'c', 'c', 'c' ];
@@ -184,10 +182,12 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      * @throws dml_exception
      */
     public function test_save(): void {
-        global $DB;
+        global $DB, $CFG;
 
-        $log = self::quick_log(150);
+        $log = $this->quick_log(150);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
+        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
+        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
         $flamedatad3 = json_encode(converter::process($flamedata));
         $reason = manager::REASON_AUTO;
         $created = 56;
@@ -204,8 +204,10 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($flamedata, $record->flamedata);
         $this->assertEquals($flamedatad3, $record->flamedatad3);
 
-        $log = self::quick_log(1500);
+        $log = $this->quick_log(1500);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
+        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
+        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
         $flamedatad3 = json_encode(converter::process($flamedata));
         $reason = manager::REASON_AUTO;
         $created = 120;
@@ -230,7 +232,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_purge_old_profiles(): void {
         global $DB;
-        $log = self::quick_log(10);
+        $log = $this->quick_log(10);
         $times = [ 12345, 23456, 34567, 45678 ];
         $cutoff1 = 30000;
         $cutoff2 = 20000;
