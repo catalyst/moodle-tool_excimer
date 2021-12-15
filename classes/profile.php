@@ -28,6 +28,9 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile {
 
+    /** Request's fallback value for when the $SCRIPT is null */
+    const REQUEST_UNKNOWN = 'UNKNOWN';
+
     const SCRIPTTYPE_AJAX = 0;
     const SCRIPTTYPE_CLI = 1;
     const SCRIPTTYPE_WEB = 2;
@@ -159,11 +162,19 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
-        global $DB, $USER;
+        global $DB, $USER, $CFG, $SCRIPT;
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
+
+        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
+        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
+
         $flamedatad3 = json_encode(converter::process($flamedata));
         $type = self::get_script_type();
         $parameters = self::get_parameters($type);
+
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => substr(session_id(), 0, 10),
             'reason' => $reason,
@@ -172,7 +183,7 @@ class profile {
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',
             'created' => $created,
             'duration' => $duration,
-            'request' => $_SERVER['PHP_SELF'] ?? 'UNKNOWN',
+            'request' => $request,
             'parameters' => $parameters,
             'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
             'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
