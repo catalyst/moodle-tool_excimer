@@ -60,10 +60,14 @@ if ($hassiteconfig) {
     if ($ADMIN->fulltree) {
         $warntext = '';
         if (!class_exists('ExcimerProfiler')) {
-            $warntext  .= $OUTPUT->notification(get_string('noexcimerprofiler', 'tool_excimer'));
+            $packageinstallurl = new \moodle_url('https://github.com/catalyst/moodle-tool_excimer#installation');
+            $packageinstalllink = html_writer::link($packageinstallurl, get_string('here', 'tool_excimer'), [
+                'target' => '_blank',
+                'rel' => 'noreferrer noopener',
+            ]);
+            $warntext  .= $OUTPUT->notification(get_string('noexcimerprofiler', 'tool_excimer', $packageinstalllink));
         }
         $warntext .= get_string('general_settings_desc', 'tool_excimer');
-        $config = \tool_objectfs\local\manager::get_objectfs_config();
         $settings->add(new admin_setting_heading('tool_excimer/general',
             new lang_string('general_settings', 'tool_excimer'), $warntext));
 
