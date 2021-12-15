@@ -58,11 +58,18 @@ if ($hassiteconfig) {
     $ADMIN->add('tools', $settings);
 
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_heading(
-            'tool_excimer/general',
-            get_string('general_settings', 'tool_excimer'),
-            get_string('general_settings_desc', 'tool_excimer'),
-        ));
+        $warntext = '';
+        if (!class_exists('ExcimerProfiler')) {
+            $packageinstallurl = new \moodle_url('https://github.com/catalyst/moodle-tool_excimer#installation');
+            $packageinstalllink = html_writer::link($packageinstallurl, get_string('here', 'tool_excimer'), [
+                'target' => '_blank',
+                'rel' => 'noreferrer noopener',
+            ]);
+            $warntext  .= $OUTPUT->notification(get_string('noexcimerprofiler', 'tool_excimer', $packageinstalllink));
+        }
+        $warntext .= get_string('general_settings_desc', 'tool_excimer');
+        $settings->add(new admin_setting_heading('tool_excimer/general',
+            new lang_string('general_settings', 'tool_excimer'), $warntext));
 
         $settings->add(
             new admin_setting_configtext(
