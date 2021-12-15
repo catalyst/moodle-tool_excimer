@@ -59,7 +59,7 @@ class profile_table_page {
 
             if (profile::get_num_profiles() > 0) {
                 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteall' => true]);
-                $deletebutton = new \single_button($deleteurl, get_string('deleteall', 'tool_excimer'));
+                $deletebutton = new \single_button($deleteurl, get_string('deleteall'));
                 $deletebutton->add_confirm_action(get_string('deleteallwarning', 'tool_excimer'));
                 echo $OUTPUT->render($deletebutton);
             }

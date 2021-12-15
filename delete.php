@@ -31,19 +31,18 @@ $returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALUR
 $deleteall = optional_param('deleteall', 0, PARAM_BOOL);
 $deleteid = optional_param('deleteid', 0, PARAM_INT);
 
-if (confirm_sesskey()) {
+require_sesskey();
 
-    // Delete all profiles.
-    if ($deleteall) {
-        $DB->delete_records('tool_excimer_profiles');
-        redirect($returnurl, get_string('allprofiesdeleted', 'tool_excimer'));
-    }
+// Delete all profiles.
+if ($deleteall) {
+    $DB->delete_records('tool_excimer_profiles');
+    redirect($returnurl, get_string('allprofiesdeleted', 'tool_excimer'));
+}
 
-    // Delete profile specified by an ID.
-    if ($deleteid) {
-        $DB->delete_records('tool_excimer_profiles', ['id' => $deleteid]);
-        redirect($returnurl, get_string('profiedeleted', 'tool_excimer'));
-    }
+// Delete profile specified by an ID.
+if ($deleteid) {
+    $DB->delete_records('tool_excimer_profiles', ['id' => $deleteid]);
+    redirect($returnurl, get_string('profiedeleted', 'tool_excimer'));
 }
 
 // Universal graceful fallback.

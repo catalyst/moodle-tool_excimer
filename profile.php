@@ -39,9 +39,10 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url($url);
 
-admin_externalpage_setup('tool_excimer_report_slowest');
-
 $returnurl = get_local_referer(false);
+$report = basename($returnurl, '.php');
+
+admin_externalpage_setup('tool_excimer_report_' . $report);
 
 $pluginname = get_string('pluginname', 'tool_excimer');
 
@@ -63,7 +64,7 @@ $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool
 $deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
 
 $data = (array) $profile;
-$data['duration'] = format_time($data['duration']);
+$data['duration'] = helper::duration_display($data['duration']);
 $data['script_type_display'] = function($text, $render) {
     return helper::script_type_display((int)$render($text));
 };
@@ -72,6 +73,7 @@ $data['reason_display'] = function($text, $render) {
 };
 
 $data['delete_button'] = $OUTPUT->render($deletebutton);
+$data['responsecode'] = helper::http_status_display($data['responsecode']);
 
 
 if ($user) {

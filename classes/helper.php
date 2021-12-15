@@ -29,6 +29,16 @@ defined('MOODLE_INTERNAL') || die();
 class helper {
 
     /**
+     * Maps HTTP status codes to css badges.
+     */
+    const STATUS_BADGES = [
+        2 => 'badge-success',
+        3 => 'badge-info',
+        4 => 'badge-warning',
+        5 => 'badge-error',
+    ];
+
+    /**
      * Returns a printable string for a script type value.
      *
      * @param int $type
@@ -69,5 +79,28 @@ class helper {
                 return (string) $reason;
         }
     }
-}
 
+    /**
+     * Returns a formatted time duration in m:s.ms format.
+     * @param float $duration
+     * @return string
+     * @throws \Exception
+     */
+    public static function duration_display(float $duration): string {
+        $ms = round($duration * 1000, 0);
+        $s = round($duration, 0);
+        $di = new \DateInterval('PT' . $s . 'S');
+        return $di->format('%i:%S.') . $ms;
+    }
+
+    /**
+     * Returns HTTP status as a badge.
+     *
+     * @param int $status
+     * @return string
+     */
+    public static function http_status_display(int $status): string {
+        $spanclass = 'badge ' . self::STATUS_BADGES[$status / 100];
+        return \html_writer::tag('span', $status, ['class' => $spanclass]);
+    }
+}
