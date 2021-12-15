@@ -174,10 +174,12 @@ class profile {
 
         // If set, it will trim off the leading '/' to normalise web & cli requests.
         $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+        $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => substr(session_id(), 0, 10),
             'reason' => $reason,
+            'pathinfo' => $pathinfo,
             'scripttype' => $type,
             'userid' => $USER ? $USER->id : 0,
             'method' => $_SERVER['REQUEST_METHOD'] ?? '',

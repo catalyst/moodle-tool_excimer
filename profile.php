@@ -23,7 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\manager;
 use tool_excimer\profile;
 use tool_excimer\helper;
 
@@ -50,7 +49,7 @@ $url = new moodle_url("/admin/tool/excimer/index.php");
 
 $profile = profile::getprofile($profileid);
 
-$PAGE->navbar->add($profile->request);
+$PAGE->navbar->add($profile->request . $profile->pathinfo);
 $PAGE->set_title($pluginname);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
@@ -64,7 +63,24 @@ $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool
 $deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
 
 $data = (array) $profile;
-$data['duration'] = helper::duration_display($profile->duration);
+$data['duration'] = format_time($data['duration']);
+
+$data['request'] = $profile->request . $profile->pathinfo;
+if ($profile->method === 'GET' && !empty($profile->parameters)) {
+    $data['request'] .= '?' . htmlentities($profile->parameters);
+}
+// If GET request then it should be reproducable as a idempotent request (readonly).
+if ($profile->method === 'GET') {
+    $requesturl = new \moodle_url('/' . $data['request']);
+    $data['request'] = \html_writer::link(
+            $requesturl,
+            urldecode($data['request']),
+            [
+                'rel' => 'noreferrer noopener',
+                'target' => '_blank',
+            ]);
+}
+
 $data['script_type_display'] = function($text, $render) {
     return helper::script_type_display((int)$render($text));
 };
