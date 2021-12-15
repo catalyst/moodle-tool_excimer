@@ -130,7 +130,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      * @throws dml_exception
      */
     public function test_n_slowest_kept_per_page(): void {
-        global $DB;
+        global $DB, $SCRIPT;
 
         $log = $this->quick_log(10);
 
@@ -141,17 +141,17 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        $_SERVER['PHP_SELF'] = 'a';
+        $SCRIPT = 'a';
         profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
-        $_SERVER['PHP_SELF'] = 'b';
+        $SCRIPT = 'b';
         profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
 
         for ($i = 0; $i < count($times); ++$i) {
-            $_SERVER['PHP_SELF'] = $reqnames[$i];
+            $SCRIPT = $reqnames[$i];
             profile::save($log, manager::REASON_AUTO, 12345, $times[$i]);
         }
 
-        $_SERVER['PHP_SELF'] = 'c';
+        $SCRIPT = 'c';
         profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
