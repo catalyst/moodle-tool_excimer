@@ -69,7 +69,7 @@ $string['field_referer'] = 'Referer';
 $string['field_cookies'] = 'Cookies Enabled';
 $string['field_buffering'] = 'Buffering Enabled';
 // Note: This is needed as the headers for the profile table are added in a loop.
-$string['field_delete'] = '';
+$string['field_actions'] = 'Actions';
 
 // Terminology.
 $string['term_profile'] = 'Profile';

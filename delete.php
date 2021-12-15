@@ -25,8 +25,6 @@
 
 require_once(__DIR__ . '/../../../config.php');
 
-require_once($CFG->libdir.'/adminlib.php');
-
 require_admin();
 
 $returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALURL);
