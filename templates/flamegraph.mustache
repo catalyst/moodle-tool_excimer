@@ -27,13 +27,12 @@
 
     Context variables required for this template:
     * id - The id of the profile
-    * request - The request url (without parameters)
+    * request - The request url (with pathinfo and parameters)
     * sessionid - The session ID
     * userid - ID of the user who loaded the page
     * scripttype - The script type
     * created - Unix timestamp of profile creation
     * duration - Profile duration in seconds.
-    * parameters - Parameter string
     * resposnecode - HTTP response code
     * cookies - Is cookies enabled?
     * buffering - Is buffering enabled?
@@ -43,12 +42,11 @@
     Example context (json):
     {
         "id" : 3,
-        "request" : "/my/index.php",
+        "request" : "/my/index.php/another/deeper/path?time=day&duration=week",
         "sessionid" : "9842abcdef",
         "scripttype" : 2,
         "created" : 1638244603,
         "duration" : 0.153,
-        "paramters" : "time=day&duration=week",
         "resposnecode" : 200,
         "cookies" : 1,
         "buffering" : 1,
@@ -63,7 +61,7 @@
     <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
         <tr>
             <th>{{#str}} field_request, tool_excimer {{/str}}</th>
-            <td>{{request}}</td>
+            <td>{{{request}}}</td>
         </tr>
         <tr>
             <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
@@ -86,10 +84,6 @@
             <td>{{{duration}}}</td>
         </tr>
         <tr>
-            <th>{{#str}} field_parameters, tool_excimer {{/str}}</th>
-            <td>{{parameters}}</td>
-        </tr>
-        <tr>
             <th>{{#str}} field_user, tool_excimer {{/str}}</th>
             <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
                 {{^userlink}}{{fullname}}{{/userlink}}</td>
@@ -97,10 +91,6 @@
         <tr>
             <th>{{#str}} field_responsecode, tool_excimer {{/str}}</th>
             <td>{{{responsecode}}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_referer, tool_excimer {{/str}}</th>
-            <td>{{referer}}</td>
         </tr>
         <tr>
             <th>{{#str}} field_cookies, tool_excimer {{/str}}</th>

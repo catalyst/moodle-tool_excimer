@@ -26,12 +26,26 @@
 defined('MOODLE_INTERNAL') || die;
 
 function xmldb_tool_excimer_upgrade($oldversion) {
-    global $CFG, $DB;
+    global $DB;
 
     $dbman = $DB->get_manager();
 
     // Automatically generated Moodle v3.11.0 release upgrade line.
     // Put any upgrade step following this.
+    if ($oldversion < 2021121500) {
+
+        // Define field pathinfo to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('pathinfo', XMLDB_TYPE_CHAR, '256', null, XMLDB_NOTNULL, null, null, 'request');
+
+        // Conditionally launch add field pathinfo.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2021121500, 'tool', 'excimer');
+    }
 
     return true;
 }

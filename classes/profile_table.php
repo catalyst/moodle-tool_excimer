@@ -56,7 +56,7 @@ class profile_table extends \table_sql {
         }
 
         $this->set_sql(
-            '{tool_excimer_profiles}.id as id, reason, scripttype, request, created, duration, parameters, responsecode,
+            '{tool_excimer_profiles}.id as id, reason, scripttype, method, request, pathinfo, created, duration, parameters, responsecode,
                      referer, userid, lang, firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, alternatename',
             '{tool_excimer_profiles} LEFT JOIN {user} on ({tool_excimer_profiles}.userid = {user}.id)',
             '1=1'
@@ -107,14 +107,19 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(object $record): string {
-        if ($this->is_downloading()) {
-            return $record->request;
-        } else {
-            return \html_writer::link(
-                new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
-                $record->request
-            );
+        $displayedrequest = $record->request . $record->pathinfo;
+        if ($record->method === 'GET' && !empty($record->parameters)) {
+            $displayedrequest .= '?' . urldecode($record->parameters);
         }
+
+        if ($this->is_downloading()) {
+            return $displayedrequest;
+        }
+
+        return \html_writer::link(
+                new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
+                shorten_text($displayedrequest, 100, true, '…'),
+                ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
     }
 
     /**
