@@ -39,8 +39,8 @@ class profile {
 
     /** Report sections */
     const REPORT_SECTIONS = [
-      self::REPORT_SECTION_RECENT,
-      self::REPORT_SECTION_SLOWEST,
+        self::REPORT_SECTION_RECENT,
+        self::REPORT_SECTION_SLOWEST,
     ];
 
     const SCRIPTTYPE_AJAX = 0;
@@ -175,6 +175,8 @@ class profile {
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
         global $DB, $USER, $CFG, $SCRIPT;
+
+        // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
 
         // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).

@@ -188,7 +188,10 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
         $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = json_encode(converter::process($flamedata));
+        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3json = json_encode($flamedatad3);
+        $numsamples = $flamedatad3['value'];
+        $datasize = strlen($flamedatad3json);
         $reason = manager::REASON_AUTO;
         $created = 56;
         $duration = 0.123;
@@ -201,14 +204,18 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
         $this->assertEquals($created, $record->created);
         $this->assertEquals($duration, $record->duration);
-        $this->assertEquals($flamedata, $record->flamedata);
-        $this->assertEquals($flamedatad3, $record->flamedatad3);
+        $this->assertEquals($flamedatad3json, $record->flamedatad3);
+        $this->assertEquals($numsamples, $record->numsamples);
+        $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(1500);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
         // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
         $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = json_encode(converter::process($flamedata));
+        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3json = json_encode($flamedatad3);
+        $numsamples = $flamedatad3['value'];
+        $datasize = strlen($flamedatad3json);
         $reason = manager::REASON_AUTO;
         $created = 120;
         $duration = 0.456;
@@ -221,8 +228,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
         $this->assertEquals($created, $record->created);
         $this->assertEquals($duration, $record->duration);
-        $this->assertEquals($flamedata, $record->flamedata);
-        $this->assertEquals($flamedatad3, $record->flamedatad3);
+        $this->assertEquals($flamedatad3json, $record->flamedatad3);
+        $this->assertEquals($numsamples, $record->numsamples);
+        $this->assertEquals($datasize, $record->datasize);
     }
 
     /**
