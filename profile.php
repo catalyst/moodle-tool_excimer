@@ -39,8 +39,12 @@ $PAGE->set_context($context);
 $PAGE->set_url($url);
 
 $returnurl = get_local_referer(false);
-$report = basename($returnurl, '.php');
 
+// The page's breadcrumb will include a link to the reports for recent or slowest (default).
+// Handling here prevents things links from other pages and paginated listings
+// from breaking the output of this page.
+$report = explode('.php', basename($returnurl, '.php'))[0] ?? null;
+$report = in_array($report, profile::REPORT_SECTIONS) ? $report : profile::REPORT_SECTION_SLOWEST;
 admin_externalpage_setup('tool_excimer_report_' . $report);
 
 $pluginname = get_string('pluginname', 'tool_excimer');

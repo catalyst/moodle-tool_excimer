@@ -31,6 +31,18 @@ class profile {
     /** Request's fallback value for when the $SCRIPT is null */
     const REQUEST_UNKNOWN = 'UNKNOWN';
 
+    /** Report section - recent - lists the most recent profiles first */
+    const REPORT_SECTION_RECENT = 'recent';
+
+    /** Report section - slowest - lists the slowest profiles first */
+    const REPORT_SECTION_SLOWEST = 'slowest';
+
+    /** Report sections */
+    const REPORT_SECTIONS = [
+      self::REPORT_SECTION_RECENT,
+      self::REPORT_SECTION_SLOWEST,  
+    ];
+
     const SCRIPTTYPE_AJAX = 0;
     const SCRIPTTYPE_CLI = 1;
     const SCRIPTTYPE_WEB = 2;
