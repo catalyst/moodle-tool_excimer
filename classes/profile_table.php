@@ -56,8 +56,9 @@ class profile_table extends \table_sql {
         }
 
         $this->set_sql(
-            '{tool_excimer_profiles}.id as id, reason, scripttype, method, request, pathinfo, created, duration, parameters, responsecode,
-                     referer, userid, lang, firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, alternatename',
+            '{tool_excimer_profiles}.id as id, reason, scripttype, method, request, pathinfo, created,
+                     duration, parameters, responsecode, referer, userid, lang, firstname, lastname, firstnamephonetic,
+                     lastnamephonetic, middlename, alternatename',
             '{tool_excimer_profiles} LEFT JOIN {user} on ({tool_excimer_profiles}.userid = {user}.id)',
             '1=1'
         );
