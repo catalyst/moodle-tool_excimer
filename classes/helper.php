@@ -91,7 +91,7 @@ class helper {
         $s = (int) $duration;
         $m = $s / 60;
         $s = $s % 60;
-        return sprintf('%d:%02d.%3d', $m, $s, $ms);
+        return sprintf('%d:%02d<small>.%03d</small>', $m, $s, $ms);
     }
 
     /**
