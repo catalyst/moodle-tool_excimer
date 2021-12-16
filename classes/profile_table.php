@@ -62,6 +62,7 @@ class profile_table extends \table_sql {
             '1=1'
         );
         $this->define_columns(self::COLUMNS);
+        $this->column_class('responsecode', 'text-right');
         $this->column_class('duration', 'text-right');
         $this->define_headers($headers);
     }
