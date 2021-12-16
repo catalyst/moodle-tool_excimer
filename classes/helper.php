@@ -35,7 +35,7 @@ class helper {
         2 => 'badge-success',
         3 => 'badge-info',
         4 => 'badge-warning',
-        5 => 'badge-error',
+        5 => 'badge-danger',
     ];
 
     /**
@@ -87,10 +87,22 @@ class helper {
      * @throws \Exception
      */
     public static function duration_display(float $duration): string {
-        $ms = round($duration * 1000, 0);
-        $s = round($duration, 0);
-        $di = new \DateInterval('PT' . $s . 'S');
-        return $di->format('%i:%S.') . $ms;
+        $ms = round($duration * 1000, 0) % 1000;
+        $s = (int) $duration;
+        $m = $s / 60;
+        $s = $s % 60;
+        return sprintf('%d:%02d.%3d', $m, $s, $ms);
+    }
+
+    /**
+     * Returns CLI script return status as a badge.
+     *
+     * @param int $status
+     * @return string
+     */
+    public static function cli_return_status_display(int $status): string {
+        $spanclass = 'badge ' . ($status ? 'badge-danger' : 'badge-success');
+        return \html_writer::tag('span', $status, ['class' => $spanclass]);
     }
 
     /**

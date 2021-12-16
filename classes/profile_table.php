@@ -29,13 +29,13 @@ defined('MOODLE_INTERNAL') || die();
 class profile_table extends \table_sql {
 
     const COLUMNS = [
+        'responsecode',
         'request',
         'reason',
         'scripttype',
         'created',
         'duration',
         'user',
-        'responsecode',
         'actions',
     ];
 
@@ -55,6 +55,7 @@ class profile_table extends \table_sql {
             $this->no_sorting($column);
         }
 
+
         $this->set_sql(
             '{tool_excimer_profiles}.id as id, reason, scripttype, request, created, duration, parameters, responsecode,
                      referer, userid, lang, firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, alternatename',
@@ -62,6 +63,7 @@ class profile_table extends \table_sql {
             '1=1'
         );
         $this->define_columns(self::COLUMNS);
+        $this->column_class('duration', 'text-right');
         $this->define_headers($headers);
     }
 
@@ -164,6 +166,8 @@ class profile_table extends \table_sql {
     public function col_responsecode(object $record): string {
         if ($this->is_downloading()) {
             return $record->responsecode;
+        } else if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
+            return helper::cli_return_status_display($record->responsecode);
         } else {
             return helper::http_status_display($record->responsecode);
         }

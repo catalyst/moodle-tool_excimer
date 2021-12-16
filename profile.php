@@ -64,7 +64,7 @@ $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool
 $deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
 
 $data = (array) $profile;
-$data['duration'] = helper::duration_display($data['duration']);
+$data['duration'] = helper::duration_display($profile->duration);
 $data['script_type_display'] = function($text, $render) {
     return helper::script_type_display((int)$render($text));
 };
@@ -73,8 +73,12 @@ $data['reason_display'] = function($text, $render) {
 };
 
 $data['delete_button'] = $OUTPUT->render($deletebutton);
-$data['responsecode'] = helper::http_status_display($data['responsecode']);
 
+if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
+    $data['responsecode'] = helper::cli_return_status_display($profile->responsecode);
+} else {
+    $data['responsecode'] = helper::http_status_display($profile->responsecode);
+}
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
