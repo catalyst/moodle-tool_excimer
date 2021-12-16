@@ -55,7 +55,6 @@ class profile_table extends \table_sql {
             $this->no_sorting($column);
         }
 
-
         $this->set_sql(
             '{tool_excimer_profiles}.id as id, reason, scripttype, request, created, duration, parameters, responsecode,
                      referer, userid, lang, firstname, lastname, firstnamephonetic, lastnamephonetic, middlename, alternatename',
