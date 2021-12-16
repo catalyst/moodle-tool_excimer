@@ -180,7 +180,10 @@ class profile {
         // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
         $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
 
-        $flamedatad3 = json_encode(converter::process($flamedata));
+        $flamedatad3 = converter::process($flamedata);
+        $numsamples = $flamedatad3['value'];
+        $flamedatad3json = json_encode($flamedatad3);
+        $datasize = strlen($flamedatad3json);
         $type = self::get_script_type();
         $parameters = self::get_parameters($type);
 
@@ -203,8 +206,9 @@ class profile {
             'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
             'responsecode' => http_response_code(),
             'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-            'flamedata' => $flamedata,
-            'flamedatad3' => $flamedatad3
+            'datasize' => $datasize,
+            'numsamples' => $numsamples,
+            'flamedatad3' => $flamedatad3json
         ]);
     }
 

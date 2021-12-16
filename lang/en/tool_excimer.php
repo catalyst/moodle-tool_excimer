@@ -68,8 +68,10 @@ $string['field_parameters'] = 'Parameters';
 $string['field_responsecode'] = 'Code';
 $string['field_sessionid'] = 'Session ID';
 $string['field_referer'] = 'Referer';
-$string['field_cookies'] = 'Cookies Enabled';
-$string['field_buffering'] = 'Buffering Enabled';
+$string['field_cookies'] = 'Cookies enabled';
+$string['field_buffering'] = 'Buffering enabled';
+$string['field_numsamples'] = 'Number of samples';
+$string['field_datasize'] = 'Size of profile data';
 // Note: This is needed as the headers for the profile table are added in a loop.
 $string['field_actions'] = 'Actions';
 

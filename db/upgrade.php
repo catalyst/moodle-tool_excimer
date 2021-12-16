@@ -47,5 +47,28 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021121500, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2021121600) {
+        $table = new xmldb_table('tool_excimer_profiles');
+
+        // Add 'datasize' field - The size of the profile data in KB.
+        $field = new xmldb_field('datasize', XMLDB_TYPE_INTEGER, '11', true, XMLDB_NOTNULL, null, 0, 'referer');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add 'numsamples' field - The number of samples taken.
+        $field = new xmldb_field('numsamples', XMLDB_TYPE_INTEGER, '11', true, XMLDB_NOTNULL, null, 0, 'datasize');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('flamedata');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2021121600, 'tool', 'excimer');
+    }
+
     return true;
 }
