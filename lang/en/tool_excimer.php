@@ -88,7 +88,6 @@ $string['reason_auto'] = 'Auto';
 $string['reason_flameall'] = 'Flame All';
 
 // Miscellaneous.
-$string['deleteall'] = 'Delete all';
 $string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
 $string['deleteprofile'] = 'Delete profile';
 $string['deleteprofilewarning'] = 'This will remove the profile. Continue?';

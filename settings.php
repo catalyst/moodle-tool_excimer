@@ -55,7 +55,7 @@ if ($hassiteconfig) {
         'tool_excimer',
         get_string('pluginname', 'tool_excimer')
     );
-    $ADMIN->add('tools', $settings);
+    $ADMIN->add('tool_excimer_reports', $settings);
 
     if ($ADMIN->fulltree) {
         $warntext = '';

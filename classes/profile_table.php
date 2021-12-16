@@ -29,15 +29,13 @@ defined('MOODLE_INTERNAL') || die();
 class profile_table extends \table_sql {
 
     const COLUMNS = [
+        'responsecode',
         'request',
         'reason',
         'scripttype',
         'created',
         'duration',
-        'parameters',
         'user',
-        'responsecode',
-        'referer',
         'actions',
     ];
 
@@ -64,7 +62,19 @@ class profile_table extends \table_sql {
             '1=1'
         );
         $this->define_columns(self::COLUMNS);
+        $this->column_class('duration', 'text-right');
         $this->define_headers($headers);
+    }
+
+    /**
+     * Overrides felxible_table::setup() to do some extra setup.
+     *
+     * @return false|\type|void
+     */
+    public function setup() {
+        $retvalue = parent::setup();
+        $this->set_attribute('class', $this->attributes['class'] . ' table-sm');
+        return $retvalue;
     }
 
     /**
@@ -113,7 +123,7 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_duration(object $record): string {
-        return format_time($record->duration);
+        return helper::duration_display($record->duration);
     }
 
     /**
@@ -124,17 +134,7 @@ class profile_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return userdate($record->created, get_string('strftimedatetimeshort', 'langconfig'));
-    }
-
-    /**
-     * Display value for 'parameters' column entries.
-     *
-     * @param object $record
-     * @return string
-     */
-    public function col_parameters(object $record): string {
-        return htmlentities($record->parameters);
+        return userdate($record->created, '%d %b %Y, %H:%M');
     }
 
     /**
@@ -153,6 +153,22 @@ class profile_table extends \table_sql {
             } else {
                 return \html_writer::link('/user/profile.php?id=' . $record->userid, $fullname);
             }
+        }
+    }
+
+    /**
+     * Displays the 'responsecode' column entries
+     *
+     * @param object $record
+     * @return string
+     */
+    public function col_responsecode(object $record): string {
+        if ($this->is_downloading()) {
+            return $record->responsecode;
+        } else if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
+            return helper::cli_return_status_display($record->responsecode);
+        } else {
+            return helper::http_status_display($record->responsecode);
         }
     }
 
