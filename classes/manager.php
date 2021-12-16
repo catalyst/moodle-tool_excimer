@@ -32,10 +32,24 @@ class manager {
     const FLAME_ON_PARAM_NAME = 'FLAMEALL';
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
 
-    // Reason for profiling.
-    const REASON_MANUAL = 0;
-    const REASON_AUTO = 1;
-    const REASON_FLAMEALL = 2;
+    /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
+    const REASON_MANUAL   = 0b0001;
+
+    /** Reason - AUTO - Set when conditions are met and these profiles are automatically stored. */
+    const REASON_AUTO     = 0b0010;
+
+    /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
+    const REASON_FLAMEALL = 0b0100;
+
+    /** Reason - NONE - Default fallback reason value, this will not be stored. */
+    const REASON_NONE = 0b0000;
+
+    /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
+    const REASONS = [
+        self::REASON_MANUAL,
+        self::REASON_AUTO,
+        self::REASON_FLAMEALL,
+    ];
 
     const EXCIMER_LOG_LIMIT = 10000;
     const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
@@ -126,18 +140,18 @@ class manager {
         $stopped = microtime(true);
         $duration = $stopped - $started;
 
+        $reason = self::REASON_NONE;
         if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
-            $reason = self::REASON_MANUAL;
-            $dowesave = true;
-        } else if (isset($SESSION->toolexcimerflameall)) {
-            $reason = self::REASON_FLAMEALL;
-            $dowesave = true;
-        } else {
-            $reason = self::REASON_AUTO;
-            $dowesave = ($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms');
+            $reason |= self::REASON_MANUAL;
+        }
+        if (isset($SESSION->toolexcimerflameall)) {
+            $reason |= self::REASON_FLAMEALL;
+        }
+        if (($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms')) {
+            $reason |= self::REASON_AUTO;
         }
 
-        if ($dowesave) {
+        if ($reason !== self::REASON_NONE) {
             profile::save($log, $reason, (int) $started, $duration);
         }
     }

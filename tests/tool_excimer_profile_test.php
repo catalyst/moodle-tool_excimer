@@ -311,4 +311,52 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $paramexpect = [ 'a' => '1', 'sesskey' => '' ];
         $this->assertEquals($paramexpect, profile::stripparameters($param));
     }
+
+    public function test_reasons_are_being_stored(): void {
+        global $DB;
+        // Initialise the logs object.
+        $log = $this->quick_log(0);
+
+        // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
+        $allthereasons = 0;
+        foreach (manager::REASONS as $reason) {
+            $allthereasons |= $reason;
+        }
+        $id = profile::save($log, $allthereasons, 12345, 2.345);
+        $record = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
+
+        // Fetch profile from DB and confirm it matches for all the reasons.
+        $recordedreason = (int) $record->reason;
+        foreach (manager::REASONS as $reason) {
+            $this->assertTrue((bool) ($recordedreason & $reason));
+        }
+    }
+
+    public function test_reasons_being_removed(): void {
+        global $DB;
+        // Initialise the logs object.
+        $log = $this->quick_log(0);
+
+        // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
+        $allthereasons = 0;
+        foreach (manager::REASONS as $reason) {
+            $allthereasons |= $reason;
+        }
+        $id = profile::save($log, $allthereasons, 12345, 2.345);
+        $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
+
+        // Fetch profile from DB and confirm it matches for all the reasons, and
+        // that the reason no longer exists on the profile after the change.
+        foreach (manager::REASONS as $reason) {
+            profile::remove_reason([$profile], $reason);
+            $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
+            if ($profile) {
+                $remainingreason = (int) $profile->reason;
+                $this->assertFalse((bool) ($remainingreason & $reason));
+            }
+        }
+
+        // The profile should no longer exist once the reasons are all removed.
+        $this->assertFalse($profile);
+    }
 }
