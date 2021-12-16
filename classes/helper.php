@@ -33,7 +33,7 @@ class helper {
      */
     const STATUS_BADGES = [
         2 => 'badge-success',
-        3 => 'badge-info',
+        3 => 'badge-secondary',
         4 => 'badge-warning',
         5 => 'badge-danger',
     ];
