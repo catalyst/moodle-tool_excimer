@@ -40,7 +40,7 @@ class profile {
     /** Report sections */
     const REPORT_SECTIONS = [
       self::REPORT_SECTION_RECENT,
-      self::REPORT_SECTION_SLOWEST,  
+      self::REPORT_SECTION_SLOWEST,
     ];
 
     const SCRIPTTYPE_AJAX = 0;
