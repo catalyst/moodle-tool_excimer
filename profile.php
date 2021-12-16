@@ -92,6 +92,7 @@ $data['reason_display'] = function($text, $render) {
     return helper::reason_display((int)$render($text));
 };
 
+$data['datasize'] = round($profile->datasize / 1000, 1) . ' kB';
 $data['delete_button'] = $OUTPUT->render($deletebutton);
 
 if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
