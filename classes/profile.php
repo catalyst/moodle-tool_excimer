@@ -210,7 +210,7 @@ class profile {
             'referer' => $_SERVER['HTTP_REFERER'] ?? '',
             'datasize' => $datasize,
             'numsamples' => $numsamples,
-            'flamedatad3' => $flamedatad3json
+            'flamedatad3' => $flamedatad3json,
         ]);
     }
 
