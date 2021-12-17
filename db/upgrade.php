@@ -47,5 +47,17 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021121500, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2021121700) {
+        // Changing precision of field method on table tool_excimer_profiles to (7).
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('method', XMLDB_TYPE_CHAR, '7', null, XMLDB_NOTNULL, null, null, 'scripttype');
+
+        // Launch change of precision for field method.
+        $dbman->change_field_precision($table, $field);
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2021121700, 'tool', 'excimer');
+    }
+
     return true;
 }
