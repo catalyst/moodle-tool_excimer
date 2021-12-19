@@ -66,7 +66,7 @@ class grouped_profile_table extends profile_table {
         $mapper = function($i, $v) use ($record) {
             return $this->format_responsecode($i, $record->scripttype) . ' (' . $v . ')';
         };
-        $counts = array_count_values(explode(',',$record->responsecodes));
+        $counts = array_count_values(explode(',', $record->responsecodes));
         $counts = array_map($mapper, array_keys($counts), array_values($counts));
         return implode(', ', $counts);
     }

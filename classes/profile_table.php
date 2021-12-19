@@ -67,14 +67,28 @@ class profile_table extends \table_sql {
         $this->define_headers($headers);
     }
 
-    public function add_filter($field, $value) {
+    /**
+     * Add a filter to limit the profiles eing listed.
+     *
+     * @param string $field
+     * @param mixed $value
+     */
+    public function add_filter(string $field, mixed $value): void {
         $this->filters[$field] = $value;
     }
 
+    /**
+     * returns the columns defined for the table.
+     *
+     * @return string[]
+     */
     protected function get_columns(): array {
         return self::COLUMNS;
     }
 
+    /**
+     * Sets the SQL for the table.
+     */
     protected function put_sql(): void {
         $filter = [];
         $filterparams = [];
@@ -96,7 +110,8 @@ class profile_table extends \table_sql {
             $filterparams
         );
     }
-        /**
+
+    /**
      * Overrides felxible_table::setup() to do some extra setup.
      *
      * @return false|\type|void
