@@ -188,6 +188,7 @@ class profile {
         $datasize = strlen($flamedatad3json);
         $type = self::get_script_type();
         $parameters = self::get_parameters($type);
+        $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
         // If set, it will trim off the leading '/' to normalise web & cli requests.
         $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
@@ -199,7 +200,7 @@ class profile {
             'pathinfo' => $pathinfo,
             'scripttype' => $type,
             'userid' => $USER ? $USER->id : 0,
-            'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+            'method' => $method,
             'created' => $created,
             'duration' => $duration,
             'request' => $request,
