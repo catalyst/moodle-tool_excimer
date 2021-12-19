@@ -27,6 +27,7 @@ $string['pluginname'] = 'Excimer sampling profiler';
 
 // Admin Tree.
 $string['report_slowest'] = 'Profile list - slowest';
+$string['report_slowest_grouped'] = 'Profile list - slowest, grouped by request';
 $string['report_recent'] = 'Profile list - recent';
 
 // Settings.
@@ -72,6 +73,12 @@ $string['field_cookies'] = 'Cookies enabled';
 $string['field_buffering'] = 'Buffering enabled';
 $string['field_numsamples'] = 'Number of samples';
 $string['field_datasize'] = 'Size of profile data';
+$string['field_maxcreated'] = 'Latest';
+$string['field_mincreated'] = 'Earliest';
+$string['field_maxduration'] = 'Slowest';
+$string['field_minduration'] = 'Fastest';
+$string['field_requestcount'] = 'Num profiles';
+
 // Note: This is needed as the headers for the profile table are added in a loop.
 $string['field_actions'] = 'Actions';
 

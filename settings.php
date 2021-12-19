@@ -44,6 +44,16 @@ if ($hassiteconfig) {
     $ADMIN->add(
         'tool_excimer_reports',
         new admin_externalpage(
+            'tool_excimer_report_slowest_grouped',
+            get_string('report_slowest_grouped', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/slowest_grouped.php'),
+            'moodle/site:config'
+        )
+    );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
             'tool_excimer_report_recent',
             get_string('report_recent', 'tool_excimer'),
             new moodle_url('/admin/tool/excimer/recent.php'),

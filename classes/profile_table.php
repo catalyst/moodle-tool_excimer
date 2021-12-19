@@ -43,11 +43,17 @@ class profile_table extends \table_sql {
         'actions',
     ];
 
-    public function __construct($uniqueid) {
+    const TIME_FORMAT = '%d %b %Y, %H:%M';
+
+    protected $filters = []; // Where clause filters.
+
+    public function __construct($uniqueid, $filter = '1=1') {
+        global $DB;
+
         parent::__construct($uniqueid);
 
         $headers = [];
-        foreach (self::COLUMNS as $column) {
+        foreach ($this->get_columns() as $column) {
             $headers[] = get_string('field_' . $column, 'tool_excimer');
         }
 
@@ -55,25 +61,48 @@ class profile_table extends \table_sql {
             $this->no_sorting($column);
         }
 
+        $this->define_columns($this->get_columns());
+        $this->column_class('duration', 'text-right');
+        $this->column_class('responsecode', 'text-right');
+        $this->define_headers($headers);
+    }
+
+    public function add_filter($field, $value) {
+        $this->filters[$field] = $value;
+    }
+
+    protected function get_columns(): array {
+        return self::COLUMNS;
+    }
+
+    protected function put_sql(): void {
+        $filter = [];
+        $filterparams = [];
+        if (count($this->filters)) {
+            foreach ($this->filters as $i => $v) {
+                $filter[] = $i . ' = ?';
+                $filterparams[] = $v;
+            }
+            $filter = implode(' and ', $filter);
+        } else {
+            $filter = '1=1';
+        }
         $this->set_sql(
             '{tool_excimer_profiles}.id as id, reason, scripttype, method, request, pathinfo, created,
                      duration, parameters, responsecode, referer, userid, lang, firstname, lastname, firstnamephonetic,
                      lastnamephonetic, middlename, alternatename',
             '{tool_excimer_profiles} LEFT JOIN {user} on ({tool_excimer_profiles}.userid = {user}.id)',
-            '1=1'
+            $filter,
+            $filterparams
         );
-        $this->define_columns(self::COLUMNS);
-        $this->column_class('responsecode', 'text-right');
-        $this->column_class('duration', 'text-right');
-        $this->define_headers($headers);
     }
-
-    /**
+        /**
      * Overrides felxible_table::setup() to do some extra setup.
      *
      * @return false|\type|void
      */
     public function setup() {
+        $this->put_sql();
         $retvalue = parent::setup();
         $this->set_attribute('class', $this->attributes['class'] . ' table-sm');
         return $retvalue;
@@ -141,7 +170,7 @@ class profile_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return userdate($record->created, '%d %b %Y, %H:%M');
+        return userdate($record->created, self::TIME_FORMAT);
     }
 
     /**
@@ -176,6 +205,16 @@ class profile_table extends \table_sql {
             return helper::cli_return_status_display($record->responsecode);
         } else {
             return helper::http_status_display($record->responsecode);
+        }
+    }
+
+    protected function format_responsecode($responsecode, $scripttype) {
+        if ($this->is_downloading()) {
+            return $responsecode;
+        } else if ($scripttype == profile::SCRIPTTYPE_CLI) {
+            return helper::cli_return_status_display($responsecode);
+        } else {
+            return helper::http_status_display($responsecode);
         }
     }
 

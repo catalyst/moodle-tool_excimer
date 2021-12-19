@@ -24,15 +24,26 @@
  */
 
 use tool_excimer\profile_table;
-use tool_excimer\helper;
 use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
+$script = optional_param('script', '', PARAM_LOCALURL);
+
 admin_externalpage_setup('tool_excimer_report_slowest');
 
 $url = new moodle_url("/admin/tool/excimer/slowest.php");
 
-profile_table_page::display('slowest', $url);
+if ($script) {
+    $table = new profile_table('profile_table_recent', "request='$script'");
+} else {
+    $table = new profile_table('profile_table_recent');
+}
+
+$table->sortable(true, 'duration', SORT_DESC);
+if ($script) {
+    $table->add_filter('request', $script);
+}
+profile_table_page::display($table, 'slowest', $url);

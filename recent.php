@@ -24,7 +24,6 @@
  */
 
 use tool_excimer\profile_table;
-use tool_excimer\helper;
 use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
@@ -35,4 +34,6 @@ admin_externalpage_setup('tool_excimer_report_recent');
 
 $url = new moodle_url("/admin/tool/excimer/recent.php");
 
-profile_table_page::display('recent', $url);
+$table = new profile_table('profile_table_recent');
+$table->sortable(true, 'created', SORT_DESC);
+profile_table_page::display($table, 'recent', $url);
