@@ -112,6 +112,7 @@ class profile_table extends \table_sql {
             if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
                 // For CLI scripts, request should look like `command.php --flag=value` as an example.
                 $separator = ' ';
+                $record->parameters = escapeshellcmd($record->parameters);
             } else {
                 // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
                 $separator = '?';
