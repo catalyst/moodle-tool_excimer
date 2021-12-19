@@ -78,7 +78,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
             $dbman->drop_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2021121600, 'tool', 'excimer');
+        upgrade_plugin_savepoint(true, 2021122000, 'tool', 'excimer');
     }
 
     return true;
