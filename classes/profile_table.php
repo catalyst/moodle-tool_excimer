@@ -73,7 +73,7 @@ class profile_table extends \table_sql {
      * @param string $field
      * @param mixed $value
      */
-    public function add_filter(string $field, mixed $value): void {
+    public function add_filter(string $field, $value): void {
         $this->filters[$field] = $value;
     }
 
