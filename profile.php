@@ -69,6 +69,10 @@ $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $p
 $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool_excimer'));
 $deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
 
+$deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php', ['script' => $profile->request, 'returnurl' => $returnurl]);
+$deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_script', 'tool_excimer'));
+$deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
+
 $data = (array) $profile;
 $data['duration'] = format_time($data['duration']);
 
@@ -106,7 +110,8 @@ $data['reason_display'] = function($text, $render) {
 };
 
 $data['datasize'] = display_size($profile->datasize);
-$data['delete_button'] = $OUTPUT->render($deletebutton);
+$data['delete_button'] = $output->render($deletebutton);
+$data['delete_all_button'] = $output->render($deleteallbutton);
 
 if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
     $data['responsecode'] = helper::cli_return_status_display($profile->responsecode);
