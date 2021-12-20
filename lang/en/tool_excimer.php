@@ -27,6 +27,7 @@ $string['pluginname'] = 'Excimer sampling profiler';
 
 // Admin Tree.
 $string['report_slowest'] = 'Profile list - slowest';
+$string['report_slowest_grouped'] = 'Profile list - slowest, grouped by request';
 $string['report_recent'] = 'Profile list - recent';
 
 // Settings.
@@ -52,6 +53,7 @@ $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept 
 $string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue. Please check the installation instructions {$a}.';
 
 // Tabs.
+$string['slowest_grouped'] = 'Slowest - grouped';
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
 
@@ -72,6 +74,12 @@ $string['field_cookies'] = 'Cookies enabled';
 $string['field_buffering'] = 'Buffering enabled';
 $string['field_numsamples'] = 'Number of samples';
 $string['field_datasize'] = 'Size of profile data';
+$string['field_maxcreated'] = 'Latest';
+$string['field_mincreated'] = 'Earliest';
+$string['field_maxduration'] = 'Slowest';
+$string['field_minduration'] = 'Fastest';
+$string['field_requestcount'] = 'Num profiles';
+
 // Note: This is needed as the headers for the profile table are added in a loop.
 $string['field_actions'] = 'Actions';
 
@@ -89,9 +97,15 @@ $string['reason_manual'] = 'Manual';
 $string['reason_auto'] = 'Auto';
 $string['reason_flameall'] = 'Flame All';
 
+// Time formats.
+$string['strftime_datetime'] = '%d %b %Y, %H:%M';
+
 // Miscellaneous.
 $string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
 $string['deleteprofile'] = 'Delete profile';
 $string['deleteprofilewarning'] = 'This will remove the profile. Continue?';
-$string['allprofiesdeleted'] = 'All profiles have been deleted.';
-$string['profiedeleted'] = 'Profile has been deleted.';
+$string['allprofielsdeleted'] = 'All profiles have been deleted.';
+$string['profiledeleted'] = 'Profile has been deleted.';
+$string['deleteprofiles_script_warning'] = 'This will remove all stored profiles for the script. Continue?';
+$string['deleteprofiles_script'] = 'Delete all profiles for script';
+$string['profilesdeleted'] = 'Profiles have been deleted';

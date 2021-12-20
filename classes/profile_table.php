@@ -43,16 +43,61 @@ class profile_table extends \table_sql {
         'actions',
     ];
 
-    public function __construct($uniqueid) {
+    protected $filters = []; // Where clause filters.
+
+    public function __construct($uniqueid, $filter = '1=1') {
+        global $DB;
+
         parent::__construct($uniqueid);
 
         $headers = [];
-        foreach (self::COLUMNS as $column) {
+        foreach ($this->get_columns() as $column) {
             $headers[] = get_string('field_' . $column, 'tool_excimer');
         }
 
         foreach (self::NOSORT_COLUMNS as $column) {
             $this->no_sorting($column);
+        }
+
+        $this->define_columns($this->get_columns());
+        $this->column_class('duration', 'text-right');
+        $this->column_class('responsecode', 'text-right');
+        $this->define_headers($headers);
+    }
+
+    /**
+     * Add a filter to limit the profiles eing listed.
+     *
+     * @param string $field
+     * @param mixed $value
+     */
+    public function add_filter(string $field, $value): void {
+        $this->filters[$field] = $value;
+    }
+
+    /**
+     * returns the columns defined for the table.
+     *
+     * @return string[]
+     */
+    protected function get_columns(): array {
+        return self::COLUMNS;
+    }
+
+    /**
+     * Sets the SQL for the table.
+     */
+    protected function put_sql(): void {
+        $filter = [];
+        $filterparams = [];
+        if (count($this->filters)) {
+            foreach ($this->filters as $i => $v) {
+                $filter[] = $i . ' = ?';
+                $filterparams[] = $v;
+            }
+            $filter = implode(' and ', $filter);
+        } else {
+            $filter = '1=1';
         }
 
         $fields = [
@@ -77,14 +122,13 @@ class profile_table extends \table_sql {
             'alternatename',
         ];
         $fieldsstr = implode(',', $fields);
+
         $this->set_sql(
-                $fieldsstr,
-                '{tool_excimer_profiles} LEFT JOIN {user} ON {user}.id = {tool_excimer_profiles}.userid',
-                '1=1');
-        $this->define_columns(self::COLUMNS);
-        $this->column_class('responsecode', 'text-right');
-        $this->column_class('duration', 'text-right');
-        $this->define_headers($headers);
+            $fieldsstr,
+            '{tool_excimer_profiles} LEFT JOIN {user} ON {user}.id = {tool_excimer_profiles}.userid',
+            $filter,
+            $filterparams
+        );
     }
 
     /**
@@ -93,6 +137,7 @@ class profile_table extends \table_sql {
      * @return false|\type|void
      */
     public function setup() {
+        $this->put_sql();
         $retvalue = parent::setup();
         $this->set_attribute('class', $this->attributes['class'] . ' table-sm');
         return $retvalue;
@@ -171,7 +216,7 @@ class profile_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return userdate($record->created, '%d %b %Y, %H:%M');
+        return userdate($record->created, get_string('strftime_datetime', 'tool_excimer'));
     }
 
     /**
@@ -206,6 +251,16 @@ class profile_table extends \table_sql {
             return helper::cli_return_status_display($record->responsecode);
         } else {
             return helper::http_status_display($record->responsecode);
+        }
+    }
+
+    protected function format_responsecode($responsecode, $scripttype) {
+        if ($this->is_downloading()) {
+            return $responsecode;
+        } else if ($scripttype == profile::SCRIPTTYPE_CLI) {
+            return helper::cli_return_status_display($responsecode);
+        } else {
+            return helper::http_status_display($responsecode);
         }
     }
 

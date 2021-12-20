@@ -23,27 +23,18 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\profile_table;
+use tool_excimer\grouped_profile_table;
 use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-$script = optional_param('script', '', PARAM_LOCALURL);
+admin_externalpage_setup('tool_excimer_report_slowest_grouped');
 
-admin_externalpage_setup('tool_excimer_report_slowest');
+$url = new moodle_url("/admin/tool/excimer/slowest_grouped.php");
 
-$url = new moodle_url("/admin/tool/excimer/slowest.php");
+$table = new grouped_profile_table('profile_table_slowest_grouped');
+$table->sortable(true, 'maxduration', SORT_DESC);
 
-if ($script) {
-    $table = new profile_table('profile_table_slowest', "request='$script'");
-} else {
-    $table = new profile_table('profile_table_slowest');
-}
-
-$table->sortable(true, 'duration', SORT_DESC);
-if ($script) {
-    $table->add_filter('request', $script);
-}
 profile_table_page::display($table, 'slowest', $url);

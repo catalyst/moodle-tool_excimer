@@ -31,7 +31,7 @@ class profile_table_page {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function display(string $report, \moodle_url $url): void {
+    public static function display(profile_table $table, string $report, \moodle_url $url): void {
         global $PAGE, $OUTPUT;
 
         $download = optional_param('download', '', PARAM_ALPHA);
@@ -43,8 +43,6 @@ class profile_table_page {
 
         $pluginname = get_string('pluginname', 'tool_excimer');
 
-        $table = new profile_table('profile_table_' . $report);
-        $table->sortable(true, self::SORT_COLUMN[$report], SORT_DESC);
         $table->is_downloading($download, 'profile', 'profile_record');
         $table->define_baseurl($url);
 
@@ -82,6 +80,11 @@ class profile_table_page {
     public static function report_tabs(\moodle_url $url): array {
         $tabs = [
             'tabs' => [
+                [
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_grouped.php') ]],
+                    'title' => get_string('report_slowest_grouped', 'tool_excimer'),
+                    'text' => get_string('slowest_grouped', 'tool_excimer')
+                ],
                 [
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
                     'title' => get_string('report_slowest', 'tool_excimer'),
