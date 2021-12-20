@@ -30,19 +30,26 @@ require_admin();
 $returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALURL);
 $deleteall = optional_param('deleteall', 0, PARAM_BOOL);
 $deleteid = optional_param('deleteid', 0, PARAM_INT);
+$deletescript = optional_param('script', '', PARAM_LOCALURL);
 
 require_sesskey();
 
 // Delete all profiles.
 if ($deleteall) {
     $DB->delete_records('tool_excimer_profiles');
-    redirect($returnurl, get_string('allprofiesdeleted', 'tool_excimer'));
+    redirect($returnurl, get_string('allprofilesdeleted', 'tool_excimer'));
 }
 
 // Delete profile specified by an ID.
 if ($deleteid) {
     $DB->delete_records('tool_excimer_profiles', ['id' => $deleteid]);
-    redirect($returnurl, get_string('profiedeleted', 'tool_excimer'));
+    redirect($returnurl, get_string('profiledeleted', 'tool_excimer'));
+}
+
+// Delete profiles for a script.
+if ($deletescript) {
+    $DB->delete_records('tool_excimer_profiles', ['request' => $deletescript]);
+    redirect($returnurl, get_string('profilesdeleted', 'tool_excimer'));
 }
 
 // Universal graceful fallback.

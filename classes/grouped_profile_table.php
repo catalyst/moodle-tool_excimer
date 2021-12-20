@@ -35,13 +35,14 @@ class grouped_profile_table extends profile_table {
         'mincreated',
         'maxduration',
         'minduration',
+        'actions',
     ];
 
     protected function put_sql(): void {
         global $DB;
 
         $this->set_sql(
-            'count(request) as requestcount, request, scripttype, max(created) as maxcreated, min(created) as mincreated,
+            'request, count(request) as requestcount, scripttype, max(created) as maxcreated, min(created) as mincreated,
              max(duration) as maxduration, min(duration) as minduration',
             '{tool_excimer_profiles}',
             '1=1 GROUP BY request, scripttype'
@@ -82,6 +83,15 @@ class grouped_profile_table extends profile_table {
     }
     public function col_minduration(object $record): string {
         return helper::duration_display($record->minduration);
+    }
+
+    public function col_actions(object $record) {
+        global $OUTPUT;
+        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['script' => $record->request, 'sesskey' => sesskey()]);
+        $confirmaction = new \confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
+        $deleteicon = new \pix_icon('t/delete', get_string('deleteprofiles_script', 'tool_excimer'));
+        $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);
+        return $OUTPUT->render($link);
     }
 
 }
