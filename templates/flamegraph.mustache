@@ -139,7 +139,7 @@ function init() {
     const chartWidth = Math.max(chart.offsetWidth - 15, 500);
 
     window.excimerChart = flamegraph();
-    window.excimerChart.width(chartWidth).inverted(true);
+    window.excimerChart.width(chartWidth);
     window.excimerChart.setDetailsElement(details);
 
     if (window.excimerData === undefined) {
