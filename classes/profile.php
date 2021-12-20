@@ -215,7 +215,6 @@ class profile {
         ]);
     }
 
-
     /**
      * Delete profiles created earlier than a given time.
      *
@@ -233,7 +232,38 @@ class profile {
     }
 
     /**
-     * Removes auto profiles from the database so as to keep only the $numtokeep slowest for each script page.
+     * Remove the reason bitmask on profiles given a list of ids and a reason
+     * that should be removed.
+     *
+     * @param array  $profiles list of profiles to remove the reason for
+     * @param int    $reason the reason ( manager::REASON_* )
+     */
+    public static function remove_reason(array $profiles, int $reason): void {
+        global $DB;
+        $idstodelete = [];
+        foreach ($profiles as $profile) {
+            // Ensuring we only remove a reason that exists on the profile provided.
+            if ($profile->reason & $reason) {
+                $profile->reason ^= $reason; // Remove the reason.
+                if ($profile->reason === manager::REASON_NONE) {
+                    $idstodelete[] = $profile->id;
+                    continue;
+                }
+                $DB->update_record('tool_excimer_profiles', $profile, true);
+            }
+        }
+
+        // Remove profiles where the reason (after updating) would be
+        // REASON_NONE, as they no longer have a reason to exist.
+        if (!empty($idstodelete)) {
+            list($insql, $inparams) = $DB->get_in_or_equal($idstodelete);
+            $DB->delete_records_select('tool_excimer_profiles', 'id ' . $insql, $inparams);
+        }
+    }
+
+    /**
+     * Removes excess REASON_AUTO profiles keep only up to $numtokeep records
+     * per page/request.
      *
      * @param int $numtokeep Number of profiles per request to keep.
      * @throws \coding_exception
@@ -242,26 +272,50 @@ class profile {
     public static function purge_fastest_by_page(int $numtokeep): void {
         global $DB;
 
-        // TODO optimisation suggestions welcome.
+        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_AUTO);
         $records = $DB->get_records_sql(
-            "SELECT COUNT(*) AS num, request
+            "SELECT id, request, reason
                FROM {tool_excimer_profiles}
-              WHERE reason = ?
-           GROUP BY request
-             HAVING COUNT(*) > ?",
-            [manager::REASON_AUTO, $numtokeep]
+              WHERE $purgablereasons != ?
+           ORDER BY duration ASC
+               ", [manager::REASON_NONE, $numtokeep]
         );
-        foreach ($records as $record) {
-            $ids = array_keys($DB->get_records('tool_excimer_profiles',
-                    ['reason' => manager::REASON_AUTO, 'request' => $record->request ],
-                    'duration ASC', 'id', 0, $record->num - $numtokeep));
-            $inclause = $DB->get_in_or_equal($ids);
-            $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
+
+        // Group profiles by request / page.
+        $groupedprofiles = array_reduce($records, function ($acc, $record) {
+            $acc[$record->request] = $acc[$record->request] ?? [
+                'count' => 0,
+                'profiles' => [],
+            ];
+            $acc[$record->request]['count']++;
+            $acc[$record->request]['profiles'][] = $record;
+            return $acc;
+        }, []);
+
+        // For the requests found, loop through the aggregated ids, and remove
+        // the ones to keep from the final list, based on the provided
+        // $numtokeep.
+        $profilestoremovereason = [];
+        foreach ($groupedprofiles as $groupedprofile) {
+            if ($groupedprofile['count'] <= $numtokeep) {
+                continue;
+            }
+            $profiles = $groupedprofile['profiles'];
+            $remaining = array_splice($profiles, 0, -$numtokeep);
+            array_push($profilestoremovereason, ...$remaining);
         }
+
+        // This will remove the REASON_AUTO bitmask on the record, and if the
+        // final record is REASON_NONE, it will do a final purge of all the
+        // affected records.
+        self::remove_reason($profilestoremovereason, manager::REASON_AUTO);
     }
 
     /**
-     * Removes auto profiles from the database so as to keep only the $numtokeep slowest. Typically run after purge_fastest_by_page.
+     * Removes excess REASON_AUTO profiles to keep only up to $numtokeep
+     * profiles with this reason.
+     *
+     * Typically runs after purging records by request/page grouping first.
      *
      * @param int $numtokeep Overall number of profiles to keep.
      * @throws \coding_exception
@@ -269,12 +323,18 @@ class profile {
      */
     public static function purge_fastest(int $numtokeep): void {
         global $DB;
-        $numtopurge = $DB->count_records('tool_excimer_profiles', ['reason' => manager::REASON_AUTO ]) - $numtokeep;
-        if ($numtopurge > 0) {
-            $ids = array_keys($DB->get_records('tool_excimer_profiles',
-                    ['reason' => manager::REASON_AUTO ], 'duration ASC', 'id', 0, $numtopurge));
-            $inclause = $DB->get_in_or_equal($ids);
-            $DB->delete_records_select('tool_excimer_profiles', 'id ' . $inclause[0], $inclause[1]);
+        // Fetch all profiles with the reason REASON_AUTO and keep the number
+        // under $numtokeep by flipping the order, and making the offset start
+        // from the records after $numtokeep.
+        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_AUTO);
+        $records = $DB->get_records_sql(
+            "SELECT id, reason
+               FROM {tool_excimer_profiles}
+              WHERE $purgablereasons != ?
+           ORDER BY duration DESC", [manager::REASON_NONE], $numtokeep);
+
+        if (!empty($records)) {
+            self::remove_reason($records, manager::REASON_AUTO);
         }
     }
 

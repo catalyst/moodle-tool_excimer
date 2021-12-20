@@ -70,12 +70,22 @@ $data = (array) $profile;
 $data['duration'] = format_time($data['duration']);
 
 $data['request'] = $profile->request . $profile->pathinfo;
-if ($profile->method === 'GET' && !empty($profile->parameters)) {
-    $data['request'] .= '?' . htmlentities($profile->parameters);
+if (!empty($profile->parameters)) {
+    $parameters = $profile->parameters;
+    if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
+        // For CLI scripts, request should look like `command.php --flag=value` as an example.
+        $separator = ' ';
+    } else {
+        // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
+        $separator = '?';
+        $parameters = urldecode($parameters);
+    }
+    $data['request'] .= $separator . $parameters;
 }
+
 // If GET request then it should be reproducable as a idempotent request (readonly).
 if ($profile->method === 'GET') {
-    $requesturl = new \moodle_url('/' . $data['request']);
+    $requesturl = new \moodle_url('/' . $profile->request . $profile->pathinfo . '?' . htmlentities($profile->parameters));
     $data['request'] = \html_writer::link(
             $requesturl,
             urldecode($data['request']),
