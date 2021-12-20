@@ -61,23 +61,24 @@ class helper {
     }
 
     /**
-     * Returns a printable string for the profiling reason.
+     * Returns a printable string for the profiling reasons.
      *
      * @param int $reason
      * @return string
      * @throws \coding_exception
      */
     public static function reason_display(int $reason): string {
-        switch ($reason) {
-            case manager::REASON_MANUAL:
-                return get_string('reason_manual', 'tool_excimer');
-            case manager::REASON_AUTO:
-                return get_string('reason_auto', 'tool_excimer');
-            case manager::REASON_FLAMEALL:
-                return get_string('reason_flameall', 'tool_excimer');
-            default:
-                return (string) $reason;
+        $reasonsmatched = [];
+        if ($reason & manager::REASON_AUTO) {
+            $reasonsmatched[] = get_string('reason_auto', 'tool_excimer');
         }
+        if ($reason & manager::REASON_FLAMEALL) {
+            $reasonsmatched[] = get_string('reason_flameall', 'tool_excimer');
+        }
+        if ($reason & manager::REASON_MANUAL) {
+            $reasonsmatched[] = get_string('reason_manual', 'tool_excimer');
+        }
+        return implode(',', $reasonsmatched);
     }
 
     /**

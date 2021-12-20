@@ -55,13 +55,32 @@ class profile_table extends \table_sql {
             $this->no_sorting($column);
         }
 
+        $fields = [
+            '{tool_excimer_profiles}.id as id',
+            'reason',
+            'scripttype',
+            'method',
+            'request',
+            'pathinfo',
+            'created',
+            'duration',
+            'parameters',
+            'responsecode',
+            'referer',
+            'userid',
+            'lang',
+            'firstname',
+            'lastname',
+            'firstnamephonetic',
+            'lastnamephonetic',
+            'middlename',
+            'alternatename',
+        ];
+        $fieldsstr = implode(',', $fields);
         $this->set_sql(
-            '{tool_excimer_profiles}.id as id, reason, scripttype, method, request, pathinfo, created,
-                     duration, parameters, responsecode, referer, userid, lang, firstname, lastname, firstnamephonetic,
-                     lastnamephonetic, middlename, alternatename',
-            '{tool_excimer_profiles} LEFT JOIN {user} on ({tool_excimer_profiles}.userid = {user}.id)',
-            '1=1'
-        );
+                $fieldsstr,
+                '{tool_excimer_profiles} LEFT JOIN {user} ON {user}.id = {tool_excimer_profiles}.userid',
+                '1=1');
         $this->define_columns(self::COLUMNS);
         $this->column_class('responsecode', 'text-right');
         $this->column_class('duration', 'text-right');
