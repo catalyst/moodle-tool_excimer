@@ -37,9 +37,9 @@ admin_externalpage_setup('tool_excimer_report_slowest');
 $url = new moodle_url("/admin/tool/excimer/slowest.php");
 
 if ($script) {
-    $table = new profile_table('profile_table_recent', "request='$script'");
+    $table = new profile_table('profile_table_slowest', "request='$script'");
 } else {
-    $table = new profile_table('profile_table_recent');
+    $table = new profile_table('profile_table_slowest');
 }
 
 $table->sortable(true, 'duration', SORT_DESC);

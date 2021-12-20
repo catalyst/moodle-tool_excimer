@@ -32,9 +32,9 @@ require_once($CFG->libdir.'/tablelib.php');
 
 admin_externalpage_setup('tool_excimer_report_slowest_grouped');
 
-$url = new moodle_url("/admin/tool/excimer/slowest.php");
+$url = new moodle_url("/admin/tool/excimer/slowest_grouped.php");
 
-$table = new grouped_profile_table('profile_table_slowest');
+$table = new grouped_profile_table('profile_table_slowest_grouped');
 $table->sortable(true, 'maxduration', SORT_DESC);
 
 profile_table_page::display($table, 'slowest', $url);

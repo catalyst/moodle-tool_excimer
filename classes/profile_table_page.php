@@ -81,6 +81,11 @@ class profile_table_page {
         $tabs = [
             'tabs' => [
                 [
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_grouped.php') ]],
+                    'title' => get_string('report_slowest_grouped', 'tool_excimer'),
+                    'text' => get_string('slowest_grouped', 'tool_excimer')
+                ],
+                [
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
                     'title' => get_string('report_slowest', 'tool_excimer'),
                     'text' => get_string('slowest', 'tool_excimer')

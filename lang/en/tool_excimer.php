@@ -53,6 +53,7 @@ $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept 
 $string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue. Please check the installation instructions {$a}.';
 
 // Tabs.
+$string['slowest_grouped'] = 'Slowest - grouped';
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
 
