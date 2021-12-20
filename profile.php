@@ -25,6 +25,7 @@
 
 use tool_excimer\profile;
 use tool_excimer\helper;
+use tool_excimer\output\tabs;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -46,6 +47,8 @@ $returnurl = get_local_referer(false);
 $report = explode('.php', basename($returnurl, '.php'))[0] ?? null;
 $report = in_array($report, profile::REPORT_SECTIONS) ? $report : profile::REPORT_SECTION_SLOWEST;
 admin_externalpage_setup('tool_excimer_report_' . $report);
+
+$output = $PAGE->get_renderer('tool_excimer');
 
 $pluginname = get_string('pluginname', 'tool_excimer');
 
@@ -118,7 +121,10 @@ if ($user) {
     $data['userlink'] = null;
     $data['fullname'] = '-';
 }
+$tabs = new tabs($url);
 
-echo $OUTPUT->header();
-echo $OUTPUT->render_from_template('tool_excimer/flamegraph', $data);
-echo $OUTPUT->footer();
+$data['tabs'] = $tabs->export_for_template($output)['tabs'];
+
+echo $output->header();
+echo $output->render_from_template('tool_excimer/flamegraph', $data);
+echo $output->footer();

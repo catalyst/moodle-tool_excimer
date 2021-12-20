@@ -16,6 +16,8 @@
 
 namespace tool_excimer;
 
+use tool_excimer\output\tabs;
+
 class profile_table_page {
 
     const SORT_COLUMN = [
@@ -32,7 +34,7 @@ class profile_table_page {
      * @throws \dml_exception
      */
     public static function display(profile_table $table, string $report, \moodle_url $url): void {
-        global $PAGE, $OUTPUT;
+        global $PAGE;
 
         $download = optional_param('download', '', PARAM_ALPHA);
 
@@ -41,6 +43,7 @@ class profile_table_page {
         $PAGE->set_context($context);
         $PAGE->set_url($url);
 
+        $output = $PAGE->get_renderer('tool_excimer');
         $pluginname = get_string('pluginname', 'tool_excimer');
 
         $table->is_downloading($download, 'profile', 'profile_record');
@@ -50,59 +53,23 @@ class profile_table_page {
             $PAGE->set_title($pluginname);
             $PAGE->set_pagelayout('admin');
             $PAGE->set_heading($pluginname);
-            echo $OUTPUT->header();
+            echo $output->header();
 
-            $tabs = self::report_tabs($url);
-            echo $OUTPUT->render_from_template('core/tabtree', $tabs);
+            $tabs = new tabs($url);
+            echo $output->render_tabs($tabs);
 
             if (profile::get_num_profiles() > 0) {
                 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteall' => true]);
                 $deletebutton = new \single_button($deleteurl, get_string('deleteall'));
                 $deletebutton->add_confirm_action(get_string('deleteallwarning', 'tool_excimer'));
-                echo $OUTPUT->render($deletebutton);
+                echo $output->render($deletebutton);
             }
         }
 
         $table->out(40, true); // TODO replace with a value from settings.
 
         if (!$table->is_downloading()) {
-            echo $OUTPUT->footer();
+            echo $output->footer();
         }
-    }
-
-    /**
-     * Constructs the tab structure for the page.
-     *
-     * @param \moodle_url $url The active URL.
-     * @return \array[][] Tab structure to draw with the core tab template.
-     * @throws \coding_exception
-     */
-    public static function report_tabs(\moodle_url $url): array {
-        $tabs = [
-            'tabs' => [
-                [
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_grouped.php') ]],
-                    'title' => get_string('report_slowest_grouped', 'tool_excimer'),
-                    'text' => get_string('slowest_grouped', 'tool_excimer')
-                ],
-                [
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
-                    'title' => get_string('report_slowest', 'tool_excimer'),
-                    'text' => get_string('slowest', 'tool_excimer')
-                ],
-                [
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/recent.php') ]],
-                    'title' => get_string('report_recent', 'tool_excimer'),
-                    'text' => get_string('recent', 'tool_excimer')
-                ]
-            ]
-        ];
-
-        foreach ($tabs['tabs'] as &$tab) {
-            if ($tab['link'][0]['link'] == $url) {
-                $tab['active'] = true;
-            }
-        }
-        return $tabs;
     }
 }
