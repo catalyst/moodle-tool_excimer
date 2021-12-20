@@ -84,15 +84,20 @@ class helper {
     /**
      * Returns a formatted time duration in m:s.ms format.
      * @param float $duration
+     * @param bool $markup If true, then use markup on the result.
      * @return string
      * @throws \Exception
      */
-    public static function duration_display(float $duration): string {
+    public static function duration_display(float $duration, bool $markup = true): string {
         $ms = round($duration * 1000, 0) % 1000;
         $s = (int) $duration;
         $m = $s / 60;
         $s = $s % 60;
-        return sprintf('%d:%02d<small>.%03d</small>', $m, $s, $ms);
+        if ($markup) {
+            return sprintf('%d:%02d<small>.%03d</small>', $m, $s, $ms);
+        } else {
+            return sprintf('%d:%02d.%03d', $m, $s, $ms);
+        }
     }
 
     /**

@@ -35,7 +35,6 @@ class grouped_profile_table extends profile_table {
         'mincreated',
         'maxduration',
         'minduration',
-        'actions',
     ];
 
     protected function put_sql(): void {
@@ -51,16 +50,24 @@ class grouped_profile_table extends profile_table {
     }
 
     protected function get_columns(): array {
-        return self::COLUMNS;
+        $columns = self::COLUMNS;
+        if (!$this->is_downloading()) {
+            $columns[] = 'actions';
+        }
+        return $columns;
     }
 
     public function col_request(object $record): string {
         $displayedrequest = $record->request;
 
-        return \html_writer::link(
-                new \moodle_url('/admin/tool/excimer/slowest.php', ['script' => $record->request]),
-                shorten_text($displayedrequest, 100, true, '…'),
-                ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
+        if ($this->is_downloading()) {
+            return $displayedrequest;
+        } else {
+            return \html_writer::link(
+                    new \moodle_url('/admin/tool/excimer/slowest.php', ['script' => $record->request]),
+                    shorten_text($displayedrequest, 100, true, '…'),
+                    ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
+        }
     }
 
     public function col_maxcreated(object $record): string {
@@ -70,13 +77,16 @@ class grouped_profile_table extends profile_table {
         return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
     }
     public function col_maxduration(object $record): string {
-        return helper::duration_display($record->maxduration);
+        return helper::duration_display($record->maxduration, !$this->is_downloading());
     }
     public function col_minduration(object $record): string {
-        return helper::duration_display($record->minduration);
+        return helper::duration_display($record->minduration, !$this->is_downloading());
     }
 
     public function col_actions(object $record) {
+        if ($this->is_downloading()) {
+            return '';
+        }
         global $OUTPUT;
         $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['script' => $record->request, 'sesskey' => sesskey()]);
         $confirmaction = new \confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));

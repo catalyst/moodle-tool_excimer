@@ -48,6 +48,7 @@ class profile_table_page {
 
         $table->is_downloading($download, 'profile', 'profile_record');
         $table->define_baseurl($url);
+        $table->make_columns();
 
         if (!$table->is_downloading()) {
             $PAGE->set_title($pluginname);

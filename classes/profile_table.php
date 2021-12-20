@@ -36,7 +36,6 @@ class profile_table extends \table_sql {
         'created',
         'duration',
         'user',
-        'actions',
     ];
 
     const NOSORT_COLUMNS = [
@@ -44,26 +43,6 @@ class profile_table extends \table_sql {
     ];
 
     protected $filters = []; // Where clause filters.
-
-    public function __construct($uniqueid, $filter = '1=1') {
-        global $DB;
-
-        parent::__construct($uniqueid);
-
-        $headers = [];
-        foreach ($this->get_columns() as $column) {
-            $headers[] = get_string('field_' . $column, 'tool_excimer');
-        }
-
-        foreach (self::NOSORT_COLUMNS as $column) {
-            $this->no_sorting($column);
-        }
-
-        $this->define_columns($this->get_columns());
-        $this->column_class('duration', 'text-right');
-        $this->column_class('responsecode', 'text-right');
-        $this->define_headers($headers);
-    }
 
     /**
      * Add a filter to limit the profiles eing listed.
@@ -75,13 +54,34 @@ class profile_table extends \table_sql {
         $this->filters[$field] = $value;
     }
 
+    public function make_columns() {
+        $headers = [];
+        $columns = $this->get_columns();
+        foreach ($columns as $column) {
+            $headers[] = get_string('field_' . $column, 'tool_excimer');
+        }
+
+        foreach (self::NOSORT_COLUMNS as $column) {
+            $this->no_sorting($column);
+        }
+
+        $this->define_columns($columns);
+        $this->column_class('duration', 'text-right');
+        $this->column_class('responsecode', 'text-right');
+        $this->define_headers($headers);
+    }
+
     /**
      * returns the columns defined for the table.
      *
      * @return string[]
      */
     protected function get_columns(): array {
-        return self::COLUMNS;
+        $columns = self::COLUMNS;
+        if (!$this->is_downloading()) {
+            $columns[] = 'actions';
+        }
+        return $columns;
     }
 
     /**
@@ -205,7 +205,7 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_duration(object $record): string {
-        return helper::duration_display($record->duration);
+        return helper::duration_display($record->duration, !$this->is_downloading());
     }
 
     /**
@@ -273,6 +273,9 @@ class profile_table extends \table_sql {
      * @throws \moodle_exception
      */
     public function col_actions(object $record) {
+        if ($this->is_downloading()) {
+            return '';
+        }
         global $OUTPUT;
         $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $record->id, 'sesskey' => sesskey()]);
         $confirmaction = new \confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
