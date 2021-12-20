@@ -216,7 +216,7 @@ class profile_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return userdate($record->created,get_string('strftime_datetime', 'tool_excimer'));
+        return userdate($record->created, get_string('strftime_datetime', 'tool_excimer'));
     }
 
     /**
