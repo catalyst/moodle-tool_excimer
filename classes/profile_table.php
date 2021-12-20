@@ -109,15 +109,26 @@ class profile_table extends \table_sql {
      */
     public function col_request(object $record): string {
         $displayedrequest = $record->request . $record->pathinfo;
-        if ($record->method === 'GET' && !empty($record->parameters)) {
-            $displayedrequest .= '?' . urldecode($record->parameters);
+        if (!empty($record->parameters)) {
+            if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
+                // For CLI scripts, request should look like `command.php --flag=value` as an example.
+                $separator = ' ';
+                $record->parameters = escapeshellcmd($record->parameters);
+            } else {
+                // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
+                $separator = '?';
+                $record->parameters = urldecode($record->parameters);
+            }
+            $displayedrequest .= $separator . $record->parameters;
         }
 
+        // Return plaintext for download table response format.
         if ($this->is_downloading()) {
-            return $displayedrequest;
+            return $record->method . ' ' . $displayedrequest;
         }
 
-        return \html_writer::link(
+        // Return the web format.
+        return $record->method . ' ' . \html_writer::link(
                 new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
                 shorten_text($displayedrequest, 100, true, '…'),
                 ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
