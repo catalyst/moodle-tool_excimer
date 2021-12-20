@@ -28,7 +28,6 @@ use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->libdir.'/tablelib.php');
 
 $script = optional_param('script', '', PARAM_LOCALURL);
 
