@@ -43,8 +43,6 @@ class profile_table extends \table_sql {
         'actions',
     ];
 
-    const TIME_FORMAT = '%d %b %Y, %H:%M';
-
     protected $filters = []; // Where clause filters.
 
     public function __construct($uniqueid, $filter = '1=1') {
@@ -218,7 +216,7 @@ class profile_table extends \table_sql {
      * @throws \coding_exception
      */
     public function col_created(object $record): string {
-        return userdate($record->created, self::TIME_FORMAT);
+        return userdate($record->created,get_string('strftime_datetime', 'tool_excimer'));
     }
 
     /**

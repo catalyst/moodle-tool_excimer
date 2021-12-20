@@ -63,20 +63,11 @@ class grouped_profile_table extends profile_table {
                 ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
     }
 
-    public function col_responsecodes(object $record): string {
-        $mapper = function($i, $v) use ($record) {
-            return $this->format_responsecode($i, $record->scripttype) . ' (' . $v . ')';
-        };
-        $counts = array_count_values(explode(',', $record->responsecodes));
-        $counts = array_map($mapper, array_keys($counts), array_values($counts));
-        return implode(', ', $counts);
-    }
-
     public function col_maxcreated(object $record): string {
-        return userdate($record->mincreated, self::TIME_FORMAT);
+        return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
     }
     public function col_mincreated(object $record): string {
-        return userdate($record->mincreated, self::TIME_FORMAT);
+        return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
     }
     public function col_maxduration(object $record): string {
         return helper::duration_display($record->maxduration);

@@ -97,6 +97,9 @@ $string['reason_manual'] = 'Manual';
 $string['reason_auto'] = 'Auto';
 $string['reason_flameall'] = 'Flame All';
 
+// Time formats.
+$string['strftime_datetime'] = '%d %b %Y, %H:%M';
+
 // Miscellaneous.
 $string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
 $string['deleteprofile'] = 'Delete profile';
