@@ -31,6 +31,7 @@ class manager {
     const MANUAL_PARAM_NAME = 'FLAMEME';
     const FLAME_ON_PARAM_NAME = 'FLAMEALL';
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
+    const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
 
     /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
     const REASON_MANUAL   = 0b0001;
@@ -89,9 +90,11 @@ class manager {
      * @throws \dml_exception
      */
     public static function is_profiling(): bool {
-        return  self::is_flame_all() ||
-                self::is_flag_set(self::MANUAL_PARAM_NAME) ||
-                (get_config('tool_excimer', 'enable_auto'));
+        return  !self::is_flag_set(self::NO_FLAME_PARAM_NAME) && (
+                    self::is_flame_all() ||
+                    self::is_flag_set(self::MANUAL_PARAM_NAME) ||
+                    (get_config('tool_excimer', 'enable_auto'))
+                );
     }
 
     /**
