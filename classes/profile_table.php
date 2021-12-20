@@ -32,7 +32,7 @@ class profile_table extends \table_sql {
         'responsecode',
         'request',
         'reason',
-        'scripttype',
+        'type',
         'created',
         'duration',
         'user',
@@ -104,6 +104,7 @@ class profile_table extends \table_sql {
             '{tool_excimer_profiles}.id as id',
             'reason',
             'scripttype',
+            'contenttypecategory',
             'method',
             'request',
             'pathinfo',
@@ -161,8 +162,26 @@ class profile_table extends \table_sql {
      * @return string
      * @throws \coding_exception
      */
-    public function col_scripttype(object $record): string {
-        return helper::script_type_display($record->scripttype);
+    public function col_type(object $record): string {
+        $scripttype = helper::script_type_display($record->scripttype);
+        $contenttype = $record->contenttypecategory;
+
+        // Wrap fields in span which more accurately describes them on hover.
+        if (!$this->is_downloading()) {
+            $scripttype = \html_writer::span(
+                    $scripttype,
+                    '',
+                    ['title' => get_string('field_scripttype', 'tool_excimer')]);
+            $contenttype = \html_writer::span(
+                    $contenttype,
+                    '',
+                    ['title' => get_string('field_contenttypecategory', 'tool_excimer')]);
+        }
+
+        return implode(' - ', [
+            $scripttype,
+            $contenttype,
+        ]);
     }
 
     /**

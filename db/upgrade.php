@@ -58,6 +58,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         // Excimer savepoint reached.
         upgrade_plugin_savepoint(true, 2021121700, 'tool', 'excimer');
     }
+
     if ($oldversion < 2021122000) {
         $table = new xmldb_table('tool_excimer_profiles');
 
@@ -79,6 +80,39 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         }
 
         upgrade_plugin_savepoint(true, 2021122000, 'tool', 'excimer');
+    }
+
+    if ($oldversion < 2021122001) {
+
+        // Define field contenttypecategory to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('contenttypecategory', XMLDB_TYPE_CHAR, '30', null, null, null, null, 'flamedatad3');
+
+        // Conditionally launch add field contenttypecategory.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field contenttypekey to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('contenttypekey', XMLDB_TYPE_CHAR, '30', null, null, null, null, 'contenttypecategory');
+
+        // Conditionally launch add field contenttypekey.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field contenttypevalue to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('contenttypevalue', XMLDB_TYPE_CHAR, '30', null, null, null, null, 'contenttypekey');
+
+        // Conditionally launch add field contenttypevalue.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2021122001, 'tool', 'excimer');
     }
 
     return true;

@@ -59,7 +59,12 @@ $string['slowest'] = 'Slowest';
 
 // Profile table.
 $string['field_id'] = 'ID';
-$string['field_scripttype'] = 'Type';
+$string['field_type'] = 'Type';
+$string['field_scripttype'] = 'Script Type';
+$string['field_contenttype'] = 'Content Type';
+$string['field_contenttypecategory'] = 'Content Type (category)';
+$string['field_contenttypekey'] = 'Content Type (extension/key)';
+$string['field_contenttypevalue'] = 'Content Type (actual value)';
 $string['field_reason'] = 'Reason';
 $string['field_created'] = 'Created';
 $string['field_user'] = 'User';
