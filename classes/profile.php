@@ -198,10 +198,10 @@ class profile {
 
         if ($intrans) {
             $cfg = $DB->export_dbconfig();
-            $DB2 = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
-            $DB2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+            $db2 = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
+            $db2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
         } else {
-            $DB2 = $DB;
+            $db2 = $DB;
         }
 
         if (self::$partialsaveid === 0) {
@@ -215,7 +215,7 @@ class profile {
 
             list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
 
-            $id = $DB2->insert_record('tool_excimer_profiles', [
+            $id = $db2->insert_record('tool_excimer_profiles', [
                 'sessionid' => substr(session_id(), 0, 10),
                 'reason' => $reason,
                 'pathinfo' => $pathinfo,
@@ -238,7 +238,7 @@ class profile {
                 'contenttypecategory' => $contenttypecategory,
             ]);
         } else {
-            $DB2->update_record('tool_excimer_profiles', (object) [
+            $db2->update_record('tool_excimer_profiles', (object) [
                 'id' => self::$partialsaveid,
                 'reason' => $reason,
                 'responsecode' => http_response_code(),
@@ -250,7 +250,7 @@ class profile {
             $id = self::$partialsaveid;
         }
         if ($intrans) {
-            $DB2->dispose();
+            $db2->dispose();
         }
         return $id;
     }
