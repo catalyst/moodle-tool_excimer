@@ -134,7 +134,8 @@ class manager {
         \core_shutdown_manager::register_function(
             function() use ($prof, $timer) {
                 $timer->stop();
-                $prof->stop(); $prof->flush();
+                $prof->stop();
+                $prof->flush();
             }
         );
 

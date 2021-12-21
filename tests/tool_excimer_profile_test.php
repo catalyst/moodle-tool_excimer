@@ -80,6 +80,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_n_slowest_kept(): void {
         global $DB;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
 
@@ -131,6 +132,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_n_slowest_kept_per_page(): void {
         global $DB, $SCRIPT;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
 
@@ -183,6 +185,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_save(): void {
         global $DB, $CFG;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(150);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
@@ -240,6 +243,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_purge_old_profiles(): void {
         global $DB;
+        $this->preventResetByRollback();
+
         $log = $this->quick_log(10);
         $times = [ 12345, 23456, 34567, 45678 ];
         $cutoff1 = 30000;
@@ -314,6 +319,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
     public function test_reasons_are_being_stored(): void {
         global $DB;
+        $this->preventResetByRollback();
+
         // Initialise the logs object.
         $log = $this->quick_log(0);
 
@@ -334,6 +341,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
     public function test_reasons_being_removed(): void {
         global $DB;
+        $this->preventResetByRollback();
+
         // Initialise the logs object.
         $log = $this->quick_log(0);
 
@@ -362,6 +371,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
     public function test_save_partial_profile(): void {
         global $DB, $CFG;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(1);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
