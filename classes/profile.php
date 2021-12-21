@@ -59,6 +59,13 @@ class profile {
     ];
 
     /**
+     * Stores the ID of a saved profile, to indicate that it should be overwritten.
+     *
+     * @var int
+     */
+    public static $partialsaveid = 0;
+
+    /**
      * Removes any parameter on profile::DENYLIST.
      *
      * @param array $parameters
@@ -186,38 +193,51 @@ class profile {
         $numsamples = $flamedatad3['value'];
         $flamedatad3json = json_encode($flamedatad3);
         $datasize = strlen($flamedatad3json);
-        $type = self::get_script_type();
-        $parameters = self::get_parameters($type);
-        $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
-        // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
-        $pathinfo = $_SERVER['PATH_INFO'] ?? '';
+        if (self::$partialsaveid === 0) {
+            $type = self::get_script_type();
+            $parameters = self::get_parameters($type);
+            $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
-        list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+            // If set, it will trim off the leading '/' to normalise web & cli requests.
+            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+            $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
-        return $DB->insert_record('tool_excimer_profiles', [
-            'sessionid' => substr(session_id(), 0, 10),
-            'reason' => $reason,
-            'pathinfo' => $pathinfo,
-            'scripttype' => $type,
-            'userid' => $USER ? $USER->id : 0,
-            'method' => $method,
-            'created' => $created,
-            'duration' => $duration,
-            'request' => $request,
-            'parameters' => $parameters,
-            'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
-            'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
-            'responsecode' => http_response_code(),
-            'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-            'datasize' => $datasize,
-            'numsamples' => $numsamples,
-            'flamedatad3' => $flamedatad3json,
-            'contenttypevalue' => $contenttypevalue,
-            'contenttypekey' => $contenttypekey,
-            'contenttypecategory' => $contenttypecategory,
-        ]);
+            list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+
+            return $DB->insert_record('tool_excimer_profiles', [
+                    'sessionid' => substr(session_id(), 0, 10),
+                    'reason' => $reason,
+                    'pathinfo' => $pathinfo,
+                    'scripttype' => $type,
+                    'userid' => $USER ? $USER->id : 0,
+                    'method' => $method,
+                    'created' => $created,
+                    'duration' => $duration,
+                    'request' => $request,
+                    'parameters' => $parameters,
+                    'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
+                    'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
+                    'responsecode' => http_response_code(),
+                    'referer' => $_SERVER['HTTP_REFERER'] ?? '',
+                    'datasize' => $datasize,
+                    'numsamples' => $numsamples,
+                    'flamedatad3' => $flamedatad3json,
+                    'contenttypevalue' => $contenttypevalue,
+                    'contenttypekey' => $contenttypekey,
+                    'contenttypecategory' => $contenttypecategory,
+            ]);
+        } else {
+            $DB->update_record('tool_excimer_profiles', (object) [
+                    'id' => self::$partialsaveid,
+                    'reason' => $reason,
+                    'duration' => $duration,
+                    'datasize' => $datasize,
+                    'numsamples' => $numsamples,
+                    'flamedatad3' => $flamedatad3json,
+            ]);
+            return self::$partialsaveid;
+        }
     }
 
     /**

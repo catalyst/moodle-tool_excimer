@@ -92,6 +92,16 @@ if ($hassiteconfig) {
         );
 
         $settings->add(
+                new admin_setting_configtext(
+                        'tool_excimer/long_interval_s',
+                        get_string('long_interval_s', 'tool_excimer'),
+                        get_string('long_interval_s_desc', 'tool_excimer'),
+                        '10',
+                        PARAM_FLOAT
+                )
+        );
+
+        $settings->add(
             new admin_setting_configduration(
                 'tool_excimer/expiry_s',
                 get_string('expiry_s', 'tool_excimer'),

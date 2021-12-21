@@ -107,10 +107,20 @@ class manager {
         $hassensiblerange = $samplems > 10 && $samplems < 10000;
         $sampleperiod = $hassensiblerange ? round($samplems / 1000, 3) : self::EXCIMER_PERIOD;
 
+        $longinterval = get_config('tool_excimer', 'long_interval_s');
+
         $prof = new \ExcimerProfiler();
         $prof->setPeriod($sampleperiod);
 
+        $timer = new \ExcimerTimer();
+        $timer->setPeriod($longinterval);
+
         $started = microtime(true);
+
+        $oninterval = function($s) use ($prof, $started) {
+            manager::on_interval($prof, $started);
+        };
+        $timer->setCallback($oninterval);
 
         // TODO: a setting to determine if logs are saved locally or sent to an external process.
 
@@ -122,12 +132,14 @@ class manager {
 
         // Stop the profiler as a part of the shutdown sequence.
         \core_shutdown_manager::register_function(
-            function() use ($prof) {
+            function() use ($prof, $timer) {
+                $timer->stop();
                 $prof->stop(); $prof->flush();
             }
         );
 
         $prof->start();
+        $timer->start();
     }
 
     /**
@@ -138,10 +150,24 @@ class manager {
      * @throws \dml_exception
      */
     public static function on_flush(\ExcimerLog $log, float $started): void {
-        global $SESSION;
-
         $stopped = microtime(true);
         $duration = $stopped - $started;
+
+        $reason = self::get_reasons($duration);
+        if ($reason !== self::REASON_NONE) {
+            profile::save($log, $reason, (int) $started, $duration);
+        }
+    }
+
+    /**
+     * Retrieves all the reasons for saving a profile.
+     *
+     * @param float $duration The duration of the script so far.
+     * @return int Reasons as bit flags.
+     * @throws \dml_exception
+     */
+    public static function get_reasons(float $duration): int {
+        global $SESSION;
 
         $reason = self::REASON_NONE;
         if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
@@ -153,9 +179,29 @@ class manager {
         if (($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms')) {
             $reason |= self::REASON_AUTO;
         }
+        return $reason;
+    }
 
-        if ($reason !== self::REASON_NONE) {
-            profile::save($log, $reason, (int) $started, $duration);
+    /**
+     * Called when an Excimer timer event is triggered.
+     *
+     * @param \ExcimerProfiler $profile
+     * @param float $started
+     * @throws \dml_exception
+     */
+    public static function on_interval(\ExcimerProfiler $profile, float $started): void {
+        $current = microtime(true);
+        $duration = $current - $started;
+
+        $reason = self::get_reasons($duration);
+        if ($reason === self::REASON_NONE) {
+            return;
         }
+
+        // TODO - may need to suspend profiling while getting the log.
+        // See https://github.com/wikimedia/php-excimer/blob/8dd7a62856866f942b52733d7a7075242ce5483e/stubs/ExcimerProfiler.php#L87.
+        $log = $profile->getLog();
+        $id = profile::save($log, $reason, (int) $started, $duration);
+        profile::$partialsaveid = $id;
     }
 }

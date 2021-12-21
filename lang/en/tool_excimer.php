@@ -51,6 +51,8 @@ $string['request_ms_desc'] = 'Record a profile only if it runs at least this lon
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
 $string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue. Please check the installation instructions {$a}.';
+$string['long_interval_s'] = 'Partial save interval (seconds)';
+$string['long_interval_s_desc'] = 'For long running taks, save a partial profile every N seconds.';
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest - grouped';
