@@ -144,23 +144,6 @@ class manager {
     }
 
     /**
-     * Called when the Excimer log flushes.
-     *
-     * @param \ExcimerLog $log
-     * @param float $started
-     * @throws \dml_exception
-     */
-    public static function on_flush(\ExcimerLog $log, float $started): void {
-        $stopped = microtime(true);
-        $duration = $stopped - $started;
-
-        $reason = self::get_reasons($duration);
-        if ($reason !== self::REASON_NONE) {
-            profile::save($log, $reason, (int) $started, $duration);
-        }
-    }
-
-    /**
      * Retrieves all the reasons for saving a profile.
      *
      * @param float $duration The duration of the script so far.
@@ -183,6 +166,24 @@ class manager {
         return $reason;
     }
 
+
+    /**
+     * Called when the Excimer log flushes.
+     *
+     * @param \ExcimerLog $log
+     * @param float $started
+     * @throws \dml_exception
+     */
+    public static function on_flush(\ExcimerLog $log, float $started): void {
+        $stopped = microtime(true);
+        $duration = $stopped - $started;
+
+        $reason = self::get_reasons($duration);
+        if ($reason !== self::REASON_NONE) {
+            profile::save($log, $reason, (int) $started, $duration);
+        }
+    }
+
     /**
      * Called when an Excimer timer event is triggered.
      *
@@ -195,14 +196,12 @@ class manager {
         $duration = $current - $started;
 
         $reason = self::get_reasons($duration);
-        if ($reason === self::REASON_NONE) {
-            return;
+        if ($reason !== self::REASON_NONE) {
+            // TODO - may need to suspend profiling while getting the log.
+            // See https://github.com/wikimedia/php-excimer/blob/8dd7a62856866f942b52733d7a7075242ce5483e/stubs/ExcimerProfiler.php#L87.
+            $log = $profile->getLog();
+            $id = profile::save($log, $reason, (int) $started, $duration);
+            profile::$partialsaveid = $id;
         }
-
-        // TODO - may need to suspend profiling while getting the log.
-        // See https://github.com/wikimedia/php-excimer/blob/8dd7a62856866f942b52733d7a7075242ce5483e/stubs/ExcimerProfiler.php#L87.
-        $log = $profile->getLog();
-        $id = profile::save($log, $reason, (int) $started, $duration);
-        profile::$partialsaveid = $id;
     }
 }

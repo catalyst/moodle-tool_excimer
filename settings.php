@@ -97,7 +97,7 @@ if ($hassiteconfig) {
                 get_string('long_interval_s', 'tool_excimer'),
                 get_string('long_interval_s_desc', 'tool_excimer'),
                 '10',
-                PARAM_FLOAT
+                PARAM_INT
             )
         );
 

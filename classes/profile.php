@@ -183,7 +183,6 @@ class profile {
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
         global $DB, $USER, $CFG, $SCRIPT;
 
-        $olddb = null;
         // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
 
@@ -198,9 +197,11 @@ class profile {
         $intrans = $DB->is_transaction_started();
 
         if ($intrans) {
-            $olddb = $DB;
-            $DB = null;
-            setup_DB();
+            $cfg = $DB->export_dbconfig();
+            $DB2 = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
+            $DB2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+        } else {
+            $DB2 = $DB;
         }
 
         if (self::$partialsaveid === 0) {
@@ -214,7 +215,7 @@ class profile {
 
             list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
 
-            $id = $DB->insert_record('tool_excimer_profiles', [
+            $id = $DB2->insert_record('tool_excimer_profiles', [
                 'sessionid' => substr(session_id(), 0, 10),
                 'reason' => $reason,
                 'pathinfo' => $pathinfo,
@@ -237,7 +238,7 @@ class profile {
                 'contenttypecategory' => $contenttypecategory,
             ]);
         } else {
-            $DB->update_record('tool_excimer_profiles', (object) [
+            $DB2->update_record('tool_excimer_profiles', (object) [
                 'id' => self::$partialsaveid,
                 'reason' => $reason,
                 'responsecode' => http_response_code(),
@@ -249,8 +250,7 @@ class profile {
             $id = self::$partialsaveid;
         }
         if ($intrans) {
-            $DB->dispose();
-            $DB = $olddb;
+            $DB2->dispose();
         }
         return $id;
     }

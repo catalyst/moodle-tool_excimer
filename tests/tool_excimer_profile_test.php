@@ -36,6 +36,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest();
+        profile::$partialsaveid = 0;
     }
 
     /**
