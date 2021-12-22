@@ -101,11 +101,6 @@
                         {{/finished}}
                     </td>
                 </tr>
-                <tr>
-                    <th>{{#str}} field_user, tool_excimer {{/str}}</th>
-                    <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
-                        {{^userlink}}{{fullname}}{{/userlink}}</td>
-                </tr>
             </table>
         </div>
         <div class="">
@@ -129,6 +124,11 @@
                 <tr>
                     <th>{{#str}} field_buffering, tool_excimer {{/str}}</th>
                     <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_user, tool_excimer {{/str}}</th>
+                    <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
+                        {{^userlink}}{{fullname}}{{/userlink}}</td>
                 </tr>
             </table>
         </div>
