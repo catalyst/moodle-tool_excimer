@@ -56,56 +56,61 @@
 }}
 
 {{> core/tabtree}}
-<h4>Profile Details</h4>
+<h3>{{{responsecode}}} {{method}} {{{request}}}</h3>
 <p>{{{delete_button}}} {{{delete_all_button}}}</p>
-<div id="profile-stats">
-    <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
-        <tr>
-            <th>{{#str}} field_request, tool_excimer {{/str}}</th>
-            <td>{{{responsecode}}} {{method}} {{{request}}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
-            <td>{{sessionid}}...</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_reason, tool_excimer {{/str}}</th>
-            <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_scripttype, tool_excimer {{/str}}</th>
-            <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_created, tool_excimer {{/str}}</th>
-            <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
-            <td>{{{duration}}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_numsamples, tool_excimer {{/str}}</th>
-            <td>{{numsamples}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_datasize, tool_excimer {{/str}}</th>
-            <td>{{datasize}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_user, tool_excimer {{/str}}</th>
-            <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
-                {{^userlink}}{{fullname}}{{/userlink}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_cookies, tool_excimer {{/str}}</th>
-            <td>{{#cookies}} {{#str}} yes, core_customfield {{/str}} {{/cookies}}{{^cookies}}{{#str}} no, core_customfield {{/str}}{{/cookies}}</td>
-        </tr>
-        <tr>
-            <th>{{#str}} field_buffering, tool_excimer {{/str}}</th>
-            <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
-        </tr>
-    </table>
+
+<div id="profile-stats" class="container">
+    <div class="row">
+        <div class="">
+            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+                <tr>
+                    <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
+                    <td>{{sessionid}}...</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_reason, tool_excimer {{/str}}</th>
+                    <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_scripttype, tool_excimer {{/str}}</th>
+                    <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_created, tool_excimer {{/str}}</th>
+                    <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_user, tool_excimer {{/str}}</th>
+                    <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
+                        {{^userlink}}{{fullname}}{{/userlink}}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="">
+            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+                <tr>
+                    <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
+                    <td>{{{duration}}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_numsamples, tool_excimer {{/str}}</th>
+                    <td>{{numsamples}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_datasize, tool_excimer {{/str}}</th>
+                    <td>{{datasize}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_cookies, tool_excimer {{/str}}</th>
+                    <td>{{#cookies}} {{#str}} yes, core_customfield {{/str}} {{/cookies}}{{^cookies}}{{#str}} no, core_customfield {{/str}}{{/cookies}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_buffering, tool_excimer {{/str}}</th>
+                    <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
 
 <h4>Profile Flame Graph</h4>
