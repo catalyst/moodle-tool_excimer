@@ -54,6 +54,7 @@ class manager {
 
     const EXCIMER_LOG_LIMIT = 10000;
     const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
+    const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
 
     /**
      * Checks if the given flag is set
@@ -90,7 +91,7 @@ class manager {
      * @throws \dml_exception
      */
     public static function is_profiling(): bool {
-        return  !self::is_flag_set(self::NO_FLAME_PARAM_NAME) && (
+        return !self::is_flag_set(self::NO_FLAME_PARAM_NAME) && (
                     self::is_flame_all() ||
                     self::is_flag_set(self::MANUAL_PARAM_NAME) ||
                     (get_config('tool_excimer', 'enable_auto'))
@@ -107,7 +108,10 @@ class manager {
         $hassensiblerange = $samplems > 10 && $samplems < 10000;
         $sampleperiod = $hassensiblerange ? round($samplems / 1000, 3) : self::EXCIMER_PERIOD;
 
-        $longinterval = get_config('tool_excimer', 'long_interval_s');
+        $longinterval = (int)get_config('tool_excimer', 'long_interval_s');
+        if ($longinterval < 1) {
+            $longinterval = self::EXCIMER_LONG_PERIOD;
+        }
 
         $prof = new \ExcimerProfiler();
         $prof->setPeriod($sampleperiod);
