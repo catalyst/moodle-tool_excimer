@@ -64,6 +64,17 @@
         <div class="">
             <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
                 <tr>
+                    <th>{{#str}} field_contenttype, tool_excimer {{/str}}</th>
+                        <td>
+                        <span title="{{#str}} field_contenttypecategory, tool_excimer {{/str}}">{{contenttypecategory}}</span>
+                        -
+                        <span title="{{#str}} field_contenttypekey, tool_excimer {{/str}}">.{{contenttypekey}}</span>
+                        -
+                        <span title="{{#str}} field_contenttypevalue, tool_excimer {{/str}}">{{contenttypevalue}}</span>
+                    </td>
+                </tr>
+
+                <tr>
                     <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
                     <td>{{sessionid}}...</td>
                 </tr>

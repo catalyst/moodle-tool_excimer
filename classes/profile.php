@@ -194,6 +194,8 @@ class profile {
         $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
         $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
+        list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+
         return $DB->insert_record('tool_excimer_profiles', [
             'sessionid' => substr(session_id(), 0, 10),
             'reason' => $reason,
@@ -212,6 +214,9 @@ class profile {
             'datasize' => $datasize,
             'numsamples' => $numsamples,
             'flamedatad3' => $flamedatad3json,
+            'contenttypevalue' => $contenttypevalue,
+            'contenttypekey' => $contenttypekey,
+            'contenttypecategory' => $contenttypecategory,
         ]);
     }
 
