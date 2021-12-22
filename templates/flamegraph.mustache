@@ -91,6 +91,18 @@
             <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
         </tr>
         <tr>
+            <th>{{#str}} field_finished, tool_excimer {{/str}}</th>
+            <td>
+                {{#finished}}
+                    {{#userdate}} {{finished}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}
+                {{/finished}}
+                {{^finished}}
+                    {{#str}} didnotfinish, tool_excimer {{/str}}
+                {{/finished}}
+            </td>
+        </tr>
+        </tr>
+        <tr>
             <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
             <td>{{{duration}}}</td>
         </tr>

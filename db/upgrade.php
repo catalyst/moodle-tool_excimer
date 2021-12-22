@@ -115,5 +115,18 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021122001, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2021122200) {
+        $table = new xmldb_table('tool_excimer_profiles');
+
+        // Add 'finished' field - The timstamp for finishind. If zero, then the run did not finish..
+        $field = new xmldb_field('finished', XMLDB_TYPE_INTEGER, '11', true, XMLDB_NOTNULL, null, 0, 'created');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2021122200, 'tool', 'excimer');
+    }
+
     return true;
 }

@@ -176,11 +176,12 @@ class profile {
      * @param int $reason Why the profile is being saved.
      * @param int $created Timestamp of when the profile was started.
      * @param float $duration The total time of the profiling, in seconds.
+     * @param int $finished Timestamp of when the profile finished, or zero if only partial.
      * @return int The ID of the database entry.
      *
      * @throws \dml_exception
      */
-    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
+    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG, $SCRIPT;
 
         // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
@@ -223,6 +224,7 @@ class profile {
                 'userid' => $USER ? $USER->id : 0,
                 'method' => $method,
                 'created' => $created,
+                'finished' => $finished,
                 'duration' => $duration,
                 'request' => $request,
                 'parameters' => $parameters,
@@ -242,6 +244,7 @@ class profile {
                 'id' => self::$partialsaveid,
                 'reason' => $reason,
                 'responsecode' => http_response_code(),
+                'finished' => $finished,
                 'duration' => $duration,
                 'datasize' => $datasize,
                 'numsamples' => $numsamples,

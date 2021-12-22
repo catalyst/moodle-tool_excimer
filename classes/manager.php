@@ -180,7 +180,7 @@ class manager {
 
         $reason = self::get_reasons($duration);
         if ($reason !== self::REASON_NONE) {
-            profile::save($log, $reason, (int) $started, $duration);
+            profile::save($log, $reason, (int) $started, $duration, (int) $stopped);
         }
     }
 
