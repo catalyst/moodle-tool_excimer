@@ -200,7 +200,13 @@ class profile {
         if ($intrans) {
             $cfg = $DB->export_dbconfig();
             $db2 = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
-            $db2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+            try {
+                $db2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+            } catch (\moodle_exception $e) {
+                // Rather than engage with complex error handling, we choose to simply not record, and move on.
+                debugging('tool_excimer: failed to open second db connection when saving profile: ' . $e->getMessage());
+                return 0;
+            }
         } else {
             $db2 = $DB;
         }
