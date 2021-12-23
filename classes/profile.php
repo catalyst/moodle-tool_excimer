@@ -59,6 +59,13 @@ class profile {
     ];
 
     /**
+     * Stores the ID of a saved profile, to indicate that it should be overwritten.
+     *
+     * @var int
+     */
+    public static $partialsaveid = 0;
+
+    /**
      * Removes any parameter on profile::DENYLIST.
      *
      * @param array $parameters
@@ -169,11 +176,12 @@ class profile {
      * @param int $reason Why the profile is being saved.
      * @param int $created Timestamp of when the profile was started.
      * @param float $duration The total time of the profiling, in seconds.
+     * @param int $finished Timestamp of when the profile finished, or zero if only partial.
      * @return int The ID of the database entry.
      *
      * @throws \dml_exception
      */
-    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration): int {
+    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG, $SCRIPT;
 
         // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
@@ -186,38 +194,74 @@ class profile {
         $numsamples = $flamedatad3['value'];
         $flamedatad3json = json_encode($flamedatad3);
         $datasize = strlen($flamedatad3json);
-        $type = self::get_script_type();
-        $parameters = self::get_parameters($type);
-        $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
-        // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
-        $pathinfo = $_SERVER['PATH_INFO'] ?? '';
+        $intrans = $DB->is_transaction_started();
 
-        list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+        if ($intrans) {
+            $cfg = $DB->export_dbconfig();
+            $db2 = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
+            try {
+                $db2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+            } catch (\moodle_exception $e) {
+                // Rather than engage with complex error handling, we choose to simply not record, and move on.
+                debugging('tool_excimer: failed to open second db connection when saving profile: ' . $e->getMessage());
+                return 0;
+            }
+        } else {
+            $db2 = $DB;
+        }
 
-        return $DB->insert_record('tool_excimer_profiles', [
-            'sessionid' => substr(session_id(), 0, 10),
-            'reason' => $reason,
-            'pathinfo' => $pathinfo,
-            'scripttype' => $type,
-            'userid' => $USER ? $USER->id : 0,
-            'method' => $method,
-            'created' => $created,
-            'duration' => $duration,
-            'request' => $request,
-            'parameters' => $parameters,
-            'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
-            'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
-            'responsecode' => http_response_code(),
-            'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-            'datasize' => $datasize,
-            'numsamples' => $numsamples,
-            'flamedatad3' => $flamedatad3json,
-            'contenttypevalue' => $contenttypevalue,
-            'contenttypekey' => $contenttypekey,
-            'contenttypecategory' => $contenttypecategory,
-        ]);
+        if (self::$partialsaveid === 0) {
+            $type = self::get_script_type();
+            $parameters = self::get_parameters($type);
+            $method = $_SERVER['REQUEST_METHOD'] ?? '';
+
+            // If set, it will trim off the leading '/' to normalise web & cli requests.
+            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+            $pathinfo = $_SERVER['PATH_INFO'] ?? '';
+
+            list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+
+            $id = $db2->insert_record('tool_excimer_profiles', [
+                'sessionid' => substr(session_id(), 0, 10),
+                'reason' => $reason,
+                'pathinfo' => $pathinfo,
+                'scripttype' => $type,
+                'userid' => $USER ? $USER->id : 0,
+                'method' => $method,
+                'created' => $created,
+                'finished' => $finished,
+                'duration' => $duration,
+                'request' => $request,
+                'parameters' => $parameters,
+                'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
+                'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
+                'responsecode' => http_response_code(),
+                'referer' => $_SERVER['HTTP_REFERER'] ?? '',
+                'datasize' => $datasize,
+                'numsamples' => $numsamples,
+                'flamedatad3' => $flamedatad3json,
+                'contenttypevalue' => $contenttypevalue,
+                'contenttypekey' => $contenttypekey,
+                'contenttypecategory' => $contenttypecategory,
+            ]);
+        } else {
+            $db2->update_record('tool_excimer_profiles', (object) [
+                'id' => self::$partialsaveid,
+                'reason' => $reason,
+                'responsecode' => http_response_code(),
+                'finished' => $finished,
+                'duration' => $duration,
+                'datasize' => $datasize,
+                'numsamples' => $numsamples,
+                'flamedatad3' => $flamedatad3json,
+            ]);
+            $id = self::$partialsaveid;
+        }
+        if ($intrans) {
+            $db2->dispose();
+        }
+        return $id;
     }
 
     /**

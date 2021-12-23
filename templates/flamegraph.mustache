@@ -91,9 +91,15 @@
                     <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
                 </tr>
                 <tr>
-                    <th>{{#str}} field_user, tool_excimer {{/str}}</th>
-                    <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
-                        {{^userlink}}{{fullname}}{{/userlink}}</td>
+                    <th>{{#str}} field_finished, tool_excimer {{/str}}</th>
+                    <td>
+                        {{#finished}}
+                            {{#userdate}} {{finished}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}
+                        {{/finished}}
+                        {{^finished}}
+                            {{#str}} didnotfinish, tool_excimer {{/str}}
+                        {{/finished}}
+                    </td>
                 </tr>
             </table>
         </div>
@@ -118,6 +124,11 @@
                 <tr>
                     <th>{{#str}} field_buffering, tool_excimer {{/str}}</th>
                     <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_user, tool_excimer {{/str}}</th>
+                    <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
+                        {{^userlink}}{{fullname}}{{/userlink}}</td>
                 </tr>
             </table>
         </div>

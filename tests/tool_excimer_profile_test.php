@@ -36,6 +36,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest();
+        profile::$partialsaveid = 0;
     }
 
     /**
@@ -80,6 +81,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_n_slowest_kept(): void {
         global $DB;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
 
@@ -131,6 +133,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_n_slowest_kept_per_page(): void {
         global $DB, $SCRIPT;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
 
@@ -183,6 +186,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_save(): void {
         global $DB, $CFG;
+        $this->preventResetByRollback();
 
         $log = $this->quick_log(150);
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
@@ -240,6 +244,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
      */
     public function test_purge_old_profiles(): void {
         global $DB;
+        $this->preventResetByRollback();
+
         $log = $this->quick_log(10);
         $times = [ 12345, 23456, 34567, 45678 ];
         $cutoff1 = 30000;
@@ -314,6 +320,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
     public function test_reasons_are_being_stored(): void {
         global $DB;
+        $this->preventResetByRollback();
+
         // Initialise the logs object.
         $log = $this->quick_log(0);
 
@@ -334,6 +342,8 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
     public function test_reasons_being_removed(): void {
         global $DB;
+        $this->preventResetByRollback();
+
         // Initialise the logs object.
         $log = $this->quick_log(0);
 
@@ -358,5 +368,72 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
         // The profile should no longer exist once the reasons are all removed.
         $this->assertFalse($profile);
+    }
+
+    public function test_save_partial_profile(): void {
+        global $DB, $CFG;
+        $this->preventResetByRollback();
+
+        $log = $this->quick_log(1);
+        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
+        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
+        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
+        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3json = json_encode($flamedatad3);
+        $numsamples = $flamedatad3['value'];
+        $datasize = strlen($flamedatad3json);
+        $reason = manager::REASON_AUTO;
+        $created = 56;
+        $duration = 0.123;
+
+        $id = profile::save($log, $reason, $created, $duration);
+        $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
+        profile::$partialsaveid = $id;
+
+        $this->assertEquals($id, $record->id);
+        $this->assertEquals($reason, $record->reason);
+        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
+        $this->assertEquals($created, $record->created);
+        $this->assertEquals($duration, $record->duration);
+        $this->assertEquals($flamedatad3json, $record->flamedatad3);
+        $this->assertEquals($numsamples, $record->numsamples);
+        $this->assertEquals($datasize, $record->datasize);
+
+        $log = $this->quick_log(2);
+        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
+        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
+        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
+        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3json = json_encode($flamedatad3);
+        $numsamples = $flamedatad3['value'];
+        $datasize = strlen($flamedatad3json);
+        $reason = manager::REASON_AUTO | manager::REASON_MANUAL;
+        $duration = 0.456;
+
+        $secondid = profile::save($log, $reason, $created, $duration);
+        $this->assertEquals($id, $secondid);
+        $record2 = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
+
+        $this->assertEquals($id, $record2->id);
+        $this->assertEquals($reason, $record2->reason);
+        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record2->scripttype);
+        $this->assertEquals($duration, $record2->duration);
+        $this->assertEquals($flamedatad3json, $record2->flamedatad3);
+        $this->assertEquals($numsamples, $record2->numsamples);
+        $this->assertEquals($datasize, $record2->datasize);
+
+        $this->assertEquals($record->id, $record2->id);
+        $this->assertEquals($record->created, $record2->created);
+        $this->assertEquals($record->pathinfo, $record2->pathinfo);
+        $this->assertEquals($record->sessionid, $record2->sessionid);
+        $this->assertEquals($record->cookies, $record2->cookies);
+        $this->assertEquals($record->parameters, $record2->parameters);
+        $this->assertEquals($record->buffering, $record2->buffering);
+        $this->assertEquals($record->request, $record2->request);
+        $this->assertEquals($record->contenttypevalue, $record2->contenttypevalue);
+        $this->assertEquals($record->contenttypecategory, $record2->contenttypecategory);
+        $this->assertEquals($record->contenttypekey, $record2->contenttypekey);
+        $this->assertEquals($record->request, $record2->request);
+        $this->assertEquals($record->userid, $record2->userid);
     }
 }

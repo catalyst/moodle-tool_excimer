@@ -51,6 +51,8 @@ $string['request_ms_desc'] = 'Record a profile only if it runs at least this lon
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
 $string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue. Please check the installation instructions {$a}.';
+$string['long_interval_s'] = 'Partial save interval (seconds)';
+$string['long_interval_s_desc'] = 'For long running taks, save a partial profile every N seconds.';
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest - grouped';
@@ -67,6 +69,7 @@ $string['field_contenttypekey'] = 'Content Type (extension/key)';
 $string['field_contenttypevalue'] = 'Content Type (actual value)';
 $string['field_reason'] = 'Reason';
 $string['field_created'] = 'Created';
+$string['field_finished'] = 'Finished';
 $string['field_user'] = 'User';
 $string['field_duration'] = 'Duration';
 $string['field_request'] = 'Request';
@@ -114,3 +117,4 @@ $string['profiledeleted'] = 'Profile has been deleted.';
 $string['deleteprofiles_script_warning'] = 'This will remove all stored profiles for the script. Continue?';
 $string['deleteprofiles_script'] = 'Delete all profiles for script';
 $string['profilesdeleted'] = 'Profiles have been deleted';
+$string['didnotfinish'] = 'Did not finish';
