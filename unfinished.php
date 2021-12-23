@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Slowest Excimer profiling data in a table.
+ * Unfishied Excimer profiling data in a table.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -29,15 +29,11 @@ use tool_excimer\profile_table_page;
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-$script = optional_param('script', '', PARAM_LOCALURL);
+admin_externalpage_setup('tool_excimer_report_unfinished');
 
-admin_externalpage_setup('tool_excimer_report_slowest');
+$url = new moodle_url("/admin/tool/excimer/unfinished.php");
 
-$url = new moodle_url("/admin/tool/excimer/slowest.php");
-
-$table = new profile_table('profile_table_slowest');
-$table->sortable(true, 'duration', SORT_DESC);
-if ($script) {
-    $table->add_filter('request', $script);
-}
+$table = new profile_table('profile_table_unfinished');
+$table->sortable(true, 'created', SORT_DESC);
+$table->add_filter('finished', 0);
 profile_table_page::display($table, $url);

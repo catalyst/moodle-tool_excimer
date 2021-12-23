@@ -62,8 +62,13 @@ class tabs implements \templatable {
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/recent.php') ]],
                     'title' => get_string('report_recent', 'tool_excimer'),
                     'text' => get_string('recent', 'tool_excimer')
-                ]
-            ]
+                ],
+                [
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/unfinished.php') ]],
+                    'title' => get_string('report_unfinished', 'tool_excimer'),
+                    'text' => get_string('unfinished', 'tool_excimer')
+                ],
+            ],
         ];
 
         foreach ($tabs['tabs'] as &$tab) {

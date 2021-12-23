@@ -29,6 +29,7 @@ $string['pluginname'] = 'Excimer sampling profiler';
 $string['report_slowest'] = 'Profile list - slowest';
 $string['report_slowest_grouped'] = 'Profile list - slowest, grouped by request';
 $string['report_recent'] = 'Profile list - recent';
+$string['report_unfinished'] = 'Profile list - unfinished';
 
 // Settings.
 $string['here'] = 'here';
@@ -58,6 +59,7 @@ $string['long_interval_s_desc'] = 'For long running taks, save a partial profile
 $string['slowest_grouped'] = 'Slowest - grouped';
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
+$string['unfinished'] = 'Unfinished';
 
 // Profile table.
 $string['field_id'] = 'ID';

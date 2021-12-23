@@ -156,4 +156,14 @@ if ($hassiteconfig) {
         )
     );
 
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_report_unfinished',
+            get_string('report_unfinished', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/unfinished.php'),
+            'moodle/site:config'
+        )
+    );
+
 }

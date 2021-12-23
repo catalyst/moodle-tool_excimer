@@ -20,20 +20,16 @@ use tool_excimer\output\tabs;
 
 class profile_table_page {
 
-    const SORT_COLUMN = [
-        'slowest' => 'duration',
-        'recent' => 'created',
-    ];
-
     /**
-     * Common display function for the profile table page.
+     * Common display function for reports.
      *
-     * @param string $report Report type (slowest, recent etc)
-     * @param \moodle_url $url URL of page
+     * @param profile_table $table Report table
+     * @param \moodle_url $url Current URL
      * @throws \coding_exception
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
-    public static function display(profile_table $table, string $report, \moodle_url $url): void {
+    public static function display(profile_table $table, \moodle_url $url): void {
         global $PAGE;
 
         $download = optional_param('download', '', PARAM_ALPHA);
