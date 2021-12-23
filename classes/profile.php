@@ -37,10 +37,14 @@ class profile {
     /** Report section - slowest - lists the slowest profiles first */
     const REPORT_SECTION_SLOWEST = 'slowest';
 
+    /** Report section - unfinished - lists profiles of scripts that did not finish */
+    const REPORT_SECTION_UNFINISHED = 'unfinished';
+
     /** Report sections */
     const REPORT_SECTIONS = [
         self::REPORT_SECTION_RECENT,
         self::REPORT_SECTION_SLOWEST,
+        self::REPORT_SECTION_UNFINISHED,
     ];
 
     const SCRIPTTYPE_AJAX = 0;

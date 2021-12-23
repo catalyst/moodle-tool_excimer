@@ -36,4 +36,4 @@ $url = new moodle_url("/admin/tool/excimer/slowest_grouped.php");
 $table = new grouped_profile_table('profile_table_slowest_grouped');
 $table->sortable(true, 'maxduration', SORT_DESC);
 
-profile_table_page::display($table, 'slowest', $url);
+profile_table_page::display($table, $url);

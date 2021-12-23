@@ -35,4 +35,4 @@ $url = new moodle_url("/admin/tool/excimer/recent.php");
 
 $table = new profile_table('profile_table_recent');
 $table->sortable(true, 'created', SORT_DESC);
-profile_table_page::display($table, 'recent', $url);
+profile_table_page::display($table, $url);
