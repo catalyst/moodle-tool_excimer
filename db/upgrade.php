@@ -118,7 +118,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     if ($oldversion < 2021122200) {
         $table = new xmldb_table('tool_excimer_profiles');
 
-        // Add 'finished' field - The timstamp for finishind. If zero, then the run did not finish..
+        // Add 'finished' field - The timestamp for finishind. If zero, then the run did not finish.
         $field = new xmldb_field('finished', XMLDB_TYPE_INTEGER, '11', true, XMLDB_NOTNULL, null, 0, 'created');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
@@ -126,6 +126,37 @@ function xmldb_tool_excimer_upgrade($oldversion) {
 
         // Excimer savepoint reached.
         upgrade_plugin_savepoint(true, 2021122200, 'tool', 'excimer');
+    }
+
+    if ($oldversion < 2021122400) {
+        $table = new xmldb_table('tool_excimer_profiles');
+
+        // Add 'pid' field - Process ID.
+        $field = new xmldb_field('pid', XMLDB_TYPE_INTEGER, '11', true, XMLDB_NOTNULL, null, 0, 'referer');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add 'hostname' field - The hostname of the server.
+        $field = new xmldb_field('hostname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 0, 'pid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add 'useragent' field - The hostname of the server.
+        $field = new xmldb_field('useragent', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 0, 'pid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add 'versionhash' field - The hash of versions of plugins.
+        $field = new xmldb_field('versionhash', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 0, 'pid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2021122400, 'tool', 'excimer');
     }
 
     return true;
