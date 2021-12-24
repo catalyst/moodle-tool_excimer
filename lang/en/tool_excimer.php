@@ -89,6 +89,10 @@ $string['field_mincreated'] = 'Earliest';
 $string['field_maxduration'] = 'Slowest';
 $string['field_minduration'] = 'Fastest';
 $string['field_requestcount'] = 'Num profiles';
+$string['field_pid'] = 'Process ID';
+$string['field_hostname'] = 'Host name';
+$string['field_useragent'] = 'User agent';
+$string['field_versionhash'] = 'Version Hash';
 
 // Note: This is needed as the headers for the profile table are added in a loop.
 $string['field_actions'] = 'Actions';

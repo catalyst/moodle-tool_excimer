@@ -101,10 +101,6 @@
                         {{/finished}}
                     </td>
                 </tr>
-            </table>
-        </div>
-        <div class="">
-            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
                 <tr>
                     <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
                     <td>{{{duration}}}</td>
@@ -113,6 +109,10 @@
                     <th>{{#str}} field_numsamples, tool_excimer {{/str}}</th>
                     <td>{{numsamples}}</td>
                 </tr>
+            </table>
+        </div>
+        <div class="">
+            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
                 <tr>
                     <th>{{#str}} field_datasize, tool_excimer {{/str}}</th>
                     <td>{{datasize}}</td>
@@ -130,6 +130,25 @@
                     <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
                         {{^userlink}}{{fullname}}{{/userlink}}</td>
                 </tr>
+
+                <tr>
+                    <th>{{#str}} field_pid, tool_excimer {{/str}}</th>
+                    <td>{{pid}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_hostname, tool_excimer {{/str}}</th>
+                    <td>{{hostname}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_useragent, tool_excimer {{/str}}</th>
+                    <td><span title="{{useragent}}">{{#shortentext}} 20,{{useragent}} {{/shortentext}}</span></td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_versionhash, tool_excimer {{/str}}</th>
+                    <td><span title="{{versionhash}}">{{#shortentext}} 20,{{versionhash}} {{/shortentext}}</span></td>
+                </tr>
+
+
             </table>
         </div>
     </div>
