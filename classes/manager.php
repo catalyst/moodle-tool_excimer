@@ -63,10 +63,9 @@ class manager {
      * @return bool
      */
     public static function is_flag_set(string $flag): bool {
-        return !empty(getenv($flag)) ||
-                isset($_COOKIE[$flag]) ||
-                isset($_POST[$flag]) ||
-                isset($_GET[$flag]);
+        return isset($_REQUEST[$flag]) ||
+               isset($_COOKIE[$flag]) ||
+               !empty(getenv($flag));
     }
 
     /**
@@ -201,8 +200,7 @@ class manager {
 
         $reason = self::get_reasons($duration);
         if ($reason !== self::REASON_NONE) {
-            // TODO - may need to suspend profiling while getting the log.
-            // See https://github.com/wikimedia/php-excimer/blob/8dd7a62856866f942b52733d7a7075242ce5483e/stubs/ExcimerProfiler.php#L87.
+            // TODO - may need to suspend profiling while getting the log. See issue #116.
             $log = $profile->getLog();
             $id = profile::save($log, $reason, (int) $started, $duration);
             profile::$partialsaveid = $id;
