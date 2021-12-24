@@ -39,5 +39,6 @@ $table = new profile_table('profile_table_slowest');
 $table->sortable(true, 'duration', SORT_DESC);
 if ($script) {
     $table->add_filter('request', $script);
+    $url->params(['script' => $script]);
 }
 profile_table_page::display($table, $url);
