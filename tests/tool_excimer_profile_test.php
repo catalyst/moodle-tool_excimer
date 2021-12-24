@@ -279,22 +279,22 @@ class tool_excimer_profile_testcase extends advanced_testcase {
     public function test_is_profiling(): void {
         $this->assertFalse(manager::is_profiling());
 
-        $_GET[manager::MANUAL_PARAM_NAME] = 1;
+        $_REQUEST[manager::MANUAL_PARAM_NAME] = 1;
         $this->assertTrue(manager::is_profiling());
 
-        unset($_GET[manager::MANUAL_PARAM_NAME]);
+        unset($_REQUEST[manager::MANUAL_PARAM_NAME]);
         $this->assertFalse(manager::is_profiling());
 
-        $_GET[manager::FLAME_ON_PARAM_NAME] = 1;
+        $_REQUEST[manager::FLAME_ON_PARAM_NAME] = 1;
         $this->assertTrue(manager::is_profiling());
 
-        unset($_GET[manager::FLAME_ON_PARAM_NAME]);
+        unset($_REQUEST[manager::FLAME_ON_PARAM_NAME]);
         $this->assertTrue(manager::is_profiling());
 
-        $_GET[manager::FLAME_OFF_PARAM_NAME] = 1;
+        $_REQUEST[manager::FLAME_OFF_PARAM_NAME] = 1;
         $this->assertFalse(manager::is_profiling());
 
-        unset($_GET[manager::FLAME_OFF_PARAM_NAME]);
+        unset($_REQUEST[manager::FLAME_OFF_PARAM_NAME]);
         $this->assertFalse(manager::is_profiling());
 
         set_config('enable_auto', 1, 'tool_excimer');
