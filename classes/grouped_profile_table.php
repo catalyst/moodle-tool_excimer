@@ -88,7 +88,8 @@ class grouped_profile_table extends profile_table {
             return '';
         }
         global $OUTPUT;
-        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['script' => $record->request, 'sesskey' => sesskey()]);
+        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php',
+                ['filter' => json_encode(['request' => $record->request]), 'sesskey' => sesskey()]);
         $confirmaction = new \confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
         $deleteicon = new \pix_icon('t/delete', get_string('deleteprofiles_script', 'tool_excimer'));
         $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);

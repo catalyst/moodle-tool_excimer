@@ -54,7 +54,21 @@ class profile_table extends \table_sql {
         $this->filters[$field] = $value;
     }
 
-    public function make_columns() {
+    /**
+     * Returns the filters being applied to the list.
+     *
+     * @return array
+     */
+    public function get_filters(): array {
+        return $this->filters;
+    }
+
+    /**
+     * Defines the columns for this table.
+     *
+     * @throws \coding_exception
+     */
+    public function make_columns(): void {
         $headers = [];
         $columns = $this->get_columns();
         foreach ($columns as $column) {
@@ -273,7 +287,14 @@ class profile_table extends \table_sql {
         }
     }
 
-    protected function format_responsecode($responsecode, $scripttype) {
+    /**
+     * Returns a formatted response code depending on the script type.
+     *
+     * @param int $responsecode
+     * @param int $scripttype
+     * @return string
+     */
+    protected function format_responsecode(int $responsecode, int $scripttype): string {
         if ($this->is_downloading()) {
             return $responsecode;
         } else if ($scripttype == profile::SCRIPTTYPE_CLI) {
