@@ -30,7 +30,8 @@ require_admin();
 $returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALURL);
 $deleteall = optional_param('deleteall', 0, PARAM_BOOL);
 $deleteid = optional_param('deleteid', 0, PARAM_INT);
-$deletescript = optional_param('script', '', PARAM_LOCALURL);
+
+$filter = optional_param('filter', 0, PARAM_RAW);
 
 require_sesskey();
 
@@ -46,10 +47,13 @@ if ($deleteid) {
     redirect($returnurl, get_string('profiledeleted', 'tool_excimer'));
 }
 
-// Delete profiles for a script.
-if ($deletescript) {
-    $DB->delete_records('tool_excimer_profiles', ['request' => $deletescript]);
-    redirect($returnurl, get_string('profilesdeleted', 'tool_excimer'));
+// Delte profiles according to a filter value.
+if ($filter) {
+    $filtervalue = json_decode($filter, true);
+    if (!is_null($filtervalue)) {
+        $DB->delete_records('tool_excimer_profiles', $filtervalue);
+        redirect($returnurl, get_string('profilesdeleted', 'tool_excimer'));
+    }
 }
 
 // Universal graceful fallback.

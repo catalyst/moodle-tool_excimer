@@ -124,3 +124,5 @@ $string['deleteprofiles_script_warning'] = 'This will remove all stored profiles
 $string['deleteprofiles_script'] = 'Delete all profiles for script';
 $string['profilesdeleted'] = 'Profiles have been deleted';
 $string['didnotfinish'] = 'Did not finish';
+$string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles that match this filter. Continue?';
+$string['deleteprofiles_filter'] = 'Delete all profiles for this filter';
