@@ -40,7 +40,7 @@ if ($hassiteconfig) {
     if ($ADMIN->fulltree) {
 
         // Ensure if particular setting(s) are updated, the cache for profile
-        // timings is cleared, at at most once.
+        // timings is cleared, at most once.
         $clearprofiletimingscachecallback = function() {
             static $called = false;
             if (!$called) {
