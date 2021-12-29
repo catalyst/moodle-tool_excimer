@@ -174,6 +174,18 @@ class profile {
     }
 
     /**
+     * Returns the determined 'request' field of this profile.
+     *
+     * @return string the request path for this profile.
+     */
+    public static function get_request(): string {
+        global $SCRIPT;
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+        return $request;
+    }
+
+    /**
      * Saves a snaphot of the profile into the database.
      *
      * @param \ExcimerLog $log The profile data.
@@ -186,7 +198,7 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
-        global $DB, $USER, $CFG, $SCRIPT;
+        global $DB, $USER, $CFG;
 
         // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
@@ -222,7 +234,7 @@ class profile {
             $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
             // If set, it will trim off the leading '/' to normalise web & cli requests.
-            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+            $request = self::get_request();
             $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
             list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
@@ -270,6 +282,11 @@ class profile {
         if ($intrans) {
             $db2->dispose();
         }
+
+        // Clear the profile timings cache on insert/update of a profile.
+        $cache = \cache::make('tool_excimer', 'timings');
+        $cache->purge();
+
         return $id;
     }
 
@@ -299,6 +316,7 @@ class profile {
     public static function remove_reason(array $profiles, int $reason): void {
         global $DB;
         $idstodelete = [];
+        $updateordelete = false;
         foreach ($profiles as $profile) {
             // Ensuring we only remove a reason that exists on the profile provided.
             if ($profile->reason & $reason) {
@@ -308,6 +326,7 @@ class profile {
                     continue;
                 }
                 $DB->update_record('tool_excimer_profiles', $profile, true);
+                $updateordelete = true;
             }
         }
 
@@ -316,6 +335,13 @@ class profile {
         if (!empty($idstodelete)) {
             list($insql, $inparams) = $DB->get_in_or_equal($idstodelete);
             $DB->delete_records_select('tool_excimer_profiles', 'id ' . $insql, $inparams);
+            $updateordelete = true;
+        }
+
+        if ($updateordelete) {
+            // Clear the profile timings cache on insert/update of a profile.
+            $cache = \cache::make('tool_excimer', 'timings');
+            $cache->purge();
         }
     }
 
