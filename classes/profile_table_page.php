@@ -62,7 +62,7 @@ class profile_table_page {
                 echo $output->render($deletebutton);
             }
             $filters = $table->get_filters();
-            if (count($filters)) {
+            if (!empty($filters)) {
                 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['filter' => json_encode($filters)]);
                 $deletebutton = new \single_button($deleteurl, get_string('deleteprofiles_filter', 'tool_excimer'));
                 $deletebutton->add_confirm_action(get_string('deleteprofiles_filter_warning', 'tool_excimer'));
