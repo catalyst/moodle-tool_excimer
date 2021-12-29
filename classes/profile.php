@@ -243,7 +243,7 @@ class profile {
                 'responsecode' => http_response_code(),
                 'referer' => $_SERVER['HTTP_REFERER'] ?? '',
                 'pid' => getmypid(),
-                'hostname' => $_SERVER['HTTP_HOST'] ?? '',
+                'hostname' => gethostname(),
                 'useragent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
                 'versionhash' => $CFG->allversionshash,
                 'datasize' => $datasize,
