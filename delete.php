@@ -47,7 +47,7 @@ if ($deleteid) {
     redirect($returnurl, get_string('profiledeleted', 'tool_excimer'));
 }
 
-// Delte profiles according to a filter value.
+// Delete profiles according to a filter value.
 if ($filter) {
     $filtervalue = json_decode($filter, true);
     if (!is_null($filtervalue)) {
