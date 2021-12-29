@@ -159,5 +159,29 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021122400, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2021122900) {
+
+        // Changing type of field flamedatad3 on table tool_excimer_profiles to binary.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('flamedatad3', XMLDB_TYPE_BINARY, null, null, null, null, null, 'numsamples');
+
+        // A text field cannot be directly converted into a byte field.
+        $records = $DB->get_records('tool_excimer_profiles', null, '', 'id, flamedatad3');
+
+        // Launch change of type for field flamedatad3.
+        $dbman->drop_field($table, $field);
+        $dbman->add_field($table, $field);
+
+        // We need to convert any exiting records to store the compressed data.
+        foreach ($records as $rec) {
+            $rec->flamedatad3 = gzcompress($rec->flamedatad3);
+            $rec->datasize = strlen($rec->flamedatad3);
+            $DB->update_record('tool_excimer_profiles', $rec);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2021122900, 'tool', 'excimer');
+    }
+
     return true;
 }

@@ -197,7 +197,8 @@ class profile {
         $flamedatad3 = converter::process($flamedata);
         $numsamples = $flamedatad3['value'];
         $flamedatad3json = json_encode($flamedatad3);
-        $datasize = strlen($flamedatad3json);
+        $flamedatad3gzip = gzcompress($flamedatad3json);
+        $datasize = strlen($flamedatad3gzip);
 
         $intrans = $DB->is_transaction_started();
 
@@ -248,7 +249,7 @@ class profile {
                 'versionhash' => $CFG->allversionshash,
                 'datasize' => $datasize,
                 'numsamples' => $numsamples,
-                'flamedatad3' => $flamedatad3json,
+                'flamedatad3' => $flamedatad3gzip,
                 'contenttypevalue' => $contenttypevalue,
                 'contenttypekey' => $contenttypekey,
                 'contenttypecategory' => $contenttypecategory,
@@ -262,7 +263,7 @@ class profile {
                 'duration' => $duration,
                 'datasize' => $datasize,
                 'numsamples' => $numsamples,
-                'flamedatad3' => $flamedatad3json,
+                'flamedatad3' => $flamedatad3gzip,
             ]);
             $id = self::$partialsaveid;
         }
