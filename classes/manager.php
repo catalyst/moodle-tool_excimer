@@ -273,14 +273,14 @@ class manager {
         // First, check against the trigger_ms value to ensure it meets the
         // minimum required duration for the profile to be considered slow.
         $triggerms = get_config('tool_excimer', 'trigger_ms');
-        if ($triggerms && $duration < $triggerms) {
+        if ($triggerms && $duration <= $triggerms) {
             return false;
         }
 
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
         $minduration = self::get_min_duration_for_reason(self::REASON_SLOW);
-        if ($minduration && $duration < $minduration) {
+        if ($minduration && $duration <= $minduration) {
             return false;
         }
 
@@ -290,7 +290,7 @@ class manager {
         // profiles slower than the fastest stored profile should be stored.
         $request = profile::get_request();
         $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_SLOW);
-        if ($requestminduration && $duration < $requestminduration) {
+        if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }
 
