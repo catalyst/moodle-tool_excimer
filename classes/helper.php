@@ -71,8 +71,8 @@ class helper {
      */
     public static function reason_display(int $reason): string {
         $reasonsmatched = [];
-        if ($reason & manager::REASON_AUTO) {
-            $reasonsmatched[] = get_string('reason_auto', 'tool_excimer');
+        if ($reason & manager::REASON_SLOW) {
+            $reasonsmatched[] = get_string('reason_slow', 'tool_excimer');
         }
         if ($reason & manager::REASON_FLAMEALL) {
             $reasonsmatched[] = get_string('reason_flameall', 'tool_excimer');
