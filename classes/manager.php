@@ -37,7 +37,7 @@ class manager {
     const REASON_MANUAL   = 0b0001;
 
     /** Reason - AUTO - Set when conditions are met and these profiles are automatically stored. */
-    const REASON_AUTO     = 0b0010;
+    const REASON_SLOW     = 0b0010;
 
     /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
     const REASON_FLAMEALL = 0b0100;
@@ -48,7 +48,7 @@ class manager {
     /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
     const REASONS = [
         self::REASON_MANUAL,
-        self::REASON_AUTO,
+        self::REASON_SLOW,
         self::REASON_FLAMEALL,
     ];
 
@@ -164,7 +164,7 @@ class manager {
             $reason |= self::REASON_FLAMEALL;
         }
         if (($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms')) {
-            $reason |= self::REASON_AUTO;
+            $reason |= self::REASON_SLOW;
         }
         return $reason;
     }

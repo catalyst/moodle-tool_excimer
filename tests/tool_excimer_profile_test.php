@@ -95,7 +95,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
 
         foreach ($times as $time) {
-            profile::save($log, manager::REASON_AUTO, 12345, $time);
+            profile::save($log, manager::REASON_SLOW, 12345, $time);
         }
 
         profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
@@ -108,7 +108,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
         $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_AUTO]));
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_SLOW]));
 
         // Should remove a few more profiles.
         $numtokeep = 5;
@@ -116,14 +116,14 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
         $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_AUTO]));
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_SLOW]));
 
         // Should remove no profiles.
         $numtokeepnew = 9;
         profile::purge_fastest($numtokeepnew);
         $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
         $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_AUTO]));
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_SLOW]));
     }
 
     /**
@@ -151,7 +151,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
 
         for ($i = 0; $i < count($times); ++$i) {
             $SCRIPT = $reqnames[$i];
-            profile::save($log, manager::REASON_AUTO, 12345, $times[$i]);
+            profile::save($log, manager::REASON_SLOW, 12345, $times[$i]);
         }
 
         $SCRIPT = 'c';
@@ -170,7 +170,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
                FROM {tool_excimer_profiles}
               WHERE reason = ?
            GROUP BY request",
-            [manager::REASON_AUTO]
+            [manager::REASON_SLOW]
         );
 
         foreach ($records as $i => $record) {
@@ -196,7 +196,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3['value'];
         $datasize = strlen($flamedatad3json);
-        $reason = manager::REASON_AUTO;
+        $reason = manager::REASON_SLOW;
         $created = 56;
         $duration = 0.123;
 
@@ -220,7 +220,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3['value'];
         $datasize = strlen($flamedatad3json);
-        $reason = manager::REASON_AUTO;
+        $reason = manager::REASON_SLOW;
         $created = 120;
         $duration = 0.456;
 
@@ -382,7 +382,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3['value'];
         $datasize = strlen($flamedatad3json);
-        $reason = manager::REASON_AUTO;
+        $reason = manager::REASON_SLOW;
         $created = 56;
         $duration = 0.123;
 
@@ -407,7 +407,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3['value'];
         $datasize = strlen($flamedatad3json);
-        $reason = manager::REASON_AUTO | manager::REASON_MANUAL;
+        $reason = manager::REASON_SLOW | manager::REASON_MANUAL;
         $duration = 0.456;
 
         $secondid = profile::save($log, $reason, $created, $duration);
