@@ -436,4 +436,61 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($record->request, $record2->request);
         $this->assertEquals($record->userid, $record2->userid);
     }
+
+    public function test_minimal_db_reads_writes_for_warm_cache() {
+        global $DB;
+
+        // Prepare test environment.
+        set_config('num_slowest_by_page', 2, 'tool_excimer'); // 3 per page
+        set_config('num_slowest', 5, 'tool_excimer'); // 5 max slowest
+        set_config('trigger_ms', 2, 'tool_excimer'); // Should capture anything at least 1ms slow.
+        get_config('tool_excimer', 'trigger_ms');
+
+        // Emulate a scenario where all breakpoints are met (request quota, system quota, etc).
+        $startreads = $DB->perf_get_reads();
+        $startwrites = $DB->perf_get_writes();
+
+        // 2, 3, 2, // Filling in the per request cap.
+        // 1, 3, 4, // Per request filled, filling in system quota (should skip
+        //          // insert for 1, but should insert 3 and 4).
+        // 5, 5, 6, // System and request quotas filled, should check throughly.
+        // 7, 8, 9, 10
+        foreach ([
+            1, 1, 1,
+            2, 1, 1,
+            2, 2, 2,
+            3, 2, 2,
+            3, 3, 3,
+            4, 3, 3,
+            4, 4, 4,
+            5, 4, 4,
+            5, 5, 5,
+            6, 5, 5,
+            6, 6, 6,
+            7, 6, 6,
+            7, 7, 7,
+            8, 7, 7,
+            8, 8, 8,
+        ] as $duration) {
+            // Same handling with on_interval and on_flush of the manager
+            // class, with a custom duration set.
+            $profile = new \ExcimerProfiler();
+            $started = microtime(true);
+            // Divide by 1000 required, as microtime(true) returns the value in seconds.
+            $reason = manager::get_reasons($duration / 1000);
+            if ($reason !== manager::REASON_NONE) {
+                $log = $profile->getLog();
+                // Won't count since saves are stored via another DB connection.
+                profile::save($log, $reason, (int) $started, $duration);
+            }
+        }
+
+        $endreads = $DB->perf_get_reads();
+        $endwrites = $DB->perf_get_writes();
+        $totalreads = $endreads - $startreads;
+        $totalwrites = $endwrites - $startwrites;
+        print_r(['reads' => $endreads - $startreads, 'writes' => $endwrites - $startwrites]);die;
+        $this->assertEquals($totalreads, 1);
+        $this->assertEquals($totalwrites, 0);
+    }
 }
