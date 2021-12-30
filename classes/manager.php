@@ -53,7 +53,7 @@ class manager {
 
     const REASON_STR_MAP = [
         self::REASON_MANUAL => 'manual',
-        self::REASON_AUTO => 'slowest',
+        self::REASON_SLOW => 'slowest',
         self::REASON_FLAMEALL => 'flameall',
     ];
 
@@ -267,7 +267,7 @@ class manager {
      * be stored once quotas are maxed.
      *
      * @param float duration of the current profile
-     * @return bool whether or not the profile should stored with the REASON_AUTO reason.
+     * @return bool whether or not the profile should stored with the REASON_SLOW reason.
      */
     public static function is_considered_slow(float $duration): bool {
         // First, check against the trigger_ms value to ensure it meets the
@@ -279,7 +279,7 @@ class manager {
 
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $minduration = self::get_min_duration_for_reason(self::REASON_AUTO);
+        $minduration = self::get_min_duration_for_reason(self::REASON_SLOW);
         if ($minduration && $duration < $minduration) {
             return false;
         }
@@ -289,7 +289,7 @@ class manager {
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
         $request = profile::get_request();
-        $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_AUTO);
+        $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_SLOW);
         if ($requestminduration && $duration < $requestminduration) {
             return false;
         }
