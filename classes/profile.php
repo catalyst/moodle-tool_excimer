@@ -211,6 +211,7 @@ class profile {
         $flamedatad3json = json_encode($flamedatad3);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);
+        $request = self::get_request();
 
         $intrans = $DB->is_transaction_started();
 
@@ -234,7 +235,6 @@ class profile {
             $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
             // If set, it will trim off the leading '/' to normalise web & cli requests.
-            $request = self::get_request();
             $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
             list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
