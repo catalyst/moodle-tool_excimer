@@ -283,9 +283,9 @@ class profile {
             $db2->dispose();
         }
 
-        // Clear the profile request_metadata cache on insert/update of a profile.
+        // Clear the request_metadata cache for the specific request.
         $cache = \cache::make('tool_excimer', 'request_metadata');
-        $cache->purge();
+        $cache->delete($request);
 
         return $id;
     }
@@ -339,9 +339,12 @@ class profile {
         }
 
         if ($updateordelete) {
-            // Clear the profile request_metadata cache on insert/update of a profile.
+            // Clear the request_metadata cache on insert/updates for affected profile requests.
             $cache = \cache::make('tool_excimer', 'request_metadata');
-            $cache->purge();
+            $requests = array_column($profiles, 'request');
+            // Note: Slightly faster than array_unique since the values can be used as keys.
+            $uniquerequests = array_flip(array_flip($requests));
+            $cache->delete_many($uniquerequests);
         }
     }
 
