@@ -166,17 +166,17 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         $field = new xmldb_field('flamedatad3', XMLDB_TYPE_BINARY, null, null, null, null, null, 'numsamples');
 
         // A text field cannot be directly converted into a byte field.
-        $records = $DB->get_records('tool_excimer_profiles', null, '', 'id, flamedatad3');
+        $profiles = $DB->get_records('tool_excimer_profiles', null, '', 'id, flamedatad3');
 
         // Launch change of type for field flamedatad3.
         $dbman->drop_field($table, $field);
         $dbman->add_field($table, $field);
 
-        // We need to convert any exiting records to store the compressed data.
-        foreach ($records as $rec) {
-            $rec->flamedatad3 = gzcompress($rec->flamedatad3);
-            $rec->datasize = strlen($rec->flamedatad3);
-            $DB->update_record('tool_excimer_profiles', $rec);
+        // We need to convert any existing records to store the compressed data.
+        foreach ($profiles as $profile) {
+            $profile->flamedatad3 = gzcompress($profile->flamedatad3);
+            $profile->datasize = strlen($profile->flamedatad3);
+            $DB->update_record('tool_excimer_profiles', $profile);
         }
 
         // Excimer savepoint reached.
