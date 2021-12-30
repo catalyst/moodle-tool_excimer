@@ -35,4 +35,4 @@ $profileid = required_param('profileid', PARAM_INT);
 $record = profile::getprofile($profileid);
 
 header('Content-Type: application/json; charset: utf-8');
-echo $record->flamedatad3;
+echo gzuncompress($record->flamedatad3);
