@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $definitions = array(
-    'timings' => array(
+    'request_metadata' => array(
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => false,
         'simpledata' => true,

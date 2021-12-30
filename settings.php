@@ -40,13 +40,13 @@ if ($hassiteconfig) {
     if ($ADMIN->fulltree) {
 
         // Ensure if particular setting(s) are updated, the cache for profile
-        // timings is cleared, at most once.
+        // request metadata is cleared, at most once.
         $clearprofiletimingscachecallback = function() {
             static $called = false;
             if (!$called) {
                 $called = true;
-                // Clear the profile timings cache on insert/update of a profile.
-                $cache = \cache::make('tool_excimer', 'timings');
+                // Clear the profile request_metadata caches.
+                $cache = \cache::make('tool_excimer', 'request_metadata');
                 $cache->purge();
             }
         };

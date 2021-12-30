@@ -168,7 +168,8 @@ class manager {
         if (isset($SESSION->toolexcimerflameall)) {
             $reason |= self::REASON_FLAMEALL;
         }
-        if (($duration * 1000) >= self::get_min_duration_for_reason_slow()) {
+
+        if (self::is_considered_slow($duration * 1000)) {
             $reason |= self::REASON_SLOW;
         }
         return $reason;
@@ -176,6 +177,9 @@ class manager {
 
     /**
      * Returns the minimum duration for profiles matching this reason and page/request.
+     *
+     * Cost: 1 cache read (ideally)
+     * Otherwise: 1 cache read, 1 DB read and 1 cache write.
      *
      * @param  int $reason - the profile type or REASON_*
      * @return float duration (in milliseconds) of the fastest profile for a given reason and request/page.
@@ -188,10 +192,11 @@ class manager {
 
         // Grab the fastest profile for this page/request, and use that as
         // the lower boundary for any new profiles of this page/request.
-        $cachekey = "profile_type_$reason" . "_page_$request" . '_min_duration_ms';
-        $cache = \cache::make('tool_excimer', 'timings');
+        $cachekey = $request;
+        $cachefield = "min_duration_for_reason_$reason";
+        $cache = \cache::make('tool_excimer', 'request_metadata');
         $result = $cache->get($cachekey);
-        if ($result === false) {
+        if ($result === false || !isset($result[$cachefield])) {
             // NOTE: Opting to query this way instead of using MIN due to
             // the fact valid profiles will be added and the limits will be
             // breached for 'some time'. This will keep the constraints as
@@ -206,16 +211,20 @@ class manager {
             $resultset = $DB->get_records_sql($sql, [
                 self::REASON_NONE,
                 $request,
-            ], 0, $pagequota);
+            ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
-            $result = (end($resultset)->min_duration ?? 0) * 1000;
+            $minduration = (end($resultset)->min_duration ?? 0) * 1000;
+            $result[$cachefield] = $minduration;
             $cache->set($cachekey, $result);
         }
-        return $result;
+        return $result[$cachefield];
     }
 
     /**
      * Returns the minimum duration for profiles matching this reason.
+     *
+     * Cost: Should be free as long as the cache exists in the config.
+     * Otherwise: 1 DB read, 1 cache write
      *
      * @param  int $reason - the profile type or REASON_*
      * @return float duration (in milliseconds) of the fastest profile for a given reason.
@@ -225,11 +234,9 @@ class manager {
 
         $reasonstr = self::REASON_STR_MAP[$reason];
         $quota = (int) get_config('tool_excimer', "num_$reasonstr");
-        $cache = \cache::make('tool_excimer', 'timings');
-        // Grab the fastest profile across the slow profiles, and use that
-        // as the lower boundary for any new profiles.
-        $cachekey = "profile_type_$reason" . '_min_duration_ms';
-        $result = $cache->get($cachekey);
+
+        $cachekey = 'profile_type_' . $reason . '_min_duration_ms';
+        $result = get_config('tool_excimer', $cachekey);
         if ($result === false) {
             // Get and set cache.
             $reasons = $DB->sql_bitand('reason', $reason);
@@ -240,115 +247,56 @@ class manager {
                      ";
             $resultset = $DB->get_records_sql($sql, [
                 self::REASON_NONE,
-            ], 0, $quota);
+            ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
             $result = (end($resultset)->min_duration ?? 0) * 1000;
-            $cache->set($cachekey, $result);
+            set_config($cachekey, $result, 'tool_excimer');
         }
         return $result;
     }
 
     /**
-     * Quota for this profile type (e.g. REASON_SLOW) has been reached.
+     * Returns whether or not the profile should be stored based on the duration provided.
      *
-     * @param int reason
-     * @return bool whether or not the quota is filled.
+     * The order in which items are checked are based on the cost of those
+     * checks, with get_config related calls considered free, cache api being
+     * slightly more expensive and DB calls being the most expensive.
+     *
+     * The order is also based on the fact most things should NOT be captured as
+     * it should be harder to reach the minimums required for a new profile to
+     * be stored once quotas are maxed.
+     *
+     * @param float duration of the current profile
+     * @return bool whether or not the profile should stored with the REASON_AUTO reason.
      */
-    public static function has_filled_reason_quota(int $reason): bool {
-        global $DB;
-
-        $reasonstr = self::REASON_STR_MAP[$reason];
-        $quota = (int) get_config('tool_excimer', "num_$reasonstr");
-
-        // Get and set cache.
-        $reasons = $DB->sql_bitand('reason', $reason);
-        $sql = "SELECT count(*)
-                  FROM {tool_excimer_profiles}
-                 WHERE $reasons != ?";
-        $count = $DB->count_records_sql($sql, [
-            self::REASON_NONE,
-        ]);
-        return $count >= $quota;
-    }
-
-    /**
-     * Quota for this page, for this profile type (e.g. REASON_SLOW) has been reached.
-     *
-     * @param int reason
-     * @return bool whether or not the quota is filled.
-     */
-    public static function has_filled_page_and_reason_quota(string $request, int $reason): bool {
-        global $DB;
-        $reasonstr = self::REASON_STR_MAP[$reason];
-        $quota = (int) get_config('tool_excimer', "num_' . $reasonstr . '_by_page");
-
-        // Get and set cache.
-        $reasons = $DB->sql_bitand('reason', $reason);
-        $sql = "SELECT count(*)
-                  FROM {tool_excimer_profiles}
-                 WHERE $reasons != ?
-                       AND request = ?";
-        $count = $DB->count_records_sql($sql, [
-            self::REASON_NONE,
-            $request,
-        ]);
-        return $count >= $quota;
-    }
-
-    /**
-     * Checks the quotas, and returns the best value for the min duration a
-     * profile should be, before it should be saved.
-     *
-     * This will check quotass per page first, then check the more broad quotas, because it only
-     * matters if the page quota has been exceeded, e.g. after the broad quota
-     * has been reached.
-     *
-     * Assuming limits of page=5 and overall=10 (unlikely to be less than the
-     * page quota). The following behaviour is based on this assumption, that
-     * the page limit is less than the other limit (the reason limit or overall
-     * limit in this example).
-     *
-     * With all examples, the check should look at the profile duration based on
-     * the quota that's filled, and if both are filled then it should look at
-     * the pagequota values before adding a new profile.
-     *
-     * Examples:
-     * [quota filled, pagequota filled]:
-     * Should look and add new profiles based on pagequota, as this is the limiting factor before it can be saved.
-     *
-     * [quota filled, pagequota notfilled]:
-     * Should be based on (overall) quota filled.
-     *
-     * [quota notfilled, pagequota filled]:
-     * Should be based on the page quota.
-     *
-     * [quota notfilled, pagequota notfilled]:
-     * Should be based on configuration thresholds/limits.
-     *
-     * @return float the minimum duration required, for a profile to be stored with the REASON_AUTO reason.
-     */
-    public static function get_min_duration_for_reason_slow(): float {
-        // Quota for this page, for this profile type (e.g. REASON_SLOW) has been reached.
-        $request = profile::get_request();
-
-        // Get the cached timings for the fastest of the stored profiles, to
-        // ensure anything faster than this does not get stored iif the quota is
-        // reached. This cache should be reset when, a new profile is
-        // stored/deleted, or settings have changed.
-        if (self::has_filled_page_and_reason_quota($request, self::REASON_AUTO)) {
-            // Quota for this profile type (e.g. REASON_SLOW) for this page/request has been reached.
-            $result = self::get_min_duration_for_request_and_reason($request, self::REASON_AUTO);
-        } else if (self::has_filled_reason_quota(self::REASON_AUTO)) {
-            // Quota for this profile type (e.g. REASON_SLOW) has been reached.
-            $result = self::get_min_duration_for_reason(self::REASON_AUTO);
+    public static function is_considered_slow(float $duration): bool {
+        // First, check against the trigger_ms value to ensure it meets the
+        // minimum required duration for the profile to be considered slow.
+        $triggerms = get_config('tool_excimer', 'trigger_ms');
+        if ($triggerms && $duration < $triggerms) {
+            return false;
         }
 
-        // Between the config and the fastest stored profile flagged for being
-        // slow, grab the slower option as that is the new minimum (#106).
-        $triggerms = (int) get_config('tool_excimer', 'trigger_ms');
-        $minduration = max($triggerms, $result ?? 0);
+        // If a min duration exists, it means the quota is filled, and only
+        // profiles slower than the fastest stored profile should be stored.
+        $minduration = self::get_min_duration_for_reason(self::REASON_AUTO);
+        if ($minduration && $duration < $minduration) {
+            return false;
+        }
 
-        return $minduration;
+        // This is reached if the duration provided should be checked with the
+        // request minimum.
+        // If a min duration exists, it means the quota is filled, and only
+        // profiles slower than the fastest stored profile should be stored.
+        $request = profile::get_request();
+        $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_AUTO);
+        if ($requestminduration && $duration < $requestminduration) {
+            return false;
+        }
+
+        // By this stage, the duration provided should have exceeded the min
+        // requirements for all the different timing types (if they exist).
+        return true;
     }
 
 

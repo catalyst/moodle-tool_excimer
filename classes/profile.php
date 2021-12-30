@@ -283,8 +283,8 @@ class profile {
             $db2->dispose();
         }
 
-        // Clear the profile timings cache on insert/update of a profile.
-        $cache = \cache::make('tool_excimer', 'timings');
+        // Clear the profile request_metadata cache on insert/update of a profile.
+        $cache = \cache::make('tool_excimer', 'request_metadata');
         $cache->purge();
 
         return $id;
@@ -339,8 +339,8 @@ class profile {
         }
 
         if ($updateordelete) {
-            // Clear the profile timings cache on insert/update of a profile.
-            $cache = \cache::make('tool_excimer', 'timings');
+            // Clear the profile request_metadata cache on insert/update of a profile.
+            $cache = \cache::make('tool_excimer', 'request_metadata');
             $cache->purge();
         }
     }
