@@ -320,7 +320,7 @@ class profile {
     }
 
     /**
-     * Removes excess REASON_AUTO profiles keep only up to $numtokeep records
+     * Removes excess REASON_SLOW profiles keep only up to $numtokeep records
      * per page/request.
      *
      * @param int $numtokeep Number of profiles per request to keep.
@@ -330,7 +330,7 @@ class profile {
     public static function purge_fastest_by_page(int $numtokeep): void {
         global $DB;
 
-        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_AUTO);
+        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_SLOW);
         $records = $DB->get_records_sql(
             "SELECT id, request, reason
                FROM {tool_excimer_profiles}
@@ -363,14 +363,14 @@ class profile {
             array_push($profilestoremovereason, ...$remaining);
         }
 
-        // This will remove the REASON_AUTO bitmask on the record, and if the
+        // This will remove the REASON_SLOW bitmask on the record, and if the
         // final record is REASON_NONE, it will do a final purge of all the
         // affected records.
-        self::remove_reason($profilestoremovereason, manager::REASON_AUTO);
+        self::remove_reason($profilestoremovereason, manager::REASON_SLOW);
     }
 
     /**
-     * Removes excess REASON_AUTO profiles to keep only up to $numtokeep
+     * Removes excess REASON_SLOW profiles to keep only up to $numtokeep
      * profiles with this reason.
      *
      * Typically runs after purging records by request/page grouping first.
@@ -381,10 +381,10 @@ class profile {
      */
     public static function purge_fastest(int $numtokeep): void {
         global $DB;
-        // Fetch all profiles with the reason REASON_AUTO and keep the number
+        // Fetch all profiles with the reason REASON_SLOW and keep the number
         // under $numtokeep by flipping the order, and making the offset start
         // from the records after $numtokeep.
-        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_AUTO);
+        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_SLOW);
         $records = $DB->get_records_sql(
             "SELECT id, reason
                FROM {tool_excimer_profiles}
@@ -392,7 +392,7 @@ class profile {
            ORDER BY duration DESC", [manager::REASON_NONE], $numtokeep);
 
         if (!empty($records)) {
-            self::remove_reason($records, manager::REASON_AUTO);
+            self::remove_reason($records, manager::REASON_SLOW);
         }
     }
 

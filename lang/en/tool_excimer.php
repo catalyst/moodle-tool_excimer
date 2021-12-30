@@ -109,6 +109,7 @@ $string['scripttype_ws'] = 'Service';
 // Log reasons.
 $string['reason_manual'] = 'Manual';
 $string['reason_auto'] = 'Auto';
+$string['reason_slow'] = 'Slow';
 $string['reason_flameall'] = 'Flame All';
 
 // Time formats.
