@@ -310,11 +310,43 @@ class profile {
     public static function purge_profiles_before_epoch_time(int $cutoff): void {
         global $DB;
 
+        // Fetch unique requets and reasons that will be purged by the cutoff
+        // datetime, so that we can selectively clear the cache.
+        $requests = $DB->get_fieldset_sql(
+            "SELECT DISTINCT request
+               FROM {tool_excimer_profiles}
+              WHERE created < :cutoff",
+            ['cutoff' => $cutoff]
+        );
+        $reasons = $DB->get_fieldset_sql(
+            "SELECT DISTINCT reason
+               FROM {tool_excimer_profiles}
+              WHERE created < :cutoff",
+            ['cutoff' => $cutoff]
+        );
+
+        // Clears the request_metadata cache for the specific request and
+        // affected reasons.
+        if (!empty($requests)) {
+            $cache = \cache::make('tool_excimer', 'request_metadata');
+            $cache->delete_many($requests);
+        }
+        if ($reasons) {
+            $combinedreasons = manager::REASON_NONE;
+            foreach ($reasons as $reason) {
+                $combinedreasons |= $reason;
+            }
+            manager::clear_min_duration_cache_for_reason($combinedreasons);
+        }
+
+        // Purge the profiles older than this time as they are no longer
+        // relevant.
         $DB->delete_records_select(
             'tool_excimer_profiles',
             'created < :cutoff',
-            [ 'cutoff' => $cutoff ]
+            ['cutoff' => $cutoff]
         );
+
     }
 
     /**
