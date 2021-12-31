@@ -83,6 +83,7 @@ $string['field_referer'] = 'Referer';
 $string['field_cookies'] = 'Cookies enabled';
 $string['field_buffering'] = 'Buffering enabled';
 $string['field_numsamples'] = 'Number of samples';
+$string['field_dbreadwrites'] = 'DB reads/writes';
 $string['field_datasize'] = 'Size of profile data';
 $string['field_maxcreated'] = 'Latest';
 $string['field_mincreated'] = 'Earliest';
