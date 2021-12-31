@@ -188,7 +188,7 @@ class manager {
         global $DB;
 
         $reasonstr = self::REASON_STR_MAP[$reason];
-        $pagequota = (int) get_config('tool_excimer', "num_' . $reasonstr . '_by_page");
+        $pagequota = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
 
         // Grab the fastest profile for this page/request, and use that as
         // the lower boundary for any new profiles of this page/request.
