@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class manager {
-
     const MANUAL_PARAM_NAME = 'FLAMEME';
     const FLAME_ON_PARAM_NAME = 'FLAMEALL';
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
@@ -36,7 +35,7 @@ class manager {
     /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
     const REASON_MANUAL   = 0b0001;
 
-    /** Reason - AUTO - Set when conditions are met and these profiles are automatically stored. */
+    /** Reason - SLOW - Set when conditions are met and these profiles are automatically stored. */
     const REASON_SLOW     = 0b0010;
 
     /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
@@ -50,6 +49,12 @@ class manager {
         self::REASON_MANUAL,
         self::REASON_SLOW,
         self::REASON_FLAMEALL,
+    ];
+
+    const REASON_STR_MAP = [
+        self::REASON_MANUAL => 'manual',
+        self::REASON_SLOW => 'slowest',
+        self::REASON_FLAMEALL => 'flameall',
     ];
 
     const EXCIMER_LOG_LIMIT = 10000;
@@ -163,12 +168,151 @@ class manager {
         if (isset($SESSION->toolexcimerflameall)) {
             $reason |= self::REASON_FLAMEALL;
         }
-        if (($duration * 1000) >= (int) get_config('tool_excimer', 'trigger_ms')) {
+
+        if (self::is_considered_slow($duration * 1000)) {
             $reason |= self::REASON_SLOW;
         }
         return $reason;
     }
 
+    /**
+     * Returns the minimum duration for profiles matching this reason and page/request.
+     *
+     * Cost: 1 cache read (ideally)
+     * Otherwise: 1 cache read, 1 DB read and 1 cache write.
+     *
+     * @param  int $reason - the profile type or REASON_*
+     * @return float duration (in milliseconds) of the fastest profile for a given reason and request/page.
+     */
+    public static function get_min_duration_for_request_and_reason(string $request, int $reason): float {
+        global $DB;
+
+        $reasonstr = self::REASON_STR_MAP[$reason];
+        $pagequota = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
+
+        // Grab the fastest profile for this page/request, and use that as
+        // the lower boundary for any new profiles of this page/request.
+        $cachekey = $request;
+        $cachefield = "min_duration_for_reason_$reason";
+        $cache = \cache::make('tool_excimer', 'request_metadata');
+        $result = $cache->get($cachekey);
+        if ($result === false || !isset($result[$cachefield])) {
+            // NOTE: Opting to query this way instead of using MIN due to
+            // the fact valid profiles will be added and the limits will be
+            // breached for 'some time'. This will keep the constraints as
+            // correct as possible.
+            $reasons = $DB->sql_bitand('reason', $reason);
+            $sql = "SELECT duration as min_duration
+                      FROM {tool_excimer_profiles}
+                     WHERE $reasons != ?
+                           AND request = ?
+                  ORDER BY duration DESC
+                     ";
+            $resultset = $DB->get_records_sql($sql, [
+                self::REASON_NONE,
+                $request,
+            ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
+            // Cache the results in milliseconds (avoids recalculation later).
+            $minduration = (end($resultset)->min_duration ?? 0) * 1000;
+            $result[$cachefield] = $minduration;
+            $cache->set($cachekey, $result);
+        }
+        return (float)$result[$cachefield];
+    }
+
+    /**
+     * Returns the minimum duration for profiles matching this reason.
+     *
+     * Cost: Should be free as long as the cache exists in the config.
+     * Otherwise: 1 DB read, 1 cache write
+     *
+     * @param  int $reason - the profile type or REASON_*
+     * @return float duration (in milliseconds) of the fastest profile for a given reason.
+     */
+    public static function get_min_duration_for_reason(int $reason): float {
+        global $DB;
+
+        $reasonstr = self::REASON_STR_MAP[$reason];
+        $quota = (int) get_config('tool_excimer', "num_$reasonstr");
+
+        $cachekey = 'profile_type_' . $reason . '_min_duration_ms';
+        $result = get_config('tool_excimer', $cachekey);
+        if ($result === false) {
+            // Get and set cache.
+            $reasons = $DB->sql_bitand('reason', $reason);
+            $sql = "SELECT duration as min_duration
+                      FROM {tool_excimer_profiles}
+                     WHERE $reasons != ?
+                  ORDER BY duration DESC
+                     ";
+            $resultset = $DB->get_records_sql($sql, [
+                self::REASON_NONE,
+            ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
+            // Cache the results in milliseconds (avoids recalculation later).
+            $result = (end($resultset)->min_duration ?? 0) * 1000;
+            set_config($cachekey, $result, 'tool_excimer');
+        }
+        return (float)$result;
+    }
+
+    /**
+     * Returns whether or not the profile should be stored based on the duration provided.
+     *
+     * The order in which items are checked are based on the cost of those
+     * checks, with get_config related calls considered free, cache api being
+     * slightly more expensive and DB calls being the most expensive.
+     *
+     * The order is also based on the fact most things should NOT be captured as
+     * it should be harder to reach the minimums required for a new profile to
+     * be stored once quotas are maxed.
+     *
+     * @param float duration of the current profile
+     * @return bool whether or not the profile should stored with the REASON_SLOW reason.
+     */
+    public static function is_considered_slow(float $duration): bool {
+        // First, check against the trigger_ms value to ensure it meets the
+        // minimum required duration for the profile to be considered slow.
+        $triggerms = get_config('tool_excimer', 'trigger_ms');
+        if ($triggerms && $duration <= $triggerms) {
+            return false;
+        }
+
+        // If a min duration exists, it means the quota is filled, and only
+        // profiles slower than the fastest stored profile should be stored.
+        $minduration = self::get_min_duration_for_reason(self::REASON_SLOW);
+        if ($minduration && $duration <= $minduration) {
+            return false;
+        }
+
+        // This is reached if the duration provided should be checked with the
+        // request minimum.
+        // If a min duration exists, it means the quota is filled, and only
+        // profiles slower than the fastest stored profile should be stored.
+        $request = profile::get_request();
+        $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_SLOW);
+        if ($requestminduration && $duration <= $requestminduration) {
+            return false;
+        }
+
+        // By this stage, the duration provided should have exceeded the min
+        // requirements for all the different timing types (if they exist).
+        return true;
+    }
+
+    /**
+     * Clears the plugin cache for keys used for the provided reasons
+     *
+     * @param int $reason bitmap of reason(s)
+     */
+    public static function clear_min_duration_cache_for_reason(int $reason): void {
+        foreach (self::REASONS as $basereason) {
+            if ($reason & $basereason) {
+                // Clear the plugin config cache for this profile's reason.
+                $cachekey = 'profile_type_' . $basereason . '_min_duration_ms';
+                unset_config($cachekey, 'tool_excimer');
+            }
+        }
+    }
 
     /**
      * Called when the Excimer log flushes.

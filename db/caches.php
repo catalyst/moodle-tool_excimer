@@ -15,23 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
- * @copyright 2021, Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Cache definitions.
+ *
+ * @package    tool_excimer
+ * @author     Kevin Pham <kevinpham@catalyst-au.net>
+ * @copyright  Catalyst IT, 2021
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2021123000;
-$plugin->release = 2021123000;
-
-$plugin->requires = 2019052006;    // Our lowest supported Moodle (3.7.6).
-
-// TODO $plugin->supported = ;     // Available as of Moodle 3.9.0 or later.
-// TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
-
-$plugin->component = 'tool_excimer';
-$plugin->maturity = MATURITY_ALPHA;
-
-$plugin->dependencies = [];
+$definitions = array(
+    'request_metadata' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => false,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 10,
+        'canuselocalstore' => false
+    ),
+);

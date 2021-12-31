@@ -116,6 +116,7 @@ $string['reason_flameall'] = 'Flame All';
 $string['strftime_datetime'] = '%d %b %Y, %H:%M';
 
 // Miscellaneous.
+$string['cachedef_request_metadata'] = 'Excimer request metadata cache';
 $string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
 $string['deleteprofile'] = 'Delete profile';
 $string['deleteprofilewarning'] = 'This will remove the profile. Continue?';

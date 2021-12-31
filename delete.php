@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_excimer\manager;
+
 require_once(__DIR__ . '/../../../config.php');
 
 require_admin();
@@ -35,15 +37,34 @@ $filter = optional_param('filter', 0, PARAM_RAW);
 
 require_sesskey();
 
+// Prepare the cache instance.
+$cache = \cache::make('tool_excimer', 'request_metadata');
+
 // Delete all profiles.
 if ($deleteall) {
+    // Clears all profile metadata caches.
+    $cache->purge();
+    // Combine all the reasons - so it can be cleared.
+    $combinedreasons = manager::REASON_NONE;
+    foreach (manager::REASONS as $reason) {
+        $combinedreasons |= $reason;
+    }
+    manager::clear_min_duration_cache_for_reason($combinedreasons);
+
+    // Delete all profile records.
     $DB->delete_records('tool_excimer_profiles');
     redirect($returnurl, get_string('allprofilesdeleted', 'tool_excimer'));
 }
 
 // Delete profile specified by an ID.
 if ($deleteid) {
-    $DB->delete_records('tool_excimer_profiles', ['id' => $deleteid]);
+    // Clears the profile metadata cache affected by this record deletion.
+    $conditions = ['id' => $deleteid];
+    $profile = $DB->get_record('tool_excimer_profiles', $conditions, 'request, reason');
+    $cache->delete($profile->request);
+    manager::clear_min_duration_cache_for_reason($profile->reason);
+    // Deletes the profile record.
+    $DB->delete_records('tool_excimer_profiles', $conditions);
     redirect($returnurl, get_string('profiledeleted', 'tool_excimer'));
 }
 
@@ -51,6 +72,26 @@ if ($deleteid) {
 if ($filter) {
     $filtervalue = json_decode($filter, true);
     if (!is_null($filtervalue)) {
+        // Clears the profile metadata caches affected by this filter.
+        $requests = $DB->get_records('tool_excimer_profiles', $filtervalue, '', 'DISTINCT request');
+        $reasons = $DB->get_records('tool_excimer_profiles', $filtervalue, '', 'DISTINCT reason');
+
+        // Clears the request_metadata cache for the specific request and
+        // affected reasons.
+        if (!empty($requests)) {
+            $requests = array_keys($requests);
+            $cache->delete_many($requests);
+        }
+        if ($reasons) {
+            $reasons = array_keys($reasons);
+            $combinedreasons = manager::REASON_NONE;
+            foreach ($reasons as $reason) {
+                $combinedreasons |= $reason;
+            }
+            manager::clear_min_duration_cache_for_reason($combinedreasons);
+        }
+
+        // Deletes affected profile records.
         $DB->delete_records('tool_excimer_profiles', $filtervalue);
         redirect($returnurl, get_string('profilesdeleted', 'tool_excimer'));
     }
