@@ -23,8 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\manager;
-
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
