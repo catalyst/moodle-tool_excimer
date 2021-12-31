@@ -174,6 +174,18 @@ class profile {
     }
 
     /**
+     * Returns the determined 'request' field of this profile.
+     *
+     * @return string the request path for this profile.
+     */
+    public static function get_request(): string {
+        global $SCRIPT;
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+        return $request;
+    }
+
+    /**
      * Saves a snaphot of the profile into the database.
      *
      * @param \ExcimerLog $log The profile data.
@@ -186,7 +198,7 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
-        global $DB, $USER, $CFG, $SCRIPT;
+        global $DB, $USER, $CFG;
 
         // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
         $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
@@ -199,6 +211,7 @@ class profile {
         $flamedatad3json = json_encode($flamedatad3);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);
+        $request = self::get_request();
 
         // Get DB ops (reads/writes).
         $dbreads = $DB->perf_get_reads();
@@ -226,7 +239,6 @@ class profile {
             $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
             // If set, it will trim off the leading '/' to normalise web & cli requests.
-            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
             $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
             list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
@@ -278,6 +290,22 @@ class profile {
         if ($intrans) {
             $db2->dispose();
         }
+
+        // NOTE: Does clearing the cache on partial saves make sense? The cache
+        // currently sets the min duration for how long a profile should go for
+        // before it gets stored, for other reasons later on, it might be
+        // pushing on additional constraints. In either case, clearing the cache
+        // here assumes a few things: 1 - quota has been reached, 2 - minimum duration
+        // will have changed, typically higher. 3 - every partial save will
+        // cause some sort of reordering and potentially the cached items won't
+        // hold correct values.
+
+        // Clear the request_metadata cache for the specific request.
+        $cache = \cache::make('tool_excimer', 'request_metadata');
+        $cache->delete($request);
+        // Clears the set_config cache for the affected reasons.
+        manager::clear_min_duration_cache_for_reason($reason);
+
         return $id;
     }
 
@@ -290,11 +318,43 @@ class profile {
     public static function purge_profiles_before_epoch_time(int $cutoff): void {
         global $DB;
 
+        // Fetch unique requets and reasons that will be purged by the cutoff
+        // datetime, so that we can selectively clear the cache.
+        $requests = $DB->get_fieldset_sql(
+            "SELECT DISTINCT request
+               FROM {tool_excimer_profiles}
+              WHERE created < :cutoff",
+            ['cutoff' => $cutoff]
+        );
+        $reasons = $DB->get_fieldset_sql(
+            "SELECT DISTINCT reason
+               FROM {tool_excimer_profiles}
+              WHERE created < :cutoff",
+            ['cutoff' => $cutoff]
+        );
+
+        // Clears the request_metadata cache for the specific request and
+        // affected reasons.
+        if (!empty($requests)) {
+            $cache = \cache::make('tool_excimer', 'request_metadata');
+            $cache->delete_many($requests);
+        }
+        if ($reasons) {
+            $combinedreasons = manager::REASON_NONE;
+            foreach ($reasons as $reason) {
+                $combinedreasons |= $reason;
+            }
+            manager::clear_min_duration_cache_for_reason($combinedreasons);
+        }
+
+        // Purge the profiles older than this time as they are no longer
+        // relevant.
         $DB->delete_records_select(
             'tool_excimer_profiles',
             'created < :cutoff',
-            [ 'cutoff' => $cutoff ]
+            ['cutoff' => $cutoff]
         );
+
     }
 
     /**
@@ -307,6 +367,7 @@ class profile {
     public static function remove_reason(array $profiles, int $reason): void {
         global $DB;
         $idstodelete = [];
+        $updateordelete = false;
         foreach ($profiles as $profile) {
             // Ensuring we only remove a reason that exists on the profile provided.
             if ($profile->reason & $reason) {
@@ -316,6 +377,7 @@ class profile {
                     continue;
                 }
                 $DB->update_record('tool_excimer_profiles', $profile, true);
+                $updateordelete = true;
             }
         }
 
@@ -324,6 +386,17 @@ class profile {
         if (!empty($idstodelete)) {
             list($insql, $inparams) = $DB->get_in_or_equal($idstodelete);
             $DB->delete_records_select('tool_excimer_profiles', 'id ' . $insql, $inparams);
+            $updateordelete = true;
+        }
+
+        if ($updateordelete) {
+            // Clear the request_metadata cache on insert/updates for affected profile requests.
+            $cache = \cache::make('tool_excimer', 'request_metadata');
+            $requests = array_column($profiles, 'request');
+            // Note: Slightly faster than array_unique since the values can be used as keys.
+            $uniquerequests = array_flip(array_flip($requests));
+            $cache->delete_many($uniquerequests);
+            manager::clear_min_duration_cache_for_reason($reason);
         }
     }
 

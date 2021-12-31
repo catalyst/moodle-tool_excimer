@@ -23,8 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\manager;
-
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
@@ -38,6 +36,19 @@ if ($hassiteconfig) {
     $ADMIN->add('tool_excimer_reports', $settings);
 
     if ($ADMIN->fulltree) {
+
+        // Ensure if particular setting(s) are updated, the cache for profile
+        // request metadata is cleared, at most once.
+        $clearprofiletimingscachecallback = function() {
+            static $called = false;
+            if (!$called) {
+                $called = true;
+                // Clear the profile request_metadata caches.
+                $cache = \cache::make('tool_excimer', 'request_metadata');
+                $cache->purge();
+            }
+        };
+
         $warntext = '';
         if (!class_exists('ExcimerProfiler')) {
             $packageinstallurl = new \moodle_url('https://github.com/catalyst/moodle-tool_excimer#installation');
@@ -95,35 +106,36 @@ if ($hassiteconfig) {
             )
         );
 
-        $settings->add(
-            new admin_setting_configtext(
-                'tool_excimer/trigger_ms',
-                get_string('request_ms', 'tool_excimer'),
-                get_string('request_ms_desc', 'tool_excimer'),
-                '100',
-                PARAM_INT
-            )
+        $item = new admin_setting_configtext(
+            'tool_excimer/trigger_ms',
+            get_string('request_ms', 'tool_excimer'),
+            get_string('request_ms_desc', 'tool_excimer'),
+            '100',
+            PARAM_INT
         );
+        $item->set_updatedcallback($clearprofiletimingscachecallback);
+        $settings->add($item);
 
-        $settings->add(
-            new admin_setting_configtext(
-                'tool_excimer/num_slowest',
-                get_string('num_slowest', 'tool_excimer'),
-                get_string('num_slowest_desc', 'tool_excimer'),
-                '100',
-                PARAM_INT
-            )
+        $item = new admin_setting_configtext(
+            'tool_excimer/num_slowest',
+            get_string('num_slowest', 'tool_excimer'),
+            get_string('num_slowest_desc', 'tool_excimer'),
+            '100',
+            PARAM_INT
         );
+        $item->set_updatedcallback($clearprofiletimingscachecallback);
+        $settings->add($item);
 
-        $settings->add(
-            new admin_setting_configtext(
-                'tool_excimer/num_slowest_by_page',
-                get_string('num_slowest_by_page', 'tool_excimer'),
-                get_string('num_slowest_by_page_desc', 'tool_excimer'),
-                '5',
-                PARAM_INT
-            )
+        $item = new admin_setting_configtext(
+            'tool_excimer/num_slowest_by_page',
+            get_string('num_slowest_by_page', 'tool_excimer'),
+            get_string('num_slowest_by_page_desc', 'tool_excimer'),
+            '5',
+            PARAM_INT
         );
+        $item->set_updatedcallback($clearprofiletimingscachecallback);
+        $settings->add($item);
+
     }
 
     $ADMIN->add(
