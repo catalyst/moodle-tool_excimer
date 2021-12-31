@@ -283,9 +283,20 @@ class profile {
             $db2->dispose();
         }
 
+        // NOTE: Does clearing the cache on partial saves make sense? The cache
+        // currently sets the min duration for how long a profile should go for
+        // before it gets stored, for other reasons later on, it might be
+        // pushing on additional constraints. In either case, clearing the cache
+        // here assumes a few things: 1 - quota has been reached, 2 - minimum duration
+        // will have changed, typically higher. 3 - every partial save will
+        // cause some sort of reordering and potentially the cached items won't
+        // hold correct values.
+
         // Clear the request_metadata cache for the specific request.
         $cache = \cache::make('tool_excimer', 'request_metadata');
         $cache->delete($request);
+        // Clears the set_config cache for the affected reasons.
+        manager::clear_min_duration_cache_for_reason($reason);
 
         return $id;
     }
@@ -345,6 +356,7 @@ class profile {
             // Note: Slightly faster than array_unique since the values can be used as keys.
             $uniquerequests = array_flip(array_flip($requests));
             $cache->delete_many($uniquerequests);
+            manager::clear_min_duration_cache_for_reason($reason);
         }
     }
 

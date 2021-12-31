@@ -217,7 +217,7 @@ class manager {
             $result[$cachefield] = $minduration;
             $cache->set($cachekey, $result);
         }
-        return $result[$cachefield];
+        return (float)$result[$cachefield];
     }
 
     /**
@@ -252,7 +252,7 @@ class manager {
             $result = (end($resultset)->min_duration ?? 0) * 1000;
             set_config($cachekey, $result, 'tool_excimer');
         }
-        return $result;
+        return (float)$result;
     }
 
     /**
@@ -299,6 +299,20 @@ class manager {
         return true;
     }
 
+    /**
+     * Clears the plugin cache for keys used for the provided reasons
+     *
+     * @param int $reason bitmap of reason(s)
+     */
+    public static function clear_min_duration_cache_for_reason(int $reason): void {
+        foreach (self::REASONS as $basereason) {
+            if ($reason & $basereason) {
+                // Clear the plugin config cache for this profile's reason.
+                $cachekey = 'profile_type_' . $basereason . '_min_duration_ms';
+                unset_config($cachekey, 'tool_excimer');
+            }
+        }
+    }
 
     /**
      * Called when the Excimer log flushes.
