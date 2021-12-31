@@ -35,7 +35,7 @@ class manager {
     /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
     const REASON_MANUAL   = 0b0001;
 
-    /** Reason - AUTO - Set when conditions are met and these profiles are automatically stored. */
+    /** Reason - SLOW - Set when conditions are met and these profiles are automatically stored. */
     const REASON_SLOW     = 0b0010;
 
     /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
