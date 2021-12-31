@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20211229" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20211231" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -32,6 +32,8 @@
         <FIELD NAME="contenttypecategory" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="core_filetypes' resolved string value"/>
         <FIELD NAME="contenttypekey" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="core_filetypes's key from the types available."/>
         <FIELD NAME="contenttypevalue" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="Raw content type as returned from the content-type response header, if available"/>
+        <FIELD NAME="dbreads" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="dbwrites" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -213,6 +213,10 @@ class profile {
         $datasize = strlen($flamedatad3gzip);
         $request = self::get_request();
 
+        // Get DB ops (reads/writes).
+        $dbreads = $DB->perf_get_reads();
+        $dbwrites = $DB->perf_get_writes();
+
         $intrans = $DB->is_transaction_started();
 
         if ($intrans) {
@@ -265,6 +269,8 @@ class profile {
                 'contenttypevalue' => $contenttypevalue,
                 'contenttypekey' => $contenttypekey,
                 'contenttypecategory' => $contenttypecategory,
+                'dbreads' => $dbreads,
+                'dbwrites' => $dbwrites,
             ]);
         } else {
             $db2->update_record('tool_excimer_profiles', (object) [
@@ -276,6 +282,8 @@ class profile {
                 'datasize' => $datasize,
                 'numsamples' => $numsamples,
                 'flamedatad3' => $flamedatad3gzip,
+                'dbreads' => $dbreads,
+                'dbwrites' => $dbwrites,
             ]);
             $id = self::$partialsaveid;
         }
