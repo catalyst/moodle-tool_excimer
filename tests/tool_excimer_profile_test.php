@@ -505,13 +505,12 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $endreads = $DB->perf_get_reads();
         $endwrites = $DB->perf_get_writes();
 
-        // TODO: This does not apply pre PR#122 patch, since it currently just
-        // reads trigger_ms and will insert records (which isn't counted here)
-        // unnecessarily instead of leveraging the cache to avoid doing so.
-        // $totalreads = $endreads - $startreads;
-        // $totalwrites = $endwrites - $startwrites;
-        // $this->assertNotEmpty($totalreads);
-        // $this->assertNotEmpty($totalwrites); // Relevant once PR#122 merges.
+        // Tests that some activity has happened before the caches were warm,
+        // which means caching and the like is happening as expected.
+        $totalreads = $endreads - $startreads;
+        $totalwrites = $endwrites - $startwrites;
+        $this->assertNotEmpty($totalreads);
+        $this->assertNotEmpty($totalwrites);
 
         $totalwarmcachereads = $endreads - $startwarmcachereads;
         $totalwarmcachewrites = $endwrites - $startwarmcachewrites;
