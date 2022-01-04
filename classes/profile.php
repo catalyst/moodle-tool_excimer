@@ -216,6 +216,10 @@ class profile {
         // Get DB ops (reads/writes).
         $dbreads = $DB->perf_get_reads();
         $dbwrites = $DB->perf_get_writes();
+        $dbreplicareads = 0;
+        if ($DB->want_read_slave()) {
+            $dbreplicareads = $DB->perf_get_reads_slave();
+        }
 
         $intrans = $DB->is_transaction_started();
 
@@ -271,6 +275,7 @@ class profile {
                 'contenttypecategory' => $contenttypecategory,
                 'dbreads' => $dbreads,
                 'dbwrites' => $dbwrites,
+                'dbreplicareads' => $dbreplicareads,
             ]);
         } else {
             $db2->update_record('tool_excimer_profiles', (object) [
@@ -284,6 +289,7 @@ class profile {
                 'flamedatad3' => $flamedatad3gzip,
                 'dbreads' => $dbreads,
                 'dbwrites' => $dbwrites,
+                'dbreplicareads' => $dbreplicareads,
             ]);
             $id = self::$partialsaveid;
         }
