@@ -436,4 +436,85 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($record->request, $record2->request);
         $this->assertEquals($record->userid, $record2->userid);
     }
+
+    private function mock_profile_insertion_with_duration(float $duration) {
+        // Same handling with on_interval and on_flush of the manager
+        // class, with a custom duration set.
+        $profile = new \ExcimerProfiler();
+        $started = microtime(true);
+        $finalduration = $duration / 1000;
+
+        // Divide by 1000 required, as microtime(true) returns the value in seconds.
+        $reason = manager::get_reasons($finalduration);
+        if ($reason !== manager::REASON_NONE) {
+            $log = $profile->getLog();
+            // Won't show DB writes count since saves are stored via another DB connection.
+            profile::save($log, $reason, (int) $started, $finalduration);
+        }
+    }
+
+    public function test_minimal_db_reads_writes_for_warm_cache() {
+        global $DB;
+
+        // Prepare test environment.
+        set_config('num_slowest_by_page', 2, 'tool_excimer'); // 3 per page
+        set_config('num_slowest', 4, 'tool_excimer'); // 5 max slowest
+        set_config('trigger_ms', 2, 'tool_excimer'); // Should capture anything at least 1ms slow.
+        get_config('tool_excimer', 'trigger_ms');
+
+        // Emulate a scenario where all breakpoints are met (request quota, system quota, etc).
+        $startreads = $DB->perf_get_reads();
+        $startwrites = $DB->perf_get_writes();
+
+        // Under triggerms - no R/Ws.
+        $this->mock_profile_insertion_with_duration(1);
+        $this->assertEquals(0, $DB->perf_get_reads() - $startreads);
+        $this->assertEquals(0, $DB->perf_get_writes() - $startwrites);
+
+        // Equal to triggerms - no R/Ws - value skipped if equal - must be greater.
+        $this->mock_profile_insertion_with_duration(2);
+        $this->assertEquals(0, $DB->perf_get_reads() - $startreads);
+        $this->assertEquals(0, $DB->perf_get_writes() - $startwrites);
+
+        foreach ([
+            3, // Should add 3.
+            3, // Should add 3 - request quota reached.
+            4, // Should add 4.
+            5, // Should add 5 - reason quota reached (note request min should be 4).
+            1, // 1 read (since previous iteration would have cleared cache after insertion), but otherwise skipped.
+            2, // Same as above.
+            3, // Since it's above the triggerms threshold, and quota is
+               // reached. It will warm the reason cache and set the min value.
+            4, // Same as above, but for the request. Since min is 4 it won't be
+               // added, but this will warm the cache.
+        ] as $duration) {
+            $this->mock_profile_insertion_with_duration($duration);
+        }
+
+        $startwarmcachereads = $DB->perf_get_reads();
+        $startwarmcachewrites = $DB->perf_get_writes();
+        foreach ([
+            // Cache should be warm, anything under here should be 0/0.
+            1, 2, 3, 4,
+            1, 2, 3, 4,
+            1, 2, 3, 4,
+        ] as $duration) {
+            $this->mock_profile_insertion_with_duration($duration);
+        }
+
+        $endreads = $DB->perf_get_reads();
+        $endwrites = $DB->perf_get_writes();
+
+        // Tests that some activity has happened before the caches were warm,
+        // which means caching and the like is happening as expected.
+        $totalreads = $endreads - $startreads;
+        $totalwrites = $endwrites - $startwrites;
+        $this->assertNotEmpty($totalreads);
+        $this->assertNotEmpty($totalwrites);
+
+        $totalwarmcachereads = $endreads - $startwarmcachereads;
+        $totalwarmcachewrites = $endwrites - $startwarmcachewrites;
+        $this->assertEquals(0, $totalwarmcachereads);
+        $this->assertEquals(0, $totalwarmcachewrites);
+    }
 }
