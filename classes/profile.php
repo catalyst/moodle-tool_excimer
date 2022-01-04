@@ -306,11 +306,11 @@ class profile {
         // cause some sort of reordering and potentially the cached items won't
         // hold correct values.
 
-        // Clear the request_metadata cache for the specific request.
-        $cache = \cache::make('tool_excimer', 'request_metadata');
-        $cache->delete($request);
-        // Clears the set_config cache for the affected reasons.
-        manager::clear_min_duration_cache_for_reason($reason);
+        // Updates the request_metadata and per reason cache with more recent values.
+        if ($reason & manager::REASON_SLOW) {
+            manager::get_min_duration_for_request_and_reason($request, manager::REASON_SLOW, false);
+            manager::get_min_duration_for_reason(manager::REASON_SLOW, false);
+        }
 
         return $id;
     }

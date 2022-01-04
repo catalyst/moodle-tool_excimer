@@ -181,10 +181,13 @@ class manager {
      * Cost: 1 cache read (ideally)
      * Otherwise: 1 cache read, 1 DB read and 1 cache write.
      *
-     * @param  int $reason - the profile type or REASON_*
+     * @param  string $request holds the request url
+     * @param  int $reason the profile type or REASON_*
+     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
+     *
      * @return float duration (in milliseconds) of the fastest profile for a given reason and request/page.
      */
-    public static function get_min_duration_for_request_and_reason(string $request, int $reason): float {
+    public static function get_min_duration_for_request_and_reason(string $request, int $reason, bool $usecache = true): float {
         global $DB;
 
         $reasonstr = self::REASON_STR_MAP[$reason];
@@ -194,9 +197,11 @@ class manager {
         // the lower boundary for any new profiles of this page/request.
         $cachekey = $request;
         $cachefield = "min_duration_for_reason_$reason";
+        $result = false;
         $cache = \cache::make('tool_excimer', 'request_metadata');
         $result = $cache->get($cachekey);
-        if ($result === false || !isset($result[$cachefield])) {
+
+        if (!$usecache || $result === false || !isset($result[$cachefield])) {
             // NOTE: Opting to query this way instead of using MIN due to
             // the fact valid profiles will be added and the limits will be
             // breached for 'some time'. This will keep the constraints as
@@ -214,8 +219,11 @@ class manager {
             ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
             $minduration = (end($resultset)->min_duration ?? 0) * 1000;
-            $result[$cachefield] = $minduration;
-            $cache->set($cachekey, $result);
+            // Updates the cache value if the calculated value is different.
+            if (!isset($result[$cachefield]) || $result[$cachefield] !== $minduration) {
+                $result[$cachefield] = $minduration;
+                $cache->set($cachekey, $result);
+            }
         }
         return (float)$result[$cachefield];
     }
@@ -226,18 +234,21 @@ class manager {
      * Cost: Should be free as long as the cache exists in the config.
      * Otherwise: 1 DB read, 1 cache write
      *
-     * @param  int $reason - the profile type or REASON_*
+     * @param  int $reason the profile type or REASON_*
+     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
      * @return float duration (in milliseconds) of the fastest profile for a given reason.
      */
-    public static function get_min_duration_for_reason(int $reason): float {
+    public static function get_min_duration_for_reason(int $reason, bool $usecache = true): float {
         global $DB;
 
         $reasonstr = self::REASON_STR_MAP[$reason];
         $quota = (int) get_config('tool_excimer', "num_$reasonstr");
 
         $cachekey = 'profile_type_' . $reason . '_min_duration_ms';
+        $result = false;
         $result = get_config('tool_excimer', $cachekey);
-        if ($result === false) {
+
+        if (!$usecache || $result === false) {
             // Get and set cache.
             $reasons = $DB->sql_bitand('reason', $reason);
             $sql = "SELECT duration as min_duration
@@ -249,8 +260,12 @@ class manager {
                 self::REASON_NONE,
             ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
-            $result = (end($resultset)->min_duration ?? 0) * 1000;
-            set_config($cachekey, $result, 'tool_excimer');
+            $newvalue = (end($resultset)->min_duration ?? 0) * 1000;
+            // Updates the cache value if the calculated value is different.
+            if ($result !== $newvalue) {
+                $result = $newvalue;
+                set_config($cachekey, $result, 'tool_excimer');
+            }
         }
         return (float)$result;
     }
