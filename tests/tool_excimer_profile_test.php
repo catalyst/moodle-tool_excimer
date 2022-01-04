@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\converter;
+use tool_excimer\flamed3_node;
 use tool_excimer\manager;
 use tool_excimer\profile;
 
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_testcase extends advanced_testcase {
+class tool_excimer_profile_test extends advanced_testcase {
 
     /**
      * Set up before each test
@@ -189,12 +189,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(150);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW;
         $created = 56;
@@ -213,12 +210,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(1500);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW;
         $created = 120;
@@ -375,12 +369,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(1);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW;
         $created = 56;
@@ -400,12 +391,9 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(2);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW | manager::REASON_MANUAL;
         $duration = 0.456;

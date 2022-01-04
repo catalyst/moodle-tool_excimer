@@ -35,7 +35,7 @@ class converter {
      * @param string $rootname Name for the root node. Defaults o 'root'.
      * @return array The data in an array compatible with d3-flame-graph.
      */
-    public static function process(string $data, string $rootname = 'root'): array {
+    public static function process(string $data, string $rootname = 'root'): flamed3_node {
         $table = [];
         if ($data === "") {
             $lines = [];
@@ -50,11 +50,7 @@ class converter {
             $total += $num;
             self::processtail($table, $trace, $num);
         }
-        return [
-            'name' => $rootname,
-            'value' => $total,
-            'children' => self::reprocess($table)
-        ];
+        return new flamed3_node($rootname, $total, self::reprocess($table));
     }
 
     /**
@@ -84,17 +80,14 @@ class converter {
      * Reprocesses the result of process() to strip away string indexes and put them inside the elements.
      *
      * @param array $table
-     * @return array
+     * @return array Array of flamed3_node.
      */
     private static function reprocess(array $table): array {
         $nodes = [];
         foreach ($table as $key => $val) {
-            $node = [
-                'name' => $key,
-                'value' => $val[0],
-            ];
+            $node = new flamed3_node($key, $val[0]);
             if (isset($val[1])) {
-                $node['children'] = self::reprocess($val[1]);
+                $node->children = self::reprocess($val[1]);
             }
             $nodes[] = $node;
         }

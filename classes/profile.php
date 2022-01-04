@@ -200,14 +200,8 @@ class profile {
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG;
 
-        // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-
-        $flamedatad3 = converter::process($flamedata);
-        $numsamples = $flamedatad3['value'];
+        $flamedatad3 = flamed3_node::from_excimer($log);
+        $numsamples = $flamedatad3->value;
         $flamedatad3json = json_encode($flamedatad3);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);

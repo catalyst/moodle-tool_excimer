@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use tool_excimer\converter;
+use tool_excimer\flamed3_node;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -64,7 +65,17 @@ class tool_excimer_converter_test extends advanced_testcase {
      */
     public function test_process(): void {
         foreach (self::TEST_DATA as $testdata) {
-            $this->assertEquals($testdata[1], converter::process($testdata[0]));
+            $this->assertEquals($this->from_array($testdata[1]), converter::process($testdata[0]));
         }
+    }
+
+    public function from_array(array $nodedata): flamed3_node {
+        $node = new flamed3_node($nodedata['name'], $nodedata['value']);
+        $children = [];
+        foreach ($nodedata['children'] as $child) {
+            $children[] = self::from_array($child);
+        }
+        $node->children = $children;
+        return $node;
     }
 }
