@@ -125,31 +125,28 @@ class manager {
 
         $started = microtime(true);
 
-        $oninterval = function($s) use ($prof, $started) {
-            manager::on_interval($prof, $started);
-        };
-        $timer->setCallback($oninterval);
-
-        // TODO: a setting to determine if logs are saved locally or sent to an external process.
-
-        // Call self::on_flush whenever the logs get flushed.
-        $onflush = function(\ExcimerLog $log) use ($started) {
-            manager::on_flush($log, $started);
-        };
-        $prof->setFlushCallback($onflush, self::EXCIMER_LOG_LIMIT);
-
-        // Stop the profiler as a part of the shutdown sequence.
-        \core_shutdown_manager::register_function(
-            function() use ($prof, $timer) {
-                $timer->stop();
-                $prof->stop();
-                $prof->flush();
-            }
-        );
+        self::set_callbacks($prof, $timer, $started);
 
         $prof->start();
         $timer->start();
     }
+
+    public static function set_callbacks($prof, $timer, $started) {
+        $timer->setCallback(function($s) use ($prof, $started) {
+            $log = $prof->getLog();
+            self::process($log, $started, false);
+        });
+
+        // Stop the profiler as a part of the shutdown sequence.
+        \core_shutdown_manager::register_function(
+            function() use ($prof, $timer, $started) {
+                $timer->stop();
+                $prof->stop();
+                $log = $prof->flush();
+                self::process($log, $started, true);
+            }
+         );
+     }
 
     /**
      * Retrieves all the reasons for saving a profile.
@@ -365,4 +362,16 @@ class manager {
             profile::$partialsaveid = $id;
         }
     }
+
+    public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
+        $current = microtime(true);
+        $duration = $current - $started;
+        $reason = self::get_reasons($duration);
+        if ($reason !== self::REASON_NONE) {
+            $id = profile::save($log, $reason, (int) $started, $duration, $isfinal ? (int) $current : 0);
+            if (!$isfinal) {
+                profile::$partialsaveid = $id;
+            }
+        }
+     }
 }
