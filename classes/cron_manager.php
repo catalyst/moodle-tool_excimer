@@ -37,7 +37,7 @@ class cron_manager {
      */
     public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer, float $started): void {
         $timer->setCallback(function($s) use ($profiler, $started) {
-            $log = $profiler->flush();
+            $log = $profiler->getLog();
             cron_manager::process($log, $started);
         });
 
@@ -60,22 +60,22 @@ class cron_manager {
      */
     protected static function process(\ExcimerLog $log, float $started): void {
         $current = microtime(true);
-        $duration = $current - $started;
-        $reasons = manager::get_reasons($duration);
-        if ($reasons) {
-            $threshold = (int)get_config('tool_excimer', 'cron_sample_threshold');
-            if ($threshold < 1) {
-                $threshold = 2;
-            }
-
-            $flamed3node = flamed3_node::from_excimer($log);
-            $nodes = self::extract_task_nodes($flamed3node);
-            foreach ($nodes as $node) {
-                if ($node->value >= $threshold) {
-                    profile::save($node, $reasons, (int) $started, $duration, $current);
-                }
+        $sampleperiod = manager::sample_period();
+        $flamed3node = flamed3_node::from_excimer($log);
+        $nodes = self::extract_task_nodes($flamed3node);
+        foreach ($nodes as $node) {
+            // Duration is between n and n+1 periods, so use n as a simple approximation.
+            $duration = $node->value * $sampleperiod;
+            $request = self::get_request($node);
+            $reasons = manager::get_reasons($request, $duration);
+            if ($reasons !== manager::REASON_NONE) {
+                profile::save($request, $node, $reasons, (int) $started, $duration, $current);
             }
         }
+    }
+
+    public static function get_request($node): string {
+        return substr($node->name, 0, -9);
     }
 
     /**

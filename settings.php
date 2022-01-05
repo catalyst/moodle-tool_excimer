@@ -83,16 +83,6 @@ if ($hassiteconfig) {
         );
 
         $settings->add(
-            new admin_setting_configtext(
-                'tool_excimer/cron_sample_threshold',
-                get_string('cron_sample_threshold', 'tool_excimer'),
-                get_string('cron_sample_threshold_desc', 'tool_excimer'),
-                '2',
-                PARAM_INT
-            )
-        );
-
-        $settings->add(
             new admin_setting_configduration(
                 'tool_excimer/expiry_s',
                 get_string('expiry_s', 'tool_excimer'),
@@ -125,6 +115,17 @@ if ($hassiteconfig) {
         );
         $item->set_updatedcallback($clearprofiletimingscachecallback);
         $settings->add($item);
+
+        $item = new admin_setting_configtext(
+            'tool_excimer/task_min_duration',
+            get_string('task_min_duration', 'tool_excimer'),
+            get_string('task_min_duration_desc', 'tool_excimer'),
+            '60',
+            PARAM_INT
+        );
+        $item->set_updatedcallback($clearprofiletimingscachecallback);
+        $settings->add($item);
+
 
         $item = new admin_setting_configtext(
             'tool_excimer/num_slowest',

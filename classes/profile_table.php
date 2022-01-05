@@ -280,7 +280,7 @@ class profile_table extends \table_sql {
     public function col_responsecode(object $record): string {
         if ($this->is_downloading()) {
             return $record->responsecode;
-        } else if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
+        } else if ($record->responsecode <= 100) {
             return helper::cli_return_status_display($record->responsecode);
         } else {
             return helper::http_status_display($record->responsecode);

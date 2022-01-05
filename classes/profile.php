@@ -51,6 +51,7 @@ class profile {
     const SCRIPTTYPE_CLI = 1;
     const SCRIPTTYPE_WEB = 2;
     const SCRIPTTYPE_WS = 3;
+    const SCRIPTTYPE_TASK = 4;
 
     const DENYLIST = [
         manager::MANUAL_PARAM_NAME,
@@ -146,7 +147,9 @@ class profile {
      * @return int
      */
     private static function get_script_type(): int {
-        if (defined('CLI_SCRIPT') && CLI_SCRIPT) {
+        if (manager::is_cron()) {
+            return self::SCRIPTTYPE_TASK;
+        } else if (defined('CLI_SCRIPT') && CLI_SCRIPT) {
             return self::SCRIPTTYPE_CLI;
         } else if (defined('AJAX_SCRIPT') && AJAX_SCRIPT) {
             return self::SCRIPTTYPE_AJAX;
@@ -164,7 +167,9 @@ class profile {
      *               For cli requests, the arguments are returned in a space sseparated list.
      */
     private static function get_parameters(int $type): string {
-        if ($type == self::SCRIPTTYPE_CLI) {
+        if ($type == self::SCRIPTTYPE_TASK) {
+            return '';
+        } else if ($type == self::SCRIPTTYPE_CLI) {
             return implode(' ', array_slice($_SERVER['argv'], 1));
         } else {
             $parameters = [];
@@ -173,17 +178,6 @@ class profile {
         }
     }
 
-    /**
-     * Returns the determined 'request' field of this profile.
-     *
-     * @return string the request path for this profile.
-     */
-    public static function get_request(): string {
-        global $SCRIPT;
-        // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
-        return $request;
-    }
 
     /**
      * Saves a snaphot of the profile into the database.
@@ -197,14 +191,13 @@ class profile {
      *
      * @throws \dml_exception
      */
-    public static function save(flamed3_node $node, int $reason, int $created, float $duration, int $finished = 0): int {
+    public static function save(string $request, flamed3_node $node, int $reason, int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG;
 
         $numsamples = $node->value;
         $flamedatad3json = json_encode($node);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);
-        $request = self::get_request();
 
         // Get DB ops (reads/writes).
         $dbreads = $DB->perf_get_reads();

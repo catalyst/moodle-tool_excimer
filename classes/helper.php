@@ -57,6 +57,8 @@ class helper {
                 return get_string('scripttype_ajax', 'tool_excimer');
             case profile::SCRIPTTYPE_WS:
                 return get_string('scripttype_ws', 'tool_excimer');
+            case profile::SCRIPTTYPE_TASK:
+                return get_string('scripttype_task', 'tool_excimer');
             default:
                 return (string) $type;
         }
