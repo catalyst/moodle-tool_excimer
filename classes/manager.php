@@ -118,32 +118,19 @@ class manager {
     }
 
     /**
-     * Gets the config value for task_min_duration, tested for sensible values.
-     * @return float The value, in seconds
-     * @throws \dml_exception
-     */
-    public static function task_min_duration(): float {
-        $task_min_duration = (float) get_config('tool_excimer', 'task_min_duration');
-        if ($task_min_duration == 0) {
-            $task_min_duration = self::EXCIMER_MIN_DURATION;
-        }
-        return $task_min_duration;
-    }
-
-    /**
      * @return float Duration in milliseconds.
      * @throws \dml_exception
      */
     public static function min_duration(): float {
         if (self::is_cron()) {
-            $min_duration = (float) get_config('tool_excimer', 'task_min_duration') * 1000;
+            $minduration = (float) get_config('tool_excimer', 'task_min_duration') * 1000;
         } else {
-            $min_duration = (float) get_config('tool_excimer', 'trigger_ms');
+            $minduration = (float) get_config('tool_excimer', 'trigger_ms');
         }
-        if ($min_duration < 0.00001) {
-            $min_duration = 0.00001;
+        if ($minduration == 0) {
+            $minduration = self::EXCIMER_MIN_DURATION;
         }
-        return $min_duration;
+        return $minduration;
     }
 
     public static function sample_period(): float {

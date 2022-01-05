@@ -191,7 +191,8 @@ class profile {
      *
      * @throws \dml_exception
      */
-    public static function save(string $request, flamed3_node $node, int $reason, int $created, float $duration, int $finished = 0): int {
+    public static function save(string $request, flamed3_node $node, int $reason,
+            int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG;
 
         $numsamples = $node->value;
