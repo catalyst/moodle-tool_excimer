@@ -60,7 +60,6 @@ class manager {
     const EXCIMER_LOG_LIMIT = 10000;
     const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
     const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
-    const EXCIMER_MIN_DURATION = 0.001; // Default minimum length for profiles.
 
     /**
      * Checks if the given flag is set
@@ -126,9 +125,6 @@ class manager {
             $minduration = (float) get_config('tool_excimer', 'task_min_duration') * 1000;
         } else {
             $minduration = (float) get_config('tool_excimer', 'trigger_ms');
-        }
-        if ($minduration == 0) {
-            $minduration = self::EXCIMER_MIN_DURATION;
         }
         return $minduration;
     }

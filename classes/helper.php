@@ -127,6 +127,20 @@ class helper {
     }
 
     /**
+     * Returns status as a badge.
+     *
+     * @param int $status
+     * @return string
+     */
+    public static function status_display(int $status): string {
+        if ($status < 100) {
+            return self::cli_return_status_display($status);
+        } else {
+            return self::http_status_display($status);
+        }
+    }
+
+    /**
      * Checks the current response headers and tries to resolve the content type
      * e.g. to store as part of the profile.
      *
