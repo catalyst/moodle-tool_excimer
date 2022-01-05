@@ -54,6 +54,8 @@ $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept 
 $string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue. Please check the installation instructions {$a}.';
 $string['long_interval_s'] = 'Partial save interval (seconds)';
 $string['long_interval_s_desc'] = 'For long running taks, save a partial profile every N seconds.';
+$string['cron_sample_threshold'] = 'Task num samples';
+$string['cron_sample_threshold_desc'] = 'For scheduled and ad-hoc tasks, the min number of samples needed to save a profile';
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest - grouped';
@@ -107,6 +109,7 @@ $string['scripttype_web'] = 'Web';
 $string['scripttype_cli'] = 'CLI';
 $string['scripttype_ajax'] = 'Ajax';
 $string['scripttype_ws'] = 'Service';
+$string['scripttype_cron'] = 'Cron';
 
 // Log reasons.
 $string['reason_manual'] = 'Manual';

@@ -31,7 +31,7 @@ class tool_excimer_flamed3_node_test  extends advanced_testcase {
     const TEST_DATA1 = "a;b;c 3\na;t;c 2";
     const TEST_DATA2 = "a;b 5\na;x 7\nb;z;y 10\nb;z;a 1";
 
-    function test_find_first_subnode() {
+    public function test_find_first_subnode() {
         $n1 = converter::process(self::TEST_DATA1);
         $n2 = $n1->find_first_subnode('b');
         $this->assertEquals('b', $n2->name);

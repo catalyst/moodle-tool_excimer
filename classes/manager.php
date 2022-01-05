@@ -103,6 +103,19 @@ class manager {
     }
 
     /**
+     * True if running cron or adhoc_task scripts.
+     *
+     * @return bool
+     */
+    public static function is_cron(): bool {
+        global $SCRIPT;
+        return CLI_SCRIPT && (
+            strpos($SCRIPT, 'admin/cli/cron.php') !== false ||
+            strpos($SCRIPT, 'admin/cli/adhoc_task.php') !== false
+        );
+    }
+
+    /**
      * Initialises the profiler and also sets up the shutdown callback.
      *
      * @throws \dml_exception
@@ -125,7 +138,11 @@ class manager {
 
         $started = microtime(true);
 
-        self::set_callbacks($prof, $timer, $started);
+        if (self::is_cron()) {
+            cron_manager::set_callbacks($prof, $timer, $started);
+        } else {
+            self::set_callbacks($prof, $timer, $started);
+        }
 
         $prof->start();
         $timer->start();
@@ -145,8 +162,8 @@ class manager {
                 $log = $prof->flush();
                 self::process($log, $started, true);
             }
-         );
-     }
+        );
+    }
 
     /**
      * Retrieves all the reasons for saving a profile.
@@ -373,5 +390,5 @@ class manager {
                 profile::$partialsaveid = $id;
             }
         }
-     }
+    }
 }

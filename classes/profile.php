@@ -198,11 +198,14 @@ class profile {
      * @throws \dml_exception
      */
     public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
+        return self::save_from_node(flamed3_node::from_excimer($log), $reason, $created, $duration, $finished);
+    }
+
+    public static function save_from_node(flamed3_node $node, int $reason, int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG;
 
-        $flamedatad3 = flamed3_node::from_excimer($log);
-        $numsamples = $flamedatad3->value;
-        $flamedatad3json = json_encode($flamedatad3);
+        $numsamples = $node->value;
+        $flamedatad3json = json_encode($node);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);
         $request = self::get_request();
