@@ -27,23 +27,38 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cron_manager {
-    public static function set_callbacks($prof, $timer, $started) {
-        $timer->setCallback(function($s) use ($prof, $started) {
-            $log = $prof->flush();
+    /**
+     * Sets callbacks to handle cron profiling.
+     *
+     * @param \ExcimerProfiler $profiler
+     * @param \ExcimerTimer $timer
+     * @param float $started
+     * @throws \dml_exception
+     */
+    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer, float $started): void {
+        $timer->setCallback(function($s) use ($profiler, $started) {
+            $log = $profiler->flush();
             cron_manager::process($log, $started);
         });
 
         \core_shutdown_manager::register_function(
-            function() use ($prof, $timer, $started) {
+            function() use ($profiler, $timer, $started) {
                 $timer->stop();
-                $prof->stop();
-                $log = $prof->flush();
+                $profiler->stop();
+                $log = $profiler->flush();
                 cron_manager::process($log, $started);
             }
         );
     }
 
-    protected static function process($log, $started) {
+    /**
+     * Process a batch of Excimer logs.
+     *
+     * @param \ExcimerLog $log
+     * @param float $started
+     * @throws \dml_exception
+     */
+    protected static function process(\ExcimerLog $log, float $started): void {
         $current = microtime(true);
         $duration = $current - $started;
         $reasons = manager::get_reasons($duration);
@@ -57,19 +72,25 @@ class cron_manager {
             $nodes = self::extract_task_nodes($flamed3node);
             foreach ($nodes as $node) {
                 if ($node->value >= $threshold) {
-                    profile::save_from_node($node, $reasons, (int) $started, $duration, $current);
+                    profile::save($node, $reasons, (int) $started, $duration, $current);
                 }
             }
         }
     }
 
-    public static function extract_task_nodes(flamed3_node $profilenode): array {
+    /**
+     * Extracts nodes from a flame tree that represent cron tasks.
+     *
+     * @param flamed3_node $node
+     * @return array
+     */
+    public static function extract_task_nodes(flamed3_node $node): array {
         $tasknodes = [];
-        $crstnode = $profilenode->find_first_subnode('cron_run_scheduled_tasks');
+        $crstnode = $node->find_first_subnode('cron_run_scheduled_tasks');
         if ($crstnode) {
-            foreach ($crstnode->children as $node) {
-                if ($node->name == 'cron_run_inner_scheduled_task') {
-                    foreach ($node->children as $innernode) {
+            foreach ($crstnode->children as $crstchild) {
+                if ($crstchild->name == 'cron_run_inner_scheduled_task') {
+                    foreach ($crstchild->children as $innernode) {
                         if (strpos($innernode->name, '::execute') !== false) {
                             $tasknodes[] = $innernode;
                         }
@@ -77,11 +98,11 @@ class cron_manager {
                 }
             }
         }
-        $cratnode = $profilenode->find_first_subnode('cron_run_adhoc_tasks');
+        $cratnode = $node->find_first_subnode('cron_run_adhoc_tasks');
         if ($cratnode) {
-            foreach ($cratnode->children as $node) {
-                if ($node->name == 'cron_run_inner_adhoc_task') {
-                    foreach ($node->children as $innernode) {
+            foreach ($cratnode->children as $cratchild) {
+                if ($cratchild->name == 'cron_run_inner_adhoc_task') {
+                    foreach ($cratchild->children as $innernode) {
                         if (strpos($innernode->name, '::execute') !== false) {
                             $tasknodes[] = $innernode;
                         }

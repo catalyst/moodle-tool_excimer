@@ -188,7 +188,7 @@ class profile {
     /**
      * Saves a snaphot of the profile into the database.
      *
-     * @param \ExcimerLog $log The profile data.
+     * @param flamed3_node $node The profile data.
      * @param int $reason Why the profile is being saved.
      * @param int $created Timestamp of when the profile was started.
      * @param float $duration The total time of the profiling, in seconds.
@@ -197,11 +197,7 @@ class profile {
      *
      * @throws \dml_exception
      */
-    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
-        return self::save_from_node(flamed3_node::from_excimer($log), $reason, $created, $duration, $finished);
-    }
-
-    public static function save_from_node(flamed3_node $node, int $reason, int $created, float $duration, int $finished = 0): int {
+    public static function save(flamed3_node $node, int $reason, int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG;
 
         $numsamples = $node->value;

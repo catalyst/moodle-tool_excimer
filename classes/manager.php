@@ -148,18 +148,26 @@ class manager {
         $timer->start();
     }
 
-    public static function set_callbacks($prof, $timer, $started) {
-        $timer->setCallback(function($s) use ($prof, $started) {
-            $log = $prof->getLog();
+    /**
+     * Sets callbacks to handle regular profiling.
+     *
+     * @param \ExcimerProfiler $profiler
+     * @param \ExcimerTimer $timer
+     * @param float $started
+     * @throws \dml_exception
+     */
+    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer, float $started): void {
+        $timer->setCallback(function($s) use ($profiler, $started) {
+            $log = $profiler->getLog();
             self::process($log, $started, false);
         });
 
         // Stop the profiler as a part of the shutdown sequence.
         \core_shutdown_manager::register_function(
-            function() use ($prof, $timer, $started) {
+            function() use ($profiler, $timer, $started) {
                 $timer->stop();
-                $prof->stop();
-                $log = $prof->flush();
+                $profiler->stop();
+                $log = $profiler->flush();
                 self::process($log, $started, true);
             }
         );
@@ -344,48 +352,20 @@ class manager {
     }
 
     /**
-     * Called when the Excimer log flushes.
+     * Process a batch of Excimer logs.
      *
      * @param \ExcimerLog $log
      * @param float $started
+     * @param bool $isfinal
      * @throws \dml_exception
      */
-    public static function on_flush(\ExcimerLog $log, float $started): void {
-        $stopped = microtime(true);
-        $duration = $stopped - $started;
-
-        $reason = self::get_reasons($duration);
-        if ($reason !== self::REASON_NONE) {
-            profile::save($log, $reason, (int) $started, $duration, (int) $stopped);
-        }
-    }
-
-    /**
-     * Called when an Excimer timer event is triggered.
-     *
-     * @param \ExcimerProfiler $profile
-     * @param float $started
-     * @throws \dml_exception
-     */
-    public static function on_interval(\ExcimerProfiler $profile, float $started): void {
-        $current = microtime(true);
-        $duration = $current - $started;
-
-        $reason = self::get_reasons($duration);
-        if ($reason !== self::REASON_NONE) {
-            // TODO - may need to suspend profiling while getting the log. See issue #116.
-            $log = $profile->getLog();
-            $id = profile::save($log, $reason, (int) $started, $duration);
-            profile::$partialsaveid = $id;
-        }
-    }
-
     public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
         $current = microtime(true);
         $duration = $current - $started;
         $reason = self::get_reasons($duration);
         if ($reason !== self::REASON_NONE) {
-            $id = profile::save($log, $reason, (int) $started, $duration, $isfinal ? (int) $current : 0);
+            $id = profile::save(flamed3_node::from_excimer($log), $reason,
+                    (int) $started, $duration, $isfinal ? (int) $current : 0);
             if (!$isfinal) {
                 profile::$partialsaveid = $id;
             }

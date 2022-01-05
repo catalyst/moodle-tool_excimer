@@ -89,16 +89,17 @@ class tool_excimer_profile_test extends advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+        $node = flamed3_node::from_excimer($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
-        profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
+        profile::save($node, manager::REASON_MANUAL, 12345, 2.345);
+        profile::save($node, manager::REASON_FLAMEALL, 12345, 0.104);
 
         foreach ($times as $time) {
-            profile::save($log, manager::REASON_SLOW, 12345, $time);
+            profile::save($node, manager::REASON_SLOW, 12345, $time);
         }
 
-        profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
+        profile::save($node, manager::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
@@ -142,20 +143,21 @@ class tool_excimer_profile_test extends advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+        $node = flamed3_node::from_excimer($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $SCRIPT = 'a';
-        profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
+        profile::save($node, manager::REASON_MANUAL, 12345, 2.345);
         $SCRIPT = 'b';
-        profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
+        profile::save($node, manager::REASON_FLAMEALL, 12345, 0.104);
 
         for ($i = 0; $i < count($times); ++$i) {
             $SCRIPT = $reqnames[$i];
-            profile::save($log, manager::REASON_SLOW, 12345, $times[$i]);
+            profile::save($node, manager::REASON_SLOW, 12345, $times[$i]);
         }
 
         $SCRIPT = 'c';
-        profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
+        profile::save($node, manager::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
@@ -197,7 +199,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $created = 56;
         $duration = 0.123;
 
-        $id = profile::save($log, $reason, $created, $duration);
+        $id = profile::save($flamedatad3, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
@@ -218,7 +220,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $created = 120;
         $duration = 0.456;
 
-        $id = profile::save($log, $reason, $created, $duration);
+        $id = profile::save($flamedatad3, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
@@ -249,7 +251,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals(0, profile::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            profile::save($log, manager::REASON_MANUAL, $time, 0.2);
+            profile::save(flamed3_node::from_excimer($log), manager::REASON_MANUAL, $time, 0.2);
             $this->assertEquals(++$expectedcount, profile::get_num_profiles());
         }
 
@@ -324,7 +326,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         foreach (manager::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save($log, $allthereasons, 12345, 2.345);
+        $id = profile::save(flamed3_node::from_excimer($log), $allthereasons, 12345, 2.345);
         $record = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons.
@@ -346,7 +348,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         foreach (manager::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save($log, $allthereasons, 12345, 2.345);
+        $id = profile::save(flamed3_node::from_excimer($log), $allthereasons, 12345, 2.345);
         $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
@@ -377,7 +379,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $created = 56;
         $duration = 0.123;
 
-        $id = profile::save($log, $reason, $created, $duration);
+        $id = profile::save($flamedatad3, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
         profile::$partialsaveid = $id;
 
@@ -398,7 +400,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $reason = manager::REASON_SLOW | manager::REASON_MANUAL;
         $duration = 0.456;
 
-        $secondid = profile::save($log, $reason, $created, $duration);
+        $secondid = profile::save($flamedatad3, $reason, $created, $duration);
         $this->assertEquals($id, $secondid);
         $record2 = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
@@ -437,7 +439,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         if ($reason !== manager::REASON_NONE) {
             $log = $profile->getLog();
             // Won't show DB writes count since saves are stored via another DB connection.
-            profile::save($log, $reason, (int) $started, $finalduration);
+            profile::save(flamed3_node::from_excimer($log), $reason, (int) $started, $finalduration);
         }
     }
 
