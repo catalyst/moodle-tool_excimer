@@ -182,20 +182,24 @@ class profile_table extends \table_sql {
 
         // Wrap fields in span which more accurately describes them on hover.
         if (!$this->is_downloading()) {
-            $scripttype = \html_writer::span(
+            $str = \html_writer::span(
                     $scripttype,
                     '',
                     ['title' => get_string('field_scripttype', 'tool_excimer')]);
-            $contenttype = \html_writer::span(
-                    $contenttype,
-                    '',
-                    ['title' => get_string('field_contenttypecategory', 'tool_excimer')]);
+            if ($contenttype) {
+                $str .= ' - ' . \html_writer::span(
+                        $contenttype,
+                        '',
+                        ['title' => get_string('field_contenttypecategory', 'tool_excimer')]);
+            }
+        } else {
+            $str = $scripttype;
+            if ($contenttype) {
+                $str .= ' - ' . $contenttype;
+            }
         }
 
-        return implode(' - ', [
-            $scripttype,
-            $contenttype,
-        ]);
+        return $str;
     }
 
     /**
