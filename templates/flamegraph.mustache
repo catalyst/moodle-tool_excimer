@@ -38,6 +38,7 @@
     * buffering - Is buffering enabled?
     * fullname - Full nane of user represented by userid.
     * userlink - Link to user's profile page, or null if no user.
+    * tabs - Tabs markup.
 
     Example context (json):
     {
@@ -51,7 +52,8 @@
         "cookies" : 1,
         "buffering" : 1,
         "fullname" : "Admin User",
-        "userlink" : "https://some.domain://user/profile?id=1'
+        "userlink" : "https://some.domain://user/profile?id=1',
+        "tabs" : "<ul></ul>"
     }
 }}
 
@@ -172,17 +174,12 @@
 <div id="details" style="min-height: 1.5rem; clear: both;">
 </div>
 
-<script type="text/javascript" src="/admin/tool/excimer/lib/d3/d3.min.js"></script>
-<script type="text/javascript" src="/admin/tool/excimer/lib/d3-flame-graph/d3-flamegraph.min.js"></script>
+<script type="text/javascript" src="/lib/javascript.php/{{config.jsrev}}/admin/tool/excimer/lib/d3/dist/d3.min.js"></script>
+<script type="text/javascript" src="/lib/javascript.php/{{config.jsrev}}/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph.min.js"></script>
 <script type="text/javascript">
 
 init();
 window.addEventListener('resize', _ => init());
-
-document.getElementById("form").addEventListener("submit", function(event){
-  event.preventDefault();
-  search();
-});
 
 function init() {
 
@@ -197,12 +194,14 @@ function init() {
 
     if (window.excimerData === undefined) {
         setLoading(true);
-        d3.json('/admin/tool/excimer/flamegraph.json.php?profileid={{id}}', function(error, data) {
-            setLoading(false);
-            if (error) return console.warn(error);
-            window.excimerData = data;
-            draw();
-        });
+        d3.json('/admin/tool/excimer/flamegraph.json.php?profileid={{id}}')
+            .then(function(data) {
+                setLoading(false);
+                window.excimerData = data;
+                draw();
+            }).catch(function(error) {
+                console.warn(error);
+            });
     } else {
         draw();
     }

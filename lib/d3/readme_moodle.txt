@@ -1,7 +1,14 @@
+Homepage for D3 is https://d3js.org.
 
 Procedure for including D3 library into Moodle.
 
-1. The download website is https://d3js.org.
-2. Download the latest version in a tgz file via a link given on the above page.
-3. Extract from the tgz file and move the contents of the 'package/dist' directory and LICENSE into lib/d3 of the plugin.
+* Create a suitable directory.
+* Perform the following commands.
+
+$ wget https://registry.npmjs.org/d3/-/d3-7.2.1.tgz
+$ tar -xzf d3-7.2.1.tgz
+$ cd package
+$ cp -r dist LICENSE -t <plugin>/lib/d3
+
+<plugin> is the root directory of this plugin.
 
