@@ -89,7 +89,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
-        $node = flamed3_node::from_excimer($log);
+        $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         profile::save('mock', $node, manager::REASON_MANUAL, 12345, 2.345);
@@ -143,7 +143,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
-        $node = flamed3_node::from_excimer($log);
+        $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $SCRIPT = 'a';
@@ -191,7 +191,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(150);
-        $flamedatad3 = flamed3_node::from_excimer($log);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
@@ -212,7 +212,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(1500);
-        $flamedatad3 = flamed3_node::from_excimer($log);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
@@ -251,7 +251,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals(0, profile::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            profile::save('mock', flamed3_node::from_excimer($log), manager::REASON_MANUAL, $time, 0.2);
+            profile::save('mock', flamed3_node::from_excimer_log_entries($log), manager::REASON_MANUAL, $time, 0.2);
             $this->assertEquals(++$expectedcount, profile::get_num_profiles());
         }
 
@@ -326,7 +326,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         foreach (manager::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save('mock', flamed3_node::from_excimer($log), $allthereasons, 12345, 2.345);
+        $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
         $record = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons.
@@ -348,7 +348,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         foreach (manager::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save('mock', flamed3_node::from_excimer($log), $allthereasons, 12345, 2.345);
+        $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
         $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
@@ -371,7 +371,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(1);
-        $flamedatad3 = flamed3_node::from_excimer($log);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
@@ -393,7 +393,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(2);
-        $flamedatad3 = flamed3_node::from_excimer($log);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
@@ -439,7 +439,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         if ($reason !== manager::REASON_NONE) {
             $log = $profile->getLog();
             // Won't show DB writes count since saves are stored via another DB connection.
-            profile::save('mock', flamed3_node::from_excimer($log), $reason, (int) $started, $finalduration);
+            profile::save('mock', flamed3_node::from_excimer_log_entries($log), $reason, (int) $started, $finalduration);
         }
     }
 

@@ -19,7 +19,7 @@ namespace tool_excimer;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * A node in a flame d3 tree
+ * A node in a flame d3 tree.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -39,39 +39,56 @@ class flamed3_node {
     }
 
     /**
-     * Finds the first subnode with the given name, using depth first search.
+     * Converts a trace tail to flamed3_nodes.
      *
-     * @param string $name
-     * @return flamed3_node|null
+     * @param array $tail
      */
-    public function find_first_subnode(string $name): ?flamed3_node {
-        foreach ($this->children as $child) {
-            if ($child->name == $name) {
-                return $child;
+    public function add_excimer_trace_tail(array $tail): void {
+        ++$this->value;
+        if (count($tail)) {
+            $child = end($this->children);
+            $fname = self::extract_name_from_trace($tail[0]);
+            if ($child === false || $child->name != $fname) {
+                $child = new flamed3_node($fname, 0);
+                $this->children[] = $child;
             }
-            $node = $child->find_first_subnode($name);
-            if ($node) {
-                return $node;
-            }
+
+            $child->add_excimer_trace_tail(array_slice($tail, 1));
         }
-        return null;
     }
 
     /**
-     * Extracts data from an Excimer log and converts it into a flame node tree.
+     * Extracts data from Excimer log entries and converts to a flame node tree, compatible with
+     * d3-flame-graph.
      *
-     * @param \ExcimerLog $log
+     * @param iterable $entries
      * @return flamed3_node
      */
-    public static function from_excimer(\ExcimerLog $log): flamed3_node {
+    public static function from_excimer_log_entries(iterable $entries): flamed3_node {
+        $root = new flamed3_node('root', 0);
+        foreach ($entries as $entry) {
+            $trace = array_reverse($entry->getTrace());
+            $root->add_excimer_trace_tail($trace);
+        }
+        return $root;
+    }
+
+    /**
+     * Returns a name to represent the call in the trace node.
+     *
+     * @param array $tracenode Associative array containing info about the function
+     * @return string Either the filename, if not in a function, a bare function name, or a class::function combo.
+     */
+    public static function extract_name_from_trace(array $tracenode): string {
         global $CFG;
-
-        // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-
-        return converter::process($flamedata);
+        if (!isset($tracenode['function'])) {
+            return str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $tracenode['file']);
+        }
+        if (isset($tracenode['class'])) {
+            $clname = $tracenode['class'] . '::';
+        } else {
+            $clname = '';
+        }
+        return $clname . $tracenode['function'];
     }
 }

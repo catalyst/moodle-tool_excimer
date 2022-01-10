@@ -57,8 +57,7 @@ class manager {
         self::REASON_FLAMEALL => 'flameall',
     ];
 
-    const EXCIMER_LOG_LIMIT = 10000;
-    const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
+    const ABS_MIN_PERIOD = 20; // The absolute minimum period that can be tolerated.
     const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
 
     /**
@@ -117,6 +116,8 @@ class manager {
     }
 
     /**
+     * Gets the minimum duration acceptable for a task/script.
+     *
      * @return float Duration in milliseconds.
      * @throws \dml_exception
      */
@@ -131,8 +132,8 @@ class manager {
 
     public static function sample_period(): float {
         $samplems = (int)get_config('tool_excimer', 'sample_ms');
-        $hassensiblerange = $samplems > 10 && $samplems < 10000;
-        return $hassensiblerange ? round($samplems / 1000, 3) : self::EXCIMER_PERIOD;
+        $insensiblerange = $samplems >= self::ABS_MIN_PERIOD && $samplems < 10000;
+        return round(($insensiblerange ? $samplems : self::ABS_MIN_PERIOD) / 1000, 3);
     }
 
     /**
@@ -142,7 +143,6 @@ class manager {
      */
     public static function init(): void {
         $sampleperiod = self::sample_period();
-
         $timerinterval = (int) get_config('tool_excimer', 'long_interval_s');
         if ($timerinterval < 1) {
             $timerinterval = self::EXCIMER_LONG_PERIOD;
@@ -157,8 +157,10 @@ class manager {
         $started = microtime(true);
 
         if (self::is_cron()) {
-            cron_manager::set_callbacks($prof, $timer, $started);
+            $timer->setPeriod($sampleperiod);
+            cron_manager::set_callbacks($prof, $timer);
         } else {
+            $timer->setPeriod($timerinterval);
             self::set_callbacks($prof, $timer, $started);
         }
 
@@ -393,7 +395,7 @@ class manager {
         $request = self::get_request();
         $reason = self::get_reasons($request, $duration);
         if ($reason !== self::REASON_NONE) {
-            $id = profile::save($request, flamed3_node::from_excimer($log), $reason,
+            $id = profile::save($request, flamed3_node::from_excimer_log_entries($log), $reason,
                     (int) $started, $duration, $isfinal ? (int) $current : 0);
             if (!$isfinal) {
                 profile::$partialsaveid = $id;

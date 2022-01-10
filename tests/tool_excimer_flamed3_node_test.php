@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\converter;
+use tool_excimer\flamed3_node;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -26,32 +26,113 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_flamed3_node_test  extends advanced_testcase {
 
-    const TEST_DATA1 = "a;b;c 3\na;t;c 2";
-    const TEST_DATA2 = "a;b 5\na;x 7\nb;z;y 10\nb;z;a 1";
+/**
+ * Emulates the ExcimerLogEntry class for testing purposes.
+ */
+class fake_log_entry {
+    public $trace = [];
+    public function __construct($trace) {
+        foreach (array_reverse($trace) as $fn) {
+            $fn = explode('::', $fn);
+            $node = [];
+            if (isset($fn[1])) {
+                $node['class'] = $fn[0];
+                $node['function'] = $fn[1];
+            } else {
+                $node['function'] = $fn[0];
+            }
+            $this->trace[] = $node;
+        }
+    }
 
-    public function test_find_first_subnode() {
-        $n1 = converter::process(self::TEST_DATA1);
-        $n2 = $n1->find_first_subnode('b');
-        $this->assertEquals('b', $n2->name);
-        $this->assertEquals(3, $n2->value);
-        $this->assertEquals(1, count($n2->children));
+    /**
+     * Emulates the getTrace() function from ExcimerLogEntry.
+     * @return array
+     */
+    public function gettrace(): array {
+        return $this->trace;
+    }
+}
 
-        $n1 = converter::process(self::TEST_DATA2);
-        $n2 = $n1->find_first_subnode('x');
-        $this->assertEquals('x', $n2->name);
-        $this->assertEquals(7, $n2->value);
-        $this->assertEquals(0, count($n2->children));
+class tool_excimer_flamed3_node_test extends advanced_testcase {
 
-        $n2 = $n1->find_first_subnode('z');
-        $this->assertEquals('z', $n2->name);
-        $this->assertEquals(11, $n2->value);
-        $this->assertEquals(2, count($n2->children));
+    /**
+     * Set up before each test
+     */
+    protected function setUp(): void {
+        parent::setUp();
+        $this->resetAfterTest();
+    }
 
-        $n2 = $n2->find_first_subnode('a');
-        $this->assertEquals('a', $n2->name);
-        $this->assertEquals(1, $n2->value);
-        $this->assertEquals(0, count($n2->children));
+    public function test_add_excimer_trace_tail(): void {
+        $trace = [];
+        $node = new flamed3_node('root', 0);
+        $node->add_excimer_trace_tail($trace);
+        $this->assertEquals(1, $node->value);
+        $this->assertEquals(0, count($node->children));
+
+        $trace = [['function' => 'a'], ['function' => 'b'], ['function' => 'c']];
+        $node->add_excimer_trace_tail($trace);
+        $this->assertEquals(2, $node->value);
+        $this->assertEquals(1, count($node->children));
+        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals(1, $node->children[0]->value);
+        $this->assertEquals('b', $node->children[0]->children[0]->name);
+        $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
+
+        $trace = [['function' => 'a'], ['function' => 'd'], ['function' => 'e']];
+        $node->add_excimer_trace_tail($trace);
+        $this->assertEquals(3, $node->value);
+        $this->assertEquals(1, count($node->children));
+        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals(2, $node->children[0]->value);
+        $this->assertEquals('b', $node->children[0]->children[0]->name);
+        $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
+        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals('d', $node->children[0]->children[1]->name);
+        $this->assertEquals('e', $node->children[0]->children[1]->children[0]->name);
+
+        $trace = [['function' => 'm'], ['function' => 'n'], ['function' => 'e']];
+        $node->add_excimer_trace_tail($trace);
+        $this->assertEquals(4, $node->value);
+        $this->assertEquals(2, count($node->children));
+        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals(2, $node->children[0]->value);
+        $this->assertEquals('b', $node->children[0]->children[0]->name);
+        $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
+        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals('d', $node->children[0]->children[1]->name);
+        $this->assertEquals('e', $node->children[0]->children[1]->children[0]->name);
+        $this->assertEquals('m', $node->children[1]->name);
+        $this->assertEquals('n', $node->children[1]->children[0]->name);
+        $this->assertEquals('e', $node->children[1]->children[0]->children[0]->name);
+    }
+
+    public function test_from_excimer_log_entries(): void {
+        $entries = [
+            new fake_log_entry(['c::a', 'b', 'c']),
+            new fake_log_entry(['c::a', 'd', 'e']),
+            new fake_log_entry(['m', 'n', 'e']),
+            new fake_log_entry(['M::m', 'n', 'e']),
+        ];
+
+        $node = flamed3_node::from_excimer_log_entries($entries);
+        $this->assertEquals(4, $node->value);
+        $this->assertEquals(3, count($node->children));
+        $this->assertEquals('c::a', $node->children[0]->name);
+        $this->assertEquals(2, $node->children[0]->value);
+        $this->assertEquals('b', $node->children[0]->children[0]->name);
+        $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
+        $this->assertEquals('c::a', $node->children[0]->name);
+        $this->assertEquals('d', $node->children[0]->children[1]->name);
+        $this->assertEquals('e', $node->children[0]->children[1]->children[0]->name);
+        $this->assertEquals('m', $node->children[1]->name);
+        $this->assertEquals(1, $node->children[1]->value);
+        $this->assertEquals('n', $node->children[1]->children[0]->name);
+        $this->assertEquals('e', $node->children[1]->children[0]->children[0]->name);
+        $this->assertEquals('M::m', $node->children[2]->name);
+        $this->assertEquals('n', $node->children[2]->children[0]->name);
+        $this->assertEquals('e', $node->children[2]->children[0]->children[0]->name);
     }
 }
