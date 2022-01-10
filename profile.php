@@ -113,7 +113,7 @@ $data['datasize'] = display_size($profile->datasize);
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 
-$data['responsecode'] = helper::status_display($profile->responsecode);
+$data['responsecode'] = helper::status_display($profile);
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);

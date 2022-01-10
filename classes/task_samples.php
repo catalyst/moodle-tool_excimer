@@ -22,8 +22,8 @@ defined('MOODLE_INTERNAL') || die();
  * Class for storing samples copied over from the profiler to match a current task.
  *
  * @package    tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright  2021 Catalyst IT
+ * @author     Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -54,15 +54,11 @@ class task_samples {
      */
     public function process(float $finishtime): void {
         $duration = $finishtime - $this->starttime;
-
         $reasons = manager::get_reasons($this->name, $duration);
-        // TODO: move this to inside if loop before full release.
-        $node = flamed3_node::from_excimer_log_entries($this->samples);
         if ($reasons !== manager::REASON_NONE) {
+            $node = flamed3_node::from_excimer_log_entries($this->samples);
             profile::save($this->name, $node, $reasons, (int) $this->starttime, $duration, $finishtime);
         }
-        // TODO: Keep the following line for alpha release. Remove before full release.
-        mtrace("++ task: $this->name, $node->value, $reasons, $this->starttime, $duration, $finishtime");
     }
 }
 

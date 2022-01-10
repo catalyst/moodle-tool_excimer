@@ -60,7 +60,7 @@ class cron_manager {
      * The logic represents the following:
      *
      * If a sample is the first of a task, we create a task_samples instance, and add the sample.
-     * as long as samples are in the same task, we keep adding samples to task_samples.
+     * As long as subsequent samples are in the same task, we keep adding them to task_samples.
      * When we get to a sample that is not in the same task, we process the task_samples and reset it.
      *
      * We then check for a new task with the current sample.

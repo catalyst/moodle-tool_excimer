@@ -285,24 +285,7 @@ class profile_table extends \table_sql {
         if ($this->is_downloading()) {
             return $record->responsecode;
         } else {
-            return helper::status_display($record->responsecode);
-        }
-    }
-
-    /**
-     * Returns a formatted response code depending on the script type.
-     *
-     * @param int $responsecode
-     * @param int $scripttype
-     * @return string
-     */
-    protected function format_responsecode(int $responsecode, int $scripttype): string {
-        if ($this->is_downloading()) {
-            return $responsecode;
-        } else if ($scripttype == profile::SCRIPTTYPE_CLI) {
-            return helper::cli_return_status_display($responsecode);
-        } else {
-            return helper::http_status_display($responsecode);
+            return helper::status_display($record);
         }
     }
 

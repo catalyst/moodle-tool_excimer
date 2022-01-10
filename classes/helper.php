@@ -132,11 +132,18 @@ class helper {
      * @param int $status
      * @return string
      */
-    public static function status_display(int $status): string {
-        if ($status < 100) {
-            return self::cli_return_status_display($status);
+    public static function status_display(object $profile): string {
+        if ($profile->scripttype == profile::SCRIPTTYPE_TASK) {
+            // TODO: A better way needs to be found to determine which kind of response code is being returned.
+            if ($profile->responsecode < 100) {
+                return self::cli_return_status_display($profile->responsecode);
+            } else {
+                return self::http_status_display($profile->responsecode);
+            }
+        } else if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
+            return self::cli_return_status_display($profile->responsecode);
         } else {
-            return self::http_status_display($status);
+            return self::http_status_display($profile->responsecode);
         }
     }
 
