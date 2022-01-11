@@ -77,6 +77,7 @@ $string['field_finished'] = 'Finished';
 $string['field_user'] = 'User';
 $string['field_duration'] = 'Duration';
 $string['field_request'] = 'Request';
+$string['field_pathinfo'] = 'Pathinfo';
 $string['field_explanation'] = 'Explanation';
 $string['field_parameters'] = 'Parameters';
 $string['field_responsecode'] = 'Code';
@@ -119,6 +120,9 @@ $string['reason_flameall'] = 'Flame All';
 
 // Time formats.
 $string['strftime_datetime'] = '%d %b %Y, %H:%M';
+
+// Privacy.
+$string['privacy:metadata:tool_excimer_profiles'] = 'Excimer';
 
 // Miscellaneous.
 $string['cachedef_request_metadata'] = 'Excimer request metadata cache';
