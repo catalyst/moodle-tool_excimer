@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\converter;
+use tool_excimer\flamed3_node;
 use tool_excimer\manager;
 use tool_excimer\profile;
 
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_testcase extends advanced_testcase {
+class tool_excimer_profile_test extends advanced_testcase {
 
     /**
      * Set up before each test
@@ -89,16 +89,17 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+        $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
-        profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
+        profile::save('mock', $node, manager::REASON_MANUAL, 12345, 2.345);
+        profile::save('mock', $node, manager::REASON_FLAMEALL, 12345, 0.104);
 
         foreach ($times as $time) {
-            profile::save($log, manager::REASON_SLOW, 12345, $time);
+            profile::save('mock', $node, manager::REASON_SLOW, 12345, $time);
         }
 
-        profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
+        profile::save('mock', $node, manager::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
@@ -142,20 +143,21 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+        $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $SCRIPT = 'a';
-        profile::save($log, manager::REASON_MANUAL, 12345, 2.345);
+        profile::save('a', $node, manager::REASON_MANUAL, 12345, 2.345);
         $SCRIPT = 'b';
-        profile::save($log, manager::REASON_FLAMEALL, 12345, 0.104);
+        profile::save('b', $node, manager::REASON_FLAMEALL, 12345, 0.104);
 
         for ($i = 0; $i < count($times); ++$i) {
             $SCRIPT = $reqnames[$i];
-            profile::save($log, manager::REASON_SLOW, 12345, $times[$i]);
+            profile::save($reqnames[$i], $node, manager::REASON_SLOW, 12345, $times[$i]);
         }
 
         $SCRIPT = 'c';
-        profile::save($log, manager::REASON_MANUAL, 12345, 0.001);
+        profile::save('c', $node, manager::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
@@ -189,18 +191,15 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(150);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW;
         $created = 56;
         $duration = 0.123;
 
-        $id = profile::save($log, $reason, $created, $duration);
+        $id = profile::save('mock', $flamedatad3, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
@@ -213,18 +212,15 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(1500);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW;
         $created = 120;
         $duration = 0.456;
 
-        $id = profile::save($log, $reason, $created, $duration);
+        $id = profile::save('mock', $flamedatad3, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
@@ -255,7 +251,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals(0, profile::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            profile::save($log, manager::REASON_MANUAL, $time, 0.2);
+            profile::save('mock', flamed3_node::from_excimer_log_entries($log), manager::REASON_MANUAL, $time, 0.2);
             $this->assertEquals(++$expectedcount, profile::get_num_profiles());
         }
 
@@ -330,7 +326,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         foreach (manager::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save($log, $allthereasons, 12345, 2.345);
+        $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
         $record = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons.
@@ -352,7 +348,7 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         foreach (manager::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save($log, $allthereasons, 12345, 2.345);
+        $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
         $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
@@ -375,18 +371,15 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(1);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW;
         $created = 56;
         $duration = 0.123;
 
-        $id = profile::save($log, $reason, $created, $duration);
+        $id = profile::save('mock', $flamedatad3, $reason, $created, $duration);
         $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
         profile::$partialsaveid = $id;
 
@@ -400,17 +393,14 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $this->assertEquals($datasize, $record->datasize);
 
         $log = $this->quick_log(2);
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-        $flamedatad3 = converter::process($flamedata);
+        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3['value'];
+        $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = manager::REASON_SLOW | manager::REASON_MANUAL;
         $duration = 0.456;
 
-        $secondid = profile::save($log, $reason, $created, $duration);
+        $secondid = profile::save('mock', $flamedatad3, $reason, $created, $duration);
         $this->assertEquals($id, $secondid);
         $record2 = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
 
@@ -445,11 +435,11 @@ class tool_excimer_profile_testcase extends advanced_testcase {
         $finalduration = $duration / 1000;
 
         // Divide by 1000 required, as microtime(true) returns the value in seconds.
-        $reason = manager::get_reasons($finalduration);
+        $reason = manager::get_reasons('mock', $finalduration);
         if ($reason !== manager::REASON_NONE) {
             $log = $profile->getLog();
             // Won't show DB writes count since saves are stored via another DB connection.
-            profile::save($log, $reason, (int) $started, $finalduration);
+            profile::save('mock', flamed3_node::from_excimer_log_entries($log), $reason, (int) $started, $finalduration);
         }
     }
 

@@ -117,6 +117,17 @@ if ($hassiteconfig) {
         $settings->add($item);
 
         $item = new admin_setting_configtext(
+            'tool_excimer/task_min_duration',
+            get_string('task_min_duration', 'tool_excimer'),
+            get_string('task_min_duration_desc', 'tool_excimer'),
+            '60',
+            PARAM_INT
+        );
+        $item->set_updatedcallback($clearprofiletimingscachecallback);
+        $settings->add($item);
+
+
+        $item = new admin_setting_configtext(
             'tool_excimer/num_slowest',
             get_string('num_slowest', 'tool_excimer'),
             get_string('num_slowest_desc', 'tool_excimer'),

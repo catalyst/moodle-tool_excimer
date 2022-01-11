@@ -57,8 +57,7 @@ class manager {
         self::REASON_FLAMEALL => 'flameall',
     ];
 
-    const EXCIMER_LOG_LIMIT = 10000;
-    const EXCIMER_PERIOD = 0.01;  // Default in seconds; used if config is out of sensible range.
+    const ABS_MIN_PERIOD = 20; // The absolute minimum period that can be tolerated.
     const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
 
     /**
@@ -103,52 +102,107 @@ class manager {
     }
 
     /**
+     * True if running cron or adhoc_task scripts.
+     *
+     * @return bool
+     */
+    public static function is_cron(): bool {
+        global $SCRIPT;
+        return (
+            strpos($SCRIPT, 'admin/cli/cron.php') !== false ||
+            strpos($SCRIPT, 'admin/cli/adhoc_task.php') !== false ||
+            strpos($SCRIPT, 'admin/cron.php') !== false
+        );
+    }
+
+    /**
+     * Gets the minimum duration acceptable for a task/script.
+     *
+     * @return float Duration in milliseconds.
+     * @throws \dml_exception
+     */
+    public static function min_duration(): float {
+        if (self::is_cron()) {
+            $minduration = (float) get_config('tool_excimer', 'task_min_duration') * 1000;
+        } else {
+            $minduration = (float) get_config('tool_excimer', 'trigger_ms');
+        }
+        return $minduration;
+    }
+
+    public static function sample_period(): float {
+        $samplems = (int)get_config('tool_excimer', 'sample_ms');
+        $insensiblerange = $samplems >= self::ABS_MIN_PERIOD && $samplems < 10000;
+        return round(($insensiblerange ? $samplems : self::ABS_MIN_PERIOD) / 1000, 3);
+    }
+
+    /**
      * Initialises the profiler and also sets up the shutdown callback.
      *
      * @throws \dml_exception
      */
     public static function init(): void {
-        $samplems = (int)get_config('tool_excimer', 'sample_ms');
-        $hassensiblerange = $samplems > 10 && $samplems < 10000;
-        $sampleperiod = $hassensiblerange ? round($samplems / 1000, 3) : self::EXCIMER_PERIOD;
-
-        $longinterval = (int)get_config('tool_excimer', 'long_interval_s');
-        if ($longinterval < 1) {
-            $longinterval = self::EXCIMER_LONG_PERIOD;
+        $sampleperiod = self::sample_period();
+        $timerinterval = (int) get_config('tool_excimer', 'long_interval_s');
+        if ($timerinterval < 1) {
+            $timerinterval = self::EXCIMER_LONG_PERIOD;
         }
 
         $prof = new \ExcimerProfiler();
         $prof->setPeriod($sampleperiod);
 
         $timer = new \ExcimerTimer();
-        $timer->setPeriod($longinterval);
+        $timer->setPeriod($timerinterval);
 
         $started = microtime(true);
 
-        $oninterval = function($s) use ($prof, $started) {
-            manager::on_interval($prof, $started);
-        };
-        $timer->setCallback($oninterval);
-
-        // TODO: a setting to determine if logs are saved locally or sent to an external process.
-
-        // Call self::on_flush whenever the logs get flushed.
-        $onflush = function(\ExcimerLog $log) use ($started) {
-            manager::on_flush($log, $started);
-        };
-        $prof->setFlushCallback($onflush, self::EXCIMER_LOG_LIMIT);
-
-        // Stop the profiler as a part of the shutdown sequence.
-        \core_shutdown_manager::register_function(
-            function() use ($prof, $timer) {
-                $timer->stop();
-                $prof->stop();
-                $prof->flush();
-            }
-        );
+        if (self::is_cron()) {
+            $timer->setPeriod($sampleperiod);
+            cron_manager::set_callbacks($prof, $timer);
+        } else {
+            $timer->setPeriod($timerinterval);
+            self::set_callbacks($prof, $timer, $started);
+        }
 
         $prof->start();
         $timer->start();
+    }
+
+    /**
+     * Sets callbacks to handle regular profiling.
+     *
+     * @param \ExcimerProfiler $profiler
+     * @param \ExcimerTimer $timer
+     * @param float $started
+     * @throws \dml_exception
+     */
+    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer, float $started): void {
+        $timer->setCallback(function($s) use ($profiler, $started) {
+            $log = $profiler->getLog();
+            self::process($log, $started, false);
+        });
+
+        // Stop the profiler as a part of the shutdown sequence.
+        \core_shutdown_manager::register_function(
+            function() use ($profiler, $timer, $started) {
+                $timer->stop();
+                $profiler->stop();
+                $log = $profiler->flush();
+                self::process($log, $started, true);
+            }
+        );
+    }
+
+    /**
+     * Returns the determined 'request' field of this profile for regular runs.
+     *
+     * @return string the request path for this profile.
+     */
+    public static function get_request(): string {
+        global $SCRIPT;
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : profile::REQUEST_UNKNOWN;
+        return $request;
     }
 
     /**
@@ -158,7 +212,7 @@ class manager {
      * @return int Reasons as bit flags.
      * @throws \dml_exception
      */
-    public static function get_reasons(float $duration): int {
+    public static function get_reasons(string $request, float $duration): int {
         global $SESSION;
 
         $reason = self::REASON_NONE;
@@ -169,7 +223,7 @@ class manager {
             $reason |= self::REASON_FLAMEALL;
         }
 
-        if (self::is_considered_slow($duration * 1000)) {
+        if (self::is_considered_slow($request, $duration * 1000)) {
             $reason |= self::REASON_SLOW;
         }
         return $reason;
@@ -284,11 +338,10 @@ class manager {
      * @param float duration of the current profile
      * @return bool whether or not the profile should stored with the REASON_SLOW reason.
      */
-    public static function is_considered_slow(float $duration): bool {
-        // First, check against the trigger_ms value to ensure it meets the
+    public static function is_considered_slow(string $request, float $duration): bool {
+        // First, check against the overall minimum duration value to ensure it meets the
         // minimum required duration for the profile to be considered slow.
-        $triggerms = get_config('tool_excimer', 'trigger_ms');
-        if ($triggerms && $duration <= $triggerms) {
+        if ($duration <= self::min_duration()) {
             return false;
         }
 
@@ -303,7 +356,6 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $request = profile::get_request();
         $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_SLOW);
         if ($requestminduration && $duration <= $requestminduration) {
             return false;
@@ -330,39 +382,24 @@ class manager {
     }
 
     /**
-     * Called when the Excimer log flushes.
+     * Process a batch of Excimer logs.
      *
      * @param \ExcimerLog $log
      * @param float $started
+     * @param bool $isfinal
      * @throws \dml_exception
      */
-    public static function on_flush(\ExcimerLog $log, float $started): void {
-        $stopped = microtime(true);
-        $duration = $stopped - $started;
-
-        $reason = self::get_reasons($duration);
-        if ($reason !== self::REASON_NONE) {
-            profile::save($log, $reason, (int) $started, $duration, (int) $stopped);
-        }
-    }
-
-    /**
-     * Called when an Excimer timer event is triggered.
-     *
-     * @param \ExcimerProfiler $profile
-     * @param float $started
-     * @throws \dml_exception
-     */
-    public static function on_interval(\ExcimerProfiler $profile, float $started): void {
+    public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
         $current = microtime(true);
         $duration = $current - $started;
-
-        $reason = self::get_reasons($duration);
+        $request = self::get_request();
+        $reason = self::get_reasons($request, $duration);
         if ($reason !== self::REASON_NONE) {
-            // TODO - may need to suspend profiling while getting the log. See issue #116.
-            $log = $profile->getLog();
-            $id = profile::save($log, $reason, (int) $started, $duration);
-            profile::$partialsaveid = $id;
+            $id = profile::save($request, flamed3_node::from_excimer_log_entries($log), $reason,
+                    (int) $started, $duration, $isfinal ? (int) $current : 0);
+            if (!$isfinal) {
+                profile::$partialsaveid = $id;
+            }
         }
     }
 }
