@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20220104" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20220111" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -14,6 +14,7 @@
         <FIELD NAME="finished" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="finish time in epoch seconds (0 if profile is incomplete)"/>
         <FIELD NAME="duration" TYPE="number" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="6" COMMENT="time between excimer startup and shutdown calls"/>
         <FIELD NAME="request" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL, command, or similar identifying string"/>
+        <FIELD NAME="groupby" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Value to use for grouping."/>
         <FIELD NAME="pathinfo" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="See PHP documentation on $_SERVER['PATH_INFO'] for more information."/>
         <FIELD NAME="parameters" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Request variables or command arguments"/>
         <FIELD NAME="sessionid" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Session ID"/>

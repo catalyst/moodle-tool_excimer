@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 class grouped_profile_table extends profile_table {
 
     const COLUMNS = [
-        'request',
+        'group',
         'requestcount',
         'maxcreated',
         'mincreated',
@@ -41,12 +41,12 @@ class grouped_profile_table extends profile_table {
         global $DB;
 
         $this->set_sql(
-            'request, count(request) as requestcount, scripttype, max(created) as maxcreated, min(created) as mincreated,
+            'groupby, count(request) as requestcount, scripttype, max(created) as maxcreated, min(created) as mincreated,
              max(duration) as maxduration, min(duration) as minduration',
             '{tool_excimer_profiles}',
-            '1=1 GROUP BY request, scripttype'
+            '1=1 GROUP BY groupby, scripttype'
         );
-        $this->set_count_sql("SELECT count(distinct request) FROM {tool_excimer_profiles}");
+        $this->set_count_sql("SELECT count(distinct groupby) FROM {tool_excimer_profiles}");
     }
 
     protected function get_columns(): array {
@@ -57,14 +57,14 @@ class grouped_profile_table extends profile_table {
         return $columns;
     }
 
-    public function col_request(object $record): string {
-        $displayedrequest = $record->request;
+    public function col_group(object $record): string {
+        $displayedrequest = $record->groupby;
 
         if ($this->is_downloading()) {
             return $displayedrequest;
         } else {
             return \html_writer::link(
-                    new \moodle_url('/admin/tool/excimer/slowest.php', ['script' => $record->request]),
+                    new \moodle_url('/admin/tool/excimer/slowest.php', ['group' => $record->groupby]),
                     shorten_text($displayedrequest, 100, true, '…'),
                     ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
         }
@@ -89,7 +89,7 @@ class grouped_profile_table extends profile_table {
         }
         global $OUTPUT;
         $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php',
-                ['filter' => json_encode(['request' => $record->request]), 'sesskey' => sesskey()]);
+                ['filter' => json_encode(['groupby' => $record->groupby]), 'sesskey' => sesskey()]);
         $confirmaction = new \confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
         $deleteicon = new \pix_icon('t/delete', get_string('deleteprofiles_script', 'tool_excimer'));
         $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);

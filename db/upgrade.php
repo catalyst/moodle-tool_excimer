@@ -221,5 +221,27 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022010400, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2022011100) {
+        // Define field dbreads to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('groupby', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'request');
+
+        $profiles = $DB->get_records('tool_excimer_profiles', null, '', 'id, request');
+
+        // Conditionally launch add field groupby.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // We set groupby to be the same as request as the initial default.
+        foreach ($profiles as $profile) {
+            $profile->groupby = $profile->request;
+            $DB->update_record('tool_excimer_profiles', $profile);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022011100, 'tool', 'excimer');
+    }
+
     return true;
 }

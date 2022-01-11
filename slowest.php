@@ -30,6 +30,7 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 $script = optional_param('script', '', PARAM_LOCALURL);
+$group = optional_param('group', '', PARAM_RAW);
 
 admin_externalpage_setup('tool_excimer_report_slowest');
 
@@ -40,5 +41,9 @@ $table->sortable(true, 'duration', SORT_DESC);
 if ($script) {
     $table->add_filter('request', $script);
     $url->params(['script' => $script]);
+}
+if ($group) {
+    $table->add_filter('groupby', $group);
+    $url->params(['groupby' => $group]);
 }
 profile_table_page::display($table, $url);

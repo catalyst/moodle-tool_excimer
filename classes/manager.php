@@ -303,7 +303,7 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $request = profile::get_request();
+        $request = context::get_request();
         $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_SLOW);
         if ($requestminduration && $duration <= $requestminduration) {
             return false;

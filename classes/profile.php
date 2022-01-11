@@ -52,46 +52,12 @@ class profile {
     const SCRIPTTYPE_WEB = 2;
     const SCRIPTTYPE_WS = 3;
 
-    const DENYLIST = [
-        manager::MANUAL_PARAM_NAME,
-        manager::FLAME_ON_PARAM_NAME,
-        manager::FLAME_OFF_PARAM_NAME,
-    ];
-
-    const REDACTLIST = [
-        'sesskey',
-    ];
-
     /**
      * Stores the ID of a saved profile, to indicate that it should be overwritten.
      *
      * @var int
      */
     public static $partialsaveid = 0;
-
-    /**
-     * Removes any parameter on profile::DENYLIST.
-     *
-     * @param array $parameters
-     * @return array
-     */
-    public static function stripparameters(array $parameters): array {
-        $parameters = array_filter(
-            $parameters,
-            function($i) {
-                return !in_array($i, self::DENYLIST);
-            },
-            ARRAY_FILTER_USE_KEY
-        );
-
-        foreach ($parameters as $i => &$v) {
-            if (in_array($i, self::REDACTLIST)) {
-                $v = '';
-            }
-        }
-
-        return $parameters;
-    }
 
     /**
      * Gets a single profile, including data.
@@ -141,51 +107,6 @@ class profile {
     }
 
     /**
-     * Gets the script type of the request.
-     *
-     * @return int
-     */
-    private static function get_script_type(): int {
-        if (defined('CLI_SCRIPT') && CLI_SCRIPT) {
-            return self::SCRIPTTYPE_CLI;
-        } else if (defined('AJAX_SCRIPT') && AJAX_SCRIPT) {
-            return self::SCRIPTTYPE_AJAX;
-        } else if (defined('WS_SERVER') && WS_SERVER) {
-            return self::SCRIPTTYPE_WS;
-        }
-        return self::SCRIPTTYPE_WEB;
-    }
-
-    /**
-     * Obtains the parameters given to the request.
-     *
-     * @param int $type - The type of call (cli, web, etc)
-     * @return string For non-cli requests, the parameters are returned in a url query string.
-     *               For cli requests, the arguments are returned in a space sseparated list.
-     */
-    private static function get_parameters(int $type): string {
-        if ($type == self::SCRIPTTYPE_CLI) {
-            return implode(' ', array_slice($_SERVER['argv'], 1));
-        } else {
-            $parameters = [];
-            parse_str($_SERVER['QUERY_STRING'], $parameters);
-            return http_build_query(self::stripparameters($parameters), '', '&');
-        }
-    }
-
-    /**
-     * Returns the determined 'request' field of this profile.
-     *
-     * @return string the request path for this profile.
-     */
-    public static function get_request(): string {
-        global $SCRIPT;
-        // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
-        return $request;
-    }
-
-    /**
      * Saves a snaphot of the profile into the database.
      *
      * @param \ExcimerLog $log The profile data.
@@ -211,7 +132,7 @@ class profile {
         $flamedatad3json = json_encode($flamedatad3);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);
-        $request = self::get_request();
+        $request = context::get_request();
 
         // Get DB ops (reads/writes).
         $dbreads = $DB->perf_get_reads();
@@ -238,14 +159,16 @@ class profile {
         }
 
         if (self::$partialsaveid === 0) {
-            $type = self::get_script_type();
-            $parameters = self::get_parameters($type);
+            $type = context::get_script_type();
+            $parameters = context::get_parameters($type);
             $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
             // If set, it will trim off the leading '/' to normalise web & cli requests.
             $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
-            list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+            $groupby = context::get_groupby_value($request, $pathinfo, $parameters);
+
+            list($contenttypevalue, $contenttypekey, $contenttypecategory) = context::resolve_content_type($request, $pathinfo);
 
             $id = $db2->insert_record('tool_excimer_profiles', [
                 'sessionid' => substr(session_id(), 0, 10),
@@ -258,6 +181,7 @@ class profile {
                 'finished' => $finished,
                 'duration' => $duration,
                 'request' => $request,
+                'groupby' => $groupby,
                 'parameters' => $parameters,
                 'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
                 'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,

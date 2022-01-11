@@ -17,6 +17,7 @@
 use tool_excimer\converter;
 use tool_excimer\manager;
 use tool_excimer\profile;
+use tool_excimer\context;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -307,15 +308,15 @@ class tool_excimer_profile_testcase extends advanced_testcase {
     public function test_stripparamters(): void {
         $param = [ 'a' => '1', 'b' => 2, 'c' => 3 ];
         $paramexpect = $param;
-        $this->assertEquals($paramexpect, profile::stripparameters($param));
+        $this->assertEquals($paramexpect, context::stripparameters($param));
 
         $param = [ 'a' => '1', 'sesskey' => 2, 'c' => 3 ];
         $paramexpect = [ 'a' => '1', 'sesskey' => '', 'c' => 3 ];
-        $this->assertEquals($paramexpect, profile::stripparameters($param));
+        $this->assertEquals($paramexpect, context::stripparameters($param));
 
         $param = [ 'a' => '1', 'sesskey' => 2, 'FLAMEME' => 3 ];
         $paramexpect = [ 'a' => '1', 'sesskey' => '' ];
-        $this->assertEquals($paramexpect, profile::stripparameters($param));
+        $this->assertEquals($paramexpect, context::stripparameters($param));
     }
 
     public function test_reasons_are_being_stored(): void {
