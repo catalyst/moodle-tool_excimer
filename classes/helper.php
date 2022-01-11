@@ -55,6 +55,8 @@ class helper {
                 return get_string('scripttype_ajax', 'tool_excimer');
             case profile::SCRIPTTYPE_WS:
                 return get_string('scripttype_ws', 'tool_excimer');
+            case profile::SCRIPTTYPE_TASK:
+                return get_string('scripttype_task', 'tool_excimer');
             default:
                 return (string) $type;
         }
@@ -120,5 +122,26 @@ class helper {
     public static function http_status_display(int $status): string {
         $spanclass = 'badge ' . self::STATUS_BADGES[$status / 100];
         return \html_writer::tag('span', $status, ['class' => $spanclass]);
+    }
+
+    /**
+     * Returns status as a badge.
+     *
+     * @param int $status
+     * @return string
+     */
+    public static function status_display(object $profile): string {
+        if ($profile->scripttype == profile::SCRIPTTYPE_TASK) {
+            // TODO: A better way needs to be found to determine which kind of response code is being returned.
+            if ($profile->responsecode < 100) {
+                return self::cli_return_status_display($profile->responsecode);
+            } else {
+                return self::http_status_display($profile->responsecode);
+            }
+        } else if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
+            return self::cli_return_status_display($profile->responsecode);
+        } else {
+            return self::http_status_display($profile->responsecode);
+        }
     }
 }

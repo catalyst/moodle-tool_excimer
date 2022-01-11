@@ -182,20 +182,24 @@ class profile_table extends \table_sql {
 
         // Wrap fields in span which more accurately describes them on hover.
         if (!$this->is_downloading()) {
-            $scripttype = \html_writer::span(
+            $str = \html_writer::span(
                     $scripttype,
                     '',
                     ['title' => get_string('field_scripttype', 'tool_excimer')]);
-            $contenttype = \html_writer::span(
-                    $contenttype,
-                    '',
-                    ['title' => get_string('field_contenttypecategory', 'tool_excimer')]);
+            if ($contenttype) {
+                $str .= ' - ' . \html_writer::span(
+                        $contenttype,
+                        '',
+                        ['title' => get_string('field_contenttypecategory', 'tool_excimer')]);
+            }
+        } else {
+            $str = $scripttype;
+            if ($contenttype) {
+                $str .= ' - ' . $contenttype;
+            }
         }
 
-        return implode(' - ', [
-            $scripttype,
-            $contenttype,
-        ]);
+        return $str;
     }
 
     /**
@@ -280,27 +284,8 @@ class profile_table extends \table_sql {
     public function col_responsecode(object $record): string {
         if ($this->is_downloading()) {
             return $record->responsecode;
-        } else if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
-            return helper::cli_return_status_display($record->responsecode);
         } else {
-            return helper::http_status_display($record->responsecode);
-        }
-    }
-
-    /**
-     * Returns a formatted response code depending on the script type.
-     *
-     * @param int $responsecode
-     * @param int $scripttype
-     * @return string
-     */
-    protected function format_responsecode(int $responsecode, int $scripttype): string {
-        if ($this->is_downloading()) {
-            return $responsecode;
-        } else if ($scripttype == profile::SCRIPTTYPE_CLI) {
-            return helper::cli_return_status_display($responsecode);
-        } else {
-            return helper::http_status_display($responsecode);
+            return helper::status_display($record);
         }
     }
 

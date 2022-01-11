@@ -51,6 +51,7 @@ class profile {
     const SCRIPTTYPE_CLI = 1;
     const SCRIPTTYPE_WEB = 2;
     const SCRIPTTYPE_WS = 3;
+    const SCRIPTTYPE_TASK = 4;
 
     /**
      * Stores the ID of a saved profile, to indicate that it should be overwritten.
@@ -109,7 +110,7 @@ class profile {
     /**
      * Saves a snaphot of the profile into the database.
      *
-     * @param \ExcimerLog $log The profile data.
+     * @param flamed3_node $node The profile data.
      * @param int $reason Why the profile is being saved.
      * @param int $created Timestamp of when the profile was started.
      * @param float $duration The total time of the profiling, in seconds.
@@ -118,21 +119,14 @@ class profile {
      *
      * @throws \dml_exception
      */
-    public static function save(\ExcimerLog $log, int $reason, int $created, float $duration, int $finished = 0): int {
+    public static function save(string $request, flamed3_node $node, int $reason,
+            int $created, float $duration, int $finished = 0): int {
         global $DB, $USER, $CFG;
 
-        // Some adjustments to work around a bug in Excimer. See https://phabricator.wikimedia.org/T296514.
-        $flamedata = trim(str_replace("\n;", "\n", $log->formatCollapsed()));
-
-        // Remove full pathing to dirroot and only keep pathing from site root (non-issue in most sane cases).
-        $flamedata = str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $flamedata);
-
-        $flamedatad3 = converter::process($flamedata);
-        $numsamples = $flamedatad3['value'];
-        $flamedatad3json = json_encode($flamedatad3);
+        $numsamples = $node->value;
+        $flamedatad3json = json_encode($node);
         $flamedatad3gzip = gzcompress($flamedatad3json);
         $datasize = strlen($flamedatad3gzip);
-        $request = context::get_request();
 
         // Get DB ops (reads/writes).
         $dbreads = $DB->perf_get_reads();

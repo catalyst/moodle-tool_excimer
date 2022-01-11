@@ -113,11 +113,7 @@ $data['datasize'] = display_size($profile->datasize);
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 
-if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
-    $data['responsecode'] = helper::cli_return_status_display($profile->responsecode);
-} else {
-    $data['responsecode'] = helper::http_status_display($profile->responsecode);
-}
+$data['responsecode'] = helper::status_display($profile);
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
