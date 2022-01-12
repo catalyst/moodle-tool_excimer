@@ -21,130 +21,98 @@ defined('MOODLE_INTERNAL') || die();
 use core_filetypes;
 
 /**
- * Helpers for displaying stuff.
+ * Functions that extract information from the execution environment.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class helper {
+class context {
 
-    /**
-     * Maps HTTP status codes to css badges.
-     */
-    const STATUS_BADGES = [
-        2 => 'badge-success',
-        3 => 'badge-secondary',
-        4 => 'badge-warning',
-        5 => 'badge-danger',
+    /** Request's fallback value for when the $SCRIPT is null */
+    const REQUEST_UNKNOWN = 'UNKNOWN';
+
+
+    /** List of parameters that are not to be recorded at all. */
+    const DENYLIST = [
+        manager::MANUAL_PARAM_NAME,
+        manager::FLAME_ON_PARAM_NAME,
+        manager::FLAME_OFF_PARAM_NAME,
+    ];
+
+    /** List of paramteres that are to be recorded in redacted form. */
+    const REDACTLIST = [
+        'sesskey',
     ];
 
     /**
-     * Returns a printable string for a script type value.
+     * Gets the script type of the request.
      *
-     * @param int $type
-     * @return string
-     * @throws \coding_exception
+     * @return int
      */
-    public static function script_type_display(int $type): string {
-        switch ($type) {
-            case profile::SCRIPTTYPE_WEB:
-                return get_string('scripttype_web', 'tool_excimer');
-            case profile::SCRIPTTYPE_CLI:
-                return get_string('scripttype_cli', 'tool_excimer');
-            case profile::SCRIPTTYPE_AJAX:
-                return get_string('scripttype_ajax', 'tool_excimer');
-            case profile::SCRIPTTYPE_WS:
-                return get_string('scripttype_ws', 'tool_excimer');
-            case profile::SCRIPTTYPE_TASK:
-                return get_string('scripttype_task', 'tool_excimer');
-            default:
-                return (string) $type;
+    public static function get_script_type(): int {
+        if (defined('CLI_SCRIPT') && CLI_SCRIPT) {
+            return profile::SCRIPTTYPE_CLI;
+        } else if (defined('AJAX_SCRIPT') && AJAX_SCRIPT) {
+            return profile::SCRIPTTYPE_AJAX;
+        } else if (defined('WS_SERVER') && WS_SERVER) {
+            return profile::SCRIPTTYPE_WS;
         }
+        return profile::SCRIPTTYPE_WEB;
     }
 
     /**
-     * Returns a printable string for the profiling reasons.
+     * Gets the parameters given to the request.
      *
-     * @param int $reason
-     * @return string
-     * @throws \coding_exception
+     * @param int $type - The type of call (cli, web, etc)
+     * @return string For non-cli requests, the parameters are returned in a url query string.
+     *               For cli requests, the arguments are returned in a space sseparated list.
      */
-    public static function reason_display(int $reason): string {
-        $reasonsmatched = [];
-        if ($reason & profile::REASON_SLOW) {
-            $reasonsmatched[] = get_string('reason_slow', 'tool_excimer');
-        }
-        if ($reason & profile::REASON_FLAMEALL) {
-            $reasonsmatched[] = get_string('reason_flameall', 'tool_excimer');
-        }
-        if ($reason & profile::REASON_MANUAL) {
-            $reasonsmatched[] = get_string('reason_manual', 'tool_excimer');
-        }
-        return implode(',', $reasonsmatched);
-    }
-
-    /**
-     * Returns a formatted time duration in m:s.ms format.
-     * @param float $duration
-     * @param bool $markup If true, then use markup on the result.
-     * @return string
-     * @throws \Exception
-     */
-    public static function duration_display(float $duration, bool $markup = true): string {
-        $ms = round($duration * 1000, 0) % 1000;
-        $s = (int) $duration;
-        $m = $s / 60;
-        $s = $s % 60;
-        if ($markup) {
-            return sprintf('%d:%02d<small>.%03d</small>', $m, $s, $ms);
+    public static function get_parameters(int $type): string {
+        if ($type == profile::SCRIPTTYPE_CLI) {
+            return implode(' ', array_slice($_SERVER['argv'], 1));
         } else {
-            return sprintf('%d:%02d.%03d', $m, $s, $ms);
+            $parameters = [];
+            parse_str($_SERVER['QUERY_STRING'], $parameters);
+            return http_build_query(self::stripparameters($parameters), '', '&');
         }
     }
 
     /**
-     * Returns CLI script return status as a badge.
+     * Removes any parameter on profile::DENYLIST.
      *
-     * @param int $status
-     * @return string
+     * @param array $parameters
+     * @return array
      */
-    public static function cli_return_status_display(int $status): string {
-        $spanclass = 'badge ' . ($status ? 'badge-danger' : 'badge-success');
-        return \html_writer::tag('span', $status, ['class' => $spanclass]);
-    }
+    public static function stripparameters(array $parameters): array {
+        $parameters = array_filter(
+            $parameters,
+            function($i) {
+                return !in_array($i, self::DENYLIST);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
 
-    /**
-     * Returns HTTP status as a badge.
-     *
-     * @param int $status
-     * @return string
-     */
-    public static function http_status_display(int $status): string {
-        $spanclass = 'badge ' . self::STATUS_BADGES[$status / 100];
-        return \html_writer::tag('span', $status, ['class' => $spanclass]);
-    }
-
-    /**
-     * Returns status as a badge.
-     *
-     * @param int $status
-     * @return string
-     */
-    public static function status_display(object $profile): string {
-        if ($profile->scripttype == profile::SCRIPTTYPE_TASK) {
-            // TODO: A better way needs to be found to determine which kind of response code is being returned.
-            if ($profile->responsecode < 100) {
-                return self::cli_return_status_display($profile->responsecode);
-            } else {
-                return self::http_status_display($profile->responsecode);
+        foreach ($parameters as $i => &$v) {
+            if (in_array($i, self::REDACTLIST)) {
+                $v = '';
             }
-        } else if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
-            return self::cli_return_status_display($profile->responsecode);
-        } else {
-            return self::http_status_display($profile->responsecode);
         }
+
+        return $parameters;
+    }
+
+    /**
+     * Gets the name of the script.
+     *
+     * @return string the request path for this profile.
+     */
+    public static function get_request(): string {
+        global $SCRIPT;
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+        return $request;
     }
 
     /**
@@ -222,6 +190,4 @@ class helper {
 
         return [$contenttypevalue, $contenttypekey, $contenttypecategory];
     }
-
-
 }

@@ -55,7 +55,7 @@ class task_samples {
     public function process(float $finishtime): void {
         $duration = $finishtime - $this->starttime;
         $reasons = manager::get_reasons($this->name, $duration);
-        if ($reasons !== manager::REASON_NONE) {
+        if ($reasons !== profile::REASON_NONE) {
             $node = flamed3_node::from_excimer_log_entries($this->samples);
             profile::save($this->name, $node, $reasons, (int) $this->starttime, $duration, $finishtime);
         }

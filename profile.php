@@ -30,6 +30,22 @@ use tool_excimer\output\tabs;
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
+/** Report section - recent - lists the most recent profiles first */
+const REPORT_SECTION_RECENT = 'recent';
+
+/** Report section - slowest - lists the slowest profiles first */
+const REPORT_SECTION_SLOWEST = 'slowest';
+
+/** Report section - unfinished - lists profiles of scripts that did not finish */
+const REPORT_SECTION_UNFINISHED = 'unfinished';
+
+/** Report sections */
+const REPORT_SECTIONS = [
+    REPORT_SECTION_RECENT,
+    REPORT_SECTION_SLOWEST,
+    REPORT_SECTION_UNFINISHED,
+];
+
 $profileid = required_param('id', PARAM_INT);
 
 $params = [ 'id' => $profileid ];
@@ -45,7 +61,7 @@ $returnurl = get_local_referer(false);
 // Handling here prevents things links from other pages and paginated listings
 // from breaking the output of this page.
 $report = explode('.php', basename($returnurl, '.php'))[0] ?? null;
-$report = in_array($report, profile::REPORT_SECTIONS) ? $report : profile::REPORT_SECTION_SLOWEST;
+$report = in_array($report, REPORT_SECTIONS) ? $report : REPORT_SECTION_SLOWEST;
 admin_externalpage_setup('tool_excimer_report_' . $report);
 
 $output = $PAGE->get_renderer('tool_excimer');
