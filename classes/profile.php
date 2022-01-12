@@ -28,23 +28,29 @@ defined('MOODLE_INTERNAL') || die();
  */
 class profile {
 
-    /** Request's fallback value for when the $SCRIPT is null */
-    const REQUEST_UNKNOWN = 'UNKNOWN';
+    /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
+    const REASON_MANUAL   = 0b0001;
 
-    /** Report section - recent - lists the most recent profiles first */
-    const REPORT_SECTION_RECENT = 'recent';
+    /** Reason - SLOW - Set when conditions are met and these profiles are automatically stored. */
+    const REASON_SLOW     = 0b0010;
 
-    /** Report section - slowest - lists the slowest profiles first */
-    const REPORT_SECTION_SLOWEST = 'slowest';
+    /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
+    const REASON_FLAMEALL = 0b0100;
 
-    /** Report section - unfinished - lists profiles of scripts that did not finish */
-    const REPORT_SECTION_UNFINISHED = 'unfinished';
+    /** Reason - NONE - Default fallback reason value, this will not be stored. */
+    const REASON_NONE = 0b0000;
 
-    /** Report sections */
-    const REPORT_SECTIONS = [
-        self::REPORT_SECTION_RECENT,
-        self::REPORT_SECTION_SLOWEST,
-        self::REPORT_SECTION_UNFINISHED,
+    /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
+    const REASONS = [
+        self::REASON_MANUAL,
+        self::REASON_SLOW,
+        self::REASON_FLAMEALL,
+    ];
+
+    const REASON_STR_MAP = [
+        self::REASON_MANUAL => 'manual',
+        self::REASON_SLOW => 'slowest',
+        self::REASON_FLAMEALL => 'flameall',
     ];
 
     const SCRIPTTYPE_AJAX = 0;
@@ -53,46 +59,12 @@ class profile {
     const SCRIPTTYPE_WS = 3;
     const SCRIPTTYPE_TASK = 4;
 
-    const DENYLIST = [
-        manager::MANUAL_PARAM_NAME,
-        manager::FLAME_ON_PARAM_NAME,
-        manager::FLAME_OFF_PARAM_NAME,
-    ];
-
-    const REDACTLIST = [
-        'sesskey',
-    ];
-
     /**
      * Stores the ID of a saved profile, to indicate that it should be overwritten.
      *
      * @var int
      */
     public static $partialsaveid = 0;
-
-    /**
-     * Removes any parameter on profile::DENYLIST.
-     *
-     * @param array $parameters
-     * @return array
-     */
-    public static function stripparameters(array $parameters): array {
-        $parameters = array_filter(
-            $parameters,
-            function($i) {
-                return !in_array($i, self::DENYLIST);
-            },
-            ARRAY_FILTER_USE_KEY
-        );
-
-        foreach ($parameters as $i => &$v) {
-            if (in_array($i, self::REDACTLIST)) {
-                $v = '';
-            }
-        }
-
-        return $parameters;
-    }
 
     /**
      * Gets a single profile, including data.
@@ -142,44 +114,6 @@ class profile {
     }
 
     /**
-     * Gets the script type of the request.
-     *
-     * @return int
-     */
-    private static function get_script_type(): int {
-        if (manager::is_cron()) {
-            return self::SCRIPTTYPE_TASK;
-        } else if (defined('CLI_SCRIPT') && CLI_SCRIPT) {
-            return self::SCRIPTTYPE_CLI;
-        } else if (defined('AJAX_SCRIPT') && AJAX_SCRIPT) {
-            return self::SCRIPTTYPE_AJAX;
-        } else if (defined('WS_SERVER') && WS_SERVER) {
-            return self::SCRIPTTYPE_WS;
-        }
-        return self::SCRIPTTYPE_WEB;
-    }
-
-    /**
-     * Obtains the parameters given to the request.
-     *
-     * @param int $type - The type of call (cli, web, etc)
-     * @return string For non-cli requests, the parameters are returned in a url query string.
-     *               For cli requests, the arguments are returned in a space sseparated list.
-     */
-    private static function get_parameters(int $type): string {
-        if ($type == self::SCRIPTTYPE_TASK) {
-            return '';
-        } else if ($type == self::SCRIPTTYPE_CLI) {
-            return implode(' ', array_slice($_SERVER['argv'], 1));
-        } else {
-            $parameters = [];
-            parse_str($_SERVER['QUERY_STRING'], $parameters);
-            return http_build_query(self::stripparameters($parameters), '', '&');
-        }
-    }
-
-
-    /**
      * Saves a snaphot of the profile into the database.
      *
      * @param flamed3_node $node The profile data.
@@ -225,14 +159,14 @@ class profile {
         }
 
         if (self::$partialsaveid === 0) {
-            $type = self::get_script_type();
-            $parameters = self::get_parameters($type);
+            $type = context::get_script_type();
+            $parameters = context::get_parameters($type);
             $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
             // If set, it will trim off the leading '/' to normalise web & cli requests.
             $pathinfo = $_SERVER['PATH_INFO'] ?? '';
 
-            list($contenttypevalue, $contenttypekey, $contenttypecategory) = helper::resolve_content_type($request, $pathinfo);
+            list($contenttypevalue, $contenttypekey, $contenttypecategory) = context::resolve_content_type($request, $pathinfo);
 
             $id = $db2->insert_record('tool_excimer_profiles', [
                 'sessionid' => substr(session_id(), 0, 10),
@@ -294,9 +228,9 @@ class profile {
         // hold correct values.
 
         // Updates the request_metadata and per reason cache with more recent values.
-        if ($reason & manager::REASON_SLOW) {
-            manager::get_min_duration_for_request_and_reason($request, manager::REASON_SLOW, false);
-            manager::get_min_duration_for_reason(manager::REASON_SLOW, false);
+        if ($reason & self::REASON_SLOW) {
+            manager::get_min_duration_for_request_and_reason($request, self::REASON_SLOW, false);
+            manager::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
         return $id;
@@ -333,7 +267,7 @@ class profile {
             $cache->delete_many($requests);
         }
         if ($reasons) {
-            $combinedreasons = manager::REASON_NONE;
+            $combinedreasons = self::REASON_NONE;
             foreach ($reasons as $reason) {
                 $combinedreasons |= $reason;
             }
@@ -355,7 +289,7 @@ class profile {
      * that should be removed.
      *
      * @param array  $profiles list of profiles to remove the reason for
-     * @param int    $reason the reason ( manager::REASON_* )
+     * @param int    $reason the reason ( self::REASON_* )
      */
     public static function remove_reason(array $profiles, int $reason): void {
         global $DB;
@@ -365,7 +299,7 @@ class profile {
             // Ensuring we only remove a reason that exists on the profile provided.
             if ($profile->reason & $reason) {
                 $profile->reason ^= $reason; // Remove the reason.
-                if ($profile->reason === manager::REASON_NONE) {
+                if ($profile->reason === self::REASON_NONE) {
                     $idstodelete[] = $profile->id;
                     continue;
                 }
@@ -404,13 +338,13 @@ class profile {
     public static function purge_fastest_by_page(int $numtokeep): void {
         global $DB;
 
-        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_SLOW);
+        $purgablereasons = $DB->sql_bitand('reason', self::REASON_SLOW);
         $records = $DB->get_records_sql(
             "SELECT id, request, reason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
            ORDER BY duration ASC
-               ", [manager::REASON_NONE, $numtokeep]
+               ", [self::REASON_NONE, $numtokeep]
         );
 
         // Group profiles by request / page.
@@ -440,7 +374,7 @@ class profile {
         // This will remove the REASON_SLOW bitmask on the record, and if the
         // final record is REASON_NONE, it will do a final purge of all the
         // affected records.
-        self::remove_reason($profilestoremovereason, manager::REASON_SLOW);
+        self::remove_reason($profilestoremovereason, self::REASON_SLOW);
     }
 
     /**
@@ -458,15 +392,15 @@ class profile {
         // Fetch all profiles with the reason REASON_SLOW and keep the number
         // under $numtokeep by flipping the order, and making the offset start
         // from the records after $numtokeep.
-        $purgablereasons = $DB->sql_bitand('reason', manager::REASON_SLOW);
+        $purgablereasons = $DB->sql_bitand('reason', self::REASON_SLOW);
         $records = $DB->get_records_sql(
             "SELECT id, reason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
-           ORDER BY duration DESC", [manager::REASON_NONE], $numtokeep);
+           ORDER BY duration DESC", [self::REASON_NONE], $numtokeep);
 
         if (!empty($records)) {
-            self::remove_reason($records, manager::REASON_SLOW);
+            self::remove_reason($records, self::REASON_SLOW);
         }
     }
 

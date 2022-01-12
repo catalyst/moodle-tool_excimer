@@ -32,31 +32,6 @@ class manager {
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
     const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
 
-    /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
-    const REASON_MANUAL   = 0b0001;
-
-    /** Reason - SLOW - Set when conditions are met and these profiles are automatically stored. */
-    const REASON_SLOW     = 0b0010;
-
-    /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
-    const REASON_FLAMEALL = 0b0100;
-
-    /** Reason - NONE - Default fallback reason value, this will not be stored. */
-    const REASON_NONE = 0b0000;
-
-    /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
-    const REASONS = [
-        self::REASON_MANUAL,
-        self::REASON_SLOW,
-        self::REASON_FLAMEALL,
-    ];
-
-    const REASON_STR_MAP = [
-        self::REASON_MANUAL => 'manual',
-        self::REASON_SLOW => 'slowest',
-        self::REASON_FLAMEALL => 'flameall',
-    ];
-
     const ABS_MIN_PERIOD = 20; // The absolute minimum period that can be tolerated.
     const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
 
@@ -194,18 +169,6 @@ class manager {
     }
 
     /**
-     * Returns the determined 'request' field of this profile for regular runs.
-     *
-     * @return string the request path for this profile.
-     */
-    public static function get_request(): string {
-        global $SCRIPT;
-        // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : profile::REQUEST_UNKNOWN;
-        return $request;
-    }
-
-    /**
      * Retrieves all the reasons for saving a profile.
      *
      * @param float $duration The duration of the script so far.
@@ -215,16 +178,16 @@ class manager {
     public static function get_reasons(string $request, float $duration): int {
         global $SESSION;
 
-        $reason = self::REASON_NONE;
+        $reason = profile::REASON_NONE;
         if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
-            $reason |= self::REASON_MANUAL;
+            $reason |= profile::REASON_MANUAL;
         }
         if (isset($SESSION->toolexcimerflameall)) {
-            $reason |= self::REASON_FLAMEALL;
+            $reason |= profile::REASON_FLAMEALL;
         }
 
         if (self::is_considered_slow($request, $duration * 1000)) {
-            $reason |= self::REASON_SLOW;
+            $reason |= profile::REASON_SLOW;
         }
         return $reason;
     }
@@ -244,7 +207,7 @@ class manager {
     public static function get_min_duration_for_request_and_reason(string $request, int $reason, bool $usecache = true): float {
         global $DB;
 
-        $reasonstr = self::REASON_STR_MAP[$reason];
+        $reasonstr = profile::REASON_STR_MAP[$reason];
         $pagequota = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
 
         // Grab the fastest profile for this page/request, and use that as
@@ -268,7 +231,7 @@ class manager {
                   ORDER BY duration DESC
                      ";
             $resultset = $DB->get_records_sql($sql, [
-                self::REASON_NONE,
+                profile::REASON_NONE,
                 $request,
             ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
@@ -295,7 +258,7 @@ class manager {
     public static function get_min_duration_for_reason(int $reason, bool $usecache = true): float {
         global $DB;
 
-        $reasonstr = self::REASON_STR_MAP[$reason];
+        $reasonstr = profile::REASON_STR_MAP[$reason];
         $quota = (int) get_config('tool_excimer', "num_$reasonstr");
 
         $cachekey = 'profile_type_' . $reason . '_min_duration_ms';
@@ -311,7 +274,7 @@ class manager {
                   ORDER BY duration DESC
                      ";
             $resultset = $DB->get_records_sql($sql, [
-                self::REASON_NONE,
+                profile::REASON_NONE,
             ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
             $newvalue = (end($resultset)->min_duration ?? 0) * 1000;
@@ -347,7 +310,7 @@ class manager {
 
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $minduration = self::get_min_duration_for_reason(self::REASON_SLOW);
+        $minduration = self::get_min_duration_for_reason(profile::REASON_SLOW);
         if ($minduration && $duration <= $minduration) {
             return false;
         }
@@ -356,7 +319,7 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = self::get_min_duration_for_request_and_reason($request, self::REASON_SLOW);
+        $requestminduration = self::get_min_duration_for_request_and_reason($request, profile::REASON_SLOW);
         if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }
@@ -372,7 +335,7 @@ class manager {
      * @param int $reason bitmap of reason(s)
      */
     public static function clear_min_duration_cache_for_reason(int $reason): void {
-        foreach (self::REASONS as $basereason) {
+        foreach (profile::REASONS as $basereason) {
             if ($reason & $basereason) {
                 // Clear the plugin config cache for this profile's reason.
                 $cachekey = 'profile_type_' . $basereason . '_min_duration_ms';
@@ -392,9 +355,9 @@ class manager {
     public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
         $current = microtime(true);
         $duration = $current - $started;
-        $request = self::get_request();
+        $request = context::get_request();
         $reason = self::get_reasons($request, $duration);
-        if ($reason !== self::REASON_NONE) {
+        if ($reason !== profile::REASON_NONE) {
             $id = profile::save($request, flamed3_node::from_excimer_log_entries($log), $reason,
                     (int) $started, $duration, $isfinal ? (int) $current : 0);
             if (!$isfinal) {

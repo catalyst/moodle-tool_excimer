@@ -92,14 +92,14 @@ class tool_excimer_profile_test extends advanced_testcase {
         $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        profile::save('mock', $node, manager::REASON_MANUAL, 12345, 2.345);
-        profile::save('mock', $node, manager::REASON_FLAMEALL, 12345, 0.104);
+        profile::save('mock', $node, profile::REASON_MANUAL, 12345, 2.345);
+        profile::save('mock', $node, profile::REASON_FLAMEALL, 12345, 0.104);
 
         foreach ($times as $time) {
-            profile::save('mock', $node, manager::REASON_SLOW, 12345, $time);
+            profile::save('mock', $node, profile::REASON_SLOW, 12345, $time);
         }
 
-        profile::save('mock', $node, manager::REASON_MANUAL, 12345, 0.001);
+        profile::save('mock', $node, profile::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
@@ -109,7 +109,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
         $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_SLOW]));
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
 
         // Should remove a few more profiles.
         $numtokeep = 5;
@@ -117,14 +117,14 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
         $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_SLOW]));
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
 
         // Should remove no profiles.
         $numtokeepnew = 9;
         profile::purge_fastest($numtokeepnew);
         $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
         $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [manager::REASON_SLOW]));
+                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
     }
 
     /**
@@ -147,17 +147,17 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $SCRIPT = 'a';
-        profile::save('a', $node, manager::REASON_MANUAL, 12345, 2.345);
+        profile::save('a', $node, profile::REASON_MANUAL, 12345, 2.345);
         $SCRIPT = 'b';
-        profile::save('b', $node, manager::REASON_FLAMEALL, 12345, 0.104);
+        profile::save('b', $node, profile::REASON_FLAMEALL, 12345, 0.104);
 
         for ($i = 0; $i < count($times); ++$i) {
             $SCRIPT = $reqnames[$i];
-            profile::save($reqnames[$i], $node, manager::REASON_SLOW, 12345, $times[$i]);
+            profile::save($reqnames[$i], $node, profile::REASON_SLOW, 12345, $times[$i]);
         }
 
         $SCRIPT = 'c';
-        profile::save('c', $node, manager::REASON_MANUAL, 12345, 0.001);
+        profile::save('c', $node, profile::REASON_MANUAL, 12345, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
 
@@ -172,7 +172,7 @@ class tool_excimer_profile_test extends advanced_testcase {
                FROM {tool_excimer_profiles}
               WHERE reason = ?
            GROUP BY request",
-            [manager::REASON_SLOW]
+            [profile::REASON_SLOW]
         );
 
         foreach ($records as $i => $record) {
@@ -195,7 +195,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
-        $reason = manager::REASON_SLOW;
+        $reason = profile::REASON_SLOW;
         $created = 56;
         $duration = 0.123;
 
@@ -216,7 +216,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
-        $reason = manager::REASON_SLOW;
+        $reason = profile::REASON_SLOW;
         $created = 120;
         $duration = 0.456;
 
@@ -251,7 +251,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals(0, profile::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            profile::save('mock', flamed3_node::from_excimer_log_entries($log), manager::REASON_MANUAL, $time, 0.2);
+            profile::save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_MANUAL, $time, 0.2);
             $this->assertEquals(++$expectedcount, profile::get_num_profiles());
         }
 
@@ -267,53 +267,6 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals($times[3], $record->created);
     }
 
-    /**
-     * Test the is_profiling test.
-     *
-     * @throws dml_exception
-     */
-    public function test_is_profiling(): void {
-        $this->assertFalse(manager::is_profiling());
-
-        $_REQUEST[manager::MANUAL_PARAM_NAME] = 1;
-        $this->assertTrue(manager::is_profiling());
-
-        unset($_REQUEST[manager::MANUAL_PARAM_NAME]);
-        $this->assertFalse(manager::is_profiling());
-
-        $_REQUEST[manager::FLAME_ON_PARAM_NAME] = 1;
-        $this->assertTrue(manager::is_profiling());
-
-        unset($_REQUEST[manager::FLAME_ON_PARAM_NAME]);
-        $this->assertTrue(manager::is_profiling());
-
-        $_REQUEST[manager::FLAME_OFF_PARAM_NAME] = 1;
-        $this->assertFalse(manager::is_profiling());
-
-        unset($_REQUEST[manager::FLAME_OFF_PARAM_NAME]);
-        $this->assertFalse(manager::is_profiling());
-
-        set_config('enable_auto', 1, 'tool_excimer');
-        $this->assertTrue(manager::is_profiling());
-
-        set_config('enable_auto', 0, 'tool_excimer');
-        $this->assertFalse(manager::is_profiling());
-    }
-
-    public function test_stripparamters(): void {
-        $param = [ 'a' => '1', 'b' => 2, 'c' => 3 ];
-        $paramexpect = $param;
-        $this->assertEquals($paramexpect, profile::stripparameters($param));
-
-        $param = [ 'a' => '1', 'sesskey' => 2, 'c' => 3 ];
-        $paramexpect = [ 'a' => '1', 'sesskey' => '', 'c' => 3 ];
-        $this->assertEquals($paramexpect, profile::stripparameters($param));
-
-        $param = [ 'a' => '1', 'sesskey' => 2, 'FLAMEME' => 3 ];
-        $paramexpect = [ 'a' => '1', 'sesskey' => '' ];
-        $this->assertEquals($paramexpect, profile::stripparameters($param));
-    }
-
     public function test_reasons_are_being_stored(): void {
         global $DB;
         $this->preventResetByRollback();
@@ -323,7 +276,7 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $allthereasons = 0;
-        foreach (manager::REASONS as $reason) {
+        foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
         $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
@@ -331,7 +284,7 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Fetch profile from DB and confirm it matches for all the reasons.
         $recordedreason = (int) $record->reason;
-        foreach (manager::REASONS as $reason) {
+        foreach (profile::REASONS as $reason) {
             $this->assertTrue((bool) ($recordedreason & $reason));
         }
     }
@@ -345,7 +298,7 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $allthereasons = 0;
-        foreach (manager::REASONS as $reason) {
+        foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
         $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
@@ -353,7 +306,7 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
         // that the reason no longer exists on the profile after the change.
-        foreach (manager::REASONS as $reason) {
+        foreach (profile::REASONS as $reason) {
             profile::remove_reason([$profile], $reason);
             $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
             if ($profile) {
@@ -375,7 +328,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
-        $reason = manager::REASON_SLOW;
+        $reason = profile::REASON_SLOW;
         $created = 56;
         $duration = 0.123;
 
@@ -397,7 +350,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $flamedatad3json = json_encode($flamedatad3);
         $numsamples = $flamedatad3->value;
         $datasize = strlen(gzcompress($flamedatad3json));
-        $reason = manager::REASON_SLOW | manager::REASON_MANUAL;
+        $reason = profile::REASON_SLOW | profile::REASON_MANUAL;
         $duration = 0.456;
 
         $secondid = profile::save('mock', $flamedatad3, $reason, $created, $duration);
@@ -436,7 +389,7 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Divide by 1000 required, as microtime(true) returns the value in seconds.
         $reason = manager::get_reasons('mock', $finalduration);
-        if ($reason !== manager::REASON_NONE) {
+        if ($reason !== profile::REASON_NONE) {
             $log = $profile->getLog();
             // Won't show DB writes count since saves are stored via another DB connection.
             profile::save('mock', flamed3_node::from_excimer_log_entries($log), $reason, (int) $started, $finalduration);
