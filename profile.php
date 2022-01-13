@@ -70,7 +70,7 @@ $pluginname = get_string('pluginname', 'tool_excimer');
 
 $url = new moodle_url("/admin/tool/excimer/index.php");
 
-$profile = profile::get_profile($profileid);
+$profile = new profile($profileid);
 
 $PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'));
 $PAGE->set_title($pluginname);
@@ -93,7 +93,7 @@ $deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php',
 $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_script', 'tool_excimer'));
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
-$data = (array) $profile->as_object();
+$data = (array) $profile->to_record();
 $data['duration'] = format_time($data['duration']);
 
 $data['request'] = $profile->get('request') . $profile->get('pathinfo');

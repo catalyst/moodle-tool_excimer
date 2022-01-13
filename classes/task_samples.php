@@ -59,7 +59,7 @@ class task_samples {
             $profile->set('reason', $reasons);
             $profile->set('created', (int) $this->starttime);
             $profile->set('duration', $duration);
-            $profile->set('finished', $finishtime);
+            $profile->set('finished', (int) $finishtime);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->samples));
             $profile->save_record();
         }

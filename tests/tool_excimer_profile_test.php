@@ -20,7 +20,8 @@ namespace tool_excimer;
  * Defines names of plugin types and some strings used at the plugin managment
  *
  * @package    tool_excimer
- * @author     Jason den Dulk<jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -197,9 +198,9 @@ class tool_excimer_profile_test extends \advanced_testcase {
 
         $profile->set('flamedatad3', $node);
         $this->assertEquals($nodejson, $profile->get_flamedatad3json());
-        $this->assertEquals($compressed, $profile->raw_get('flamedatad3'));
-        $this->assertEquals($size, $profile->raw_get('datasize'));
-        $this->assertEquals($node->value, $profile->raw_get('numsamples'));
+        $this->assertEquals($compressed, $profile->get('flamedatad3'));
+        $this->assertEquals($size, $profile->get('datasize'));
+        $this->assertEquals($node->value, $profile->get('numsamples'));
     }
 
     public function test_save(): void {
@@ -261,7 +262,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $profile->set('flamedatad3', $node);
         $id = $profile->save_record();
 
-        $record = profile::get_profile($id);
+        $record = new profile($id);
         $this->assertEquals($id, $record->get('id'));
         $this->assertEquals($reason, $record->get('reason'));
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->get('scripttype'));
@@ -284,7 +285,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $id2 = $profile->save_record();
         $this->assertEquals($id, $id2);
 
-        $record = profile::get_profile($id);
+        $record = new profile($id);
         $this->assertEquals($id, $record->get('id'));
         $this->assertEquals($request, $record->get('request'));
         $this->assertEquals($reason, $record->get('reason'));

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20220104" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20220113" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -35,6 +35,9 @@
         <FIELD NAME="dbreads" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="dbwrites" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="dbreplicareads" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The user who created/modified the object"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The timestamp at which the record was created"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The timestamp at which the record was modified"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -20,7 +20,8 @@ namespace tool_excimer;
  * Primary controller class for handling Excimer profiling.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -352,7 +353,7 @@ class manager {
     public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
         $current = microtime(true);
         $duration = $current - $started;
-        $request = context::get_request();
+        $request = script_metadata::get_request();
         $reason = self::get_reasons($request, $duration);
         if ($reason !== profile::REASON_NONE) {
             $profile = profile::get_running_profile();

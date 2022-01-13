@@ -219,5 +219,33 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022010400, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2022011300) {
+
+        // Define field usermodified to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'dbreplicareads');
+
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'usermodified');
+
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'timecreated');
+
+        // Conditionally launch add field timemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022011300, 'tool', 'excimer');
+    }
     return true;
 }

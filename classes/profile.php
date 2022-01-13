@@ -16,15 +16,18 @@
 
 namespace tool_excimer;
 
+use core\persistent;
+
 /**
  * Profile saving/loading and manipulation.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class profile {
+class profile extends persistent {
     const TABLE = 'tool_excimer_profiles';
 
 
@@ -59,27 +62,12 @@ class profile {
     const SCRIPTTYPE_WS = 3;
     const SCRIPTTYPE_TASK = 4;
 
-
     private static $runningprofile = null;
 
     // TODO: try to find a way to eliminate the need for this function.
     public static function get_num_profiles(): int {
         global $DB;
         return $DB->count_records(self::TABLE, []);
-    }
-
-    /**
-     * Loads a profile from disk.
-     *
-     * @param int $id The ID of the profile.
-     * @return profile
-     * @throws \dml_exception
-     */
-    public static function get_profile(int $id) {
-        global $DB;
-        $profile = new profile();
-        $profile->record = $DB->get_record(self::TABLE, ['id' => $id], '*', MUST_EXIST);
-        return $profile;
     }
 
     /**
@@ -95,26 +83,11 @@ class profile {
         return self::$runningprofile;
     }
 
-    protected $record;
-
-    public function __construct() {
-        $this->record = new \stdClass();
-    }
-
-    /**
-     * Gets the raw data.
-     * TODO: There should probably be a better way to get a data dump.
-     *
-     * @return object
-     */
-    public function as_object(): object {
-        return $this->record;
-    }
-
     /**
      * Custom setter to set the flame data.
      *
      * @param flamed3_node $node
+     * @throws \coding_exception
      */
     protected function set_flamedatad3(flamed3_node $node): void {
         $flamedata = gzcompress(json_encode($node));
@@ -127,6 +100,7 @@ class profile {
      * Special getter to obtain the flame data JSON.
      *
      * @return string
+     * @throws \coding_exception
      */
     public function get_flamedatad3json(): string {
         return gzuncompress($this->raw_get('flamedatad3'));
@@ -135,36 +109,39 @@ class profile {
     public function add_env(): void {
         global $USER, $CFG;
 
-        $this->set('sessionid', substr(session_id(), 0, 10));
-        $this->set('scripttype', context::get_script_type());
-        $this->set('userid', $USER ? $USER->id : 0);
-        $this->set('pid', getmypid());
-        $this->set('hostname', gethostname());
-        $this->set('versionhash', $CFG->allversionshash);
+        $this->raw_set('sessionid', substr(session_id(), 0, 10));
+        $this->raw_set('scripttype', script_metadata::get_script_type());
+        $this->raw_set('userid', $USER ? $USER->id : 0);
+        $this->raw_set('pid', getmypid());
+        $this->raw_set('hostname', gethostname());
+        $this->raw_set('versionhash', $CFG->allversionshash);
 
-        $this->set('method', $_SERVER['REQUEST_METHOD'] ?? '');
-        $this->set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
-        $this->set('useragent', $_SERVER['HTTP_USER_AGENT'] ?? '');
-        $this->set('referer', $_SERVER['HTTP_REFERER'] ?? '');
-        $this->set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
-        $this->set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
-        $this->set('parameters', context::get_parameters($this->get('scripttype')));
+        $this->raw_set('method', $_SERVER['REQUEST_METHOD'] ?? '');
+        $this->raw_set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
+        $this->raw_set('useragent', $_SERVER['HTTP_USER_AGENT'] ?? '');
+        $this->raw_set('referer', $_SERVER['HTTP_REFERER'] ?? '');
+        $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
+        $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
+        $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
 
-        list($contenttypevalue, $contenttypekey, $contenttypecategory) = context::resolve_content_type($this);
-        $this->set('contenttypevalue', $contenttypevalue);
-        $this->set('contenttypekey', $contenttypekey);
-        $this->set('contenttypecategory', $contenttypecategory);
+        list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
+        $this->raw_set('contenttypevalue', $contenttypevalue);
+        $this->raw_set('contenttypekey', $contenttypekey);
+        $this->raw_set('contenttypecategory', $contenttypecategory);
     }
 
     /**
      * Saves the record to the database. Any transaction is bypassed.
      * Additional information is obtained and inserted into the profile before recording.
      *
+     * Note: save_record() should only get called in the process of making a profile. For other manipulation,
+     * use save().
+     *
      * @return int The database ID of the record.
      * @throws \dml_exception
      */
     public function save_record(): int {
-        global $DB, $USER, $CFG;
+        global $DB, $USER;
 
         // Get DB ops (reads/writes).
         $this->raw_set('dbreads', $DB->perf_get_reads());
@@ -189,11 +166,17 @@ class profile {
             $db2 = $DB;
         }
 
-        if (!isset($this->record->id)) {
+        $now = time();
+        $this->raw_set('timemodified', $now);
+        $this->raw_set('usermodified', $USER->id);
+
+        if ($this->raw_get('id') <= 0) {
+            $this->raw_set('timecreated', $now);
             $this->add_env();
-            $this->record->id = $db2->insert_record(self::TABLE, $this->record);
+            $id = $db2->insert_record(self::TABLE, $this->to_record());
+            $this->raw_set('id', $id);
         } else {
-            $db2->update_record(self::TABLE, $this->record);
+            $db2->update_record(self::TABLE, $this->to_record());
         }
 
         if ($intrans) {
@@ -215,61 +198,7 @@ class profile {
             manager::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
-        return $this->raw_get('id');
-    }
-
-    /**
-     * Mimics persitent::set()
-     *
-     * @param string $property
-     * @param $value
-     * @return $this
-     */
-    final public function set(string $property, $value): profile {
-        $methodname = 'set_' . $property;
-        if (method_exists($this, $methodname)) {
-            $this->$methodname($value);
-            return $this;
-        } else {
-            $this->record->$property = $value;
-        }
-        return $this;
-    }
-
-    /**
-     * Mimics persistent::get()
-     *
-     * @param string $property
-     * @return mixed
-     */
-    final public function get(string $property) {
-        $methodname = 'get_' . $property;
-        if (method_exists($this, $methodname)) {
-            return $this->$methodname();
-        }
-        return $this->record->$property;
-    }
-
-    /**
-     * Mimics persistent::raw_set()
-     *
-     * @param string $property
-     * @param $value
-     * @return $this
-     */
-    public function raw_set(string $property, $value): profile {
-        $this->record->$property = $value;
-        return $this;
-    }
-
-    /**
-     * Mimics persistent::raw_get()
-     *
-     * @param string $property
-     * @return mixed
-     */
-    public function raw_get(string $property) {
-        return $this->record->$property;
+        return (int) $this->raw_get('id');
     }
 
     /**
@@ -438,5 +367,43 @@ class profile {
         if (!empty($records)) {
             self::remove_reason($records, self::REASON_SLOW);
         }
+    }
+
+    /**
+     * Return the definition of the properties of this model.
+     *
+     * @return array
+     */
+    protected static function define_properties(): array {
+        return [
+            'reason' => ['type' => PARAM_INT],
+            'scripttype' => ['type' => PARAM_INT],
+            'method' => ['type' => PARAM_ALPHA],
+            'created' => ['type' => PARAM_INT],
+            'finished' => ['type' => PARAM_INT, 'default' => 0],
+            'duration' => ['type' => PARAM_FLOAT],
+            'request' => ['type' => PARAM_TEXT],
+            'pathinfo' => ['type' => PARAM_SAFEPATH],
+            'parameters' => ['type' => PARAM_TEXT],
+            'sessionid' => ['type' => PARAM_ALPHANUM],
+            'userid' => ['type' => PARAM_INT],
+            'cookies' => ['type' => PARAM_BOOL],
+            'buffering' => ['type' => PARAM_BOOL],
+            'responsecode' => ['type' => PARAM_INT],
+            'referer' => ['type' => PARAM_URL],
+            'pid' => ['type' => PARAM_INT],
+            'hostname' => ['type' => PARAM_TEXT],
+            'useragent' => ['type' => PARAM_TEXT],
+            'versionhash' => ['type' => PARAM_TEXT],
+            'datasize' => ['type' => PARAM_INT],
+            'numsamples' => ['type' => PARAM_INT],
+            'flamedatad3' => ['type' => PARAM_RAW],
+            'contenttypecategory' => ['type' => PARAM_TEXT],
+            'contenttypekey' => ['type' => PARAM_TEXT],
+            'contenttypevalue' => ['type' => PARAM_TEXT],
+            'dbreads' => ['type' => PARAM_INT],
+            'dbwrites' => ['type' => PARAM_INT],
+            'dbreplicareads' => ['type' => PARAM_INT],
+        ];
     }
 }

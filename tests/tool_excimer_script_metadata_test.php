@@ -17,26 +17,26 @@
 namespace tool_excimer;
 
 /**
- * Units tests for the context class.
+ * Units tests for the scriptmetadata class.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_context_test extends \advanced_testcase {
+class tool_excimer_script_metadata_test extends \advanced_testcase {
 
     public function test_stripparamters(): void {
         $param = ['a' => '1', 'b' => 2, 'c' => 3];
         $paramexpect = $param;
-        $this->assertEquals($paramexpect, context::stripparameters($param));
+        $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
 
         $param = ['a' => '1', 'sesskey' => 2, 'c' => 3];
         $paramexpect = ['a' => '1', 'sesskey' => '', 'c' => 3];
-        $this->assertEquals($paramexpect, context::stripparameters($param));
+        $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
 
         $param = ['a' => '1', 'sesskey' => 2, 'FLAMEME' => 3];
         $paramexpect = ['a' => '1', 'sesskey' => ''];
-        $this->assertEquals($paramexpect, context::stripparameters($param));
+        $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
     }
 }
