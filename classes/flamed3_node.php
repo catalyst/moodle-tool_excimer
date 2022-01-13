@@ -16,8 +16,6 @@
 
 namespace tool_excimer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * A node in a flame d3 tree.
  *

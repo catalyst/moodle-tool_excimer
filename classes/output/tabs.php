@@ -16,8 +16,6 @@
 
 namespace tool_excimer\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Tabs component used for plugin.
  *

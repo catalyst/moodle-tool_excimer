@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\manager;
-
-defined('MOODLE_INTERNAL') || die();
+namespace tool_excimer;
 
 /**
  * Units tests for the manager class.
@@ -26,7 +24,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_manager_test extends advanced_testcase {
+class tool_excimer_manager_test extends \advanced_testcase {
 
     /**
      * Set up before each test
@@ -39,7 +37,7 @@ class tool_excimer_manager_test extends advanced_testcase {
     /**
      * Test is_profiling().
      *
-     * @throws dml_exception
+     * @throws \dml_exception
      */
     public function test_is_profiling(): void {
         $this->assertFalse(manager::is_profiling());

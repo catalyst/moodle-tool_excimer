@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\context;
-
-defined('MOODLE_INTERNAL') || die();
+namespace tool_excimer;
 
 /**
  * Units tests for the context class.
@@ -26,7 +24,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_context_test extends advanced_testcase {
+class tool_excimer_context_test extends \advanced_testcase {
 
     public function test_stripparamters(): void {
         $param = ['a' => '1', 'b' => 2, 'c' => 3];

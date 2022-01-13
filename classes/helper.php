@@ -16,8 +16,6 @@
 
 namespace tool_excimer;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core_filetypes;
 
 /**

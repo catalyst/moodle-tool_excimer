@@ -14,11 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use tool_excimer\flamed3_node;
-use tool_excimer\manager;
-use tool_excimer\profile;
-
-defined('MOODLE_INTERNAL') || die();
+namespace tool_excimer;
 
 /**
  * Defines names of plugin types and some strings used at the plugin managment
@@ -28,7 +24,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_test extends advanced_testcase {
+class tool_excimer_profile_test extends \advanced_testcase {
 
     /**
      * Set up before each test
@@ -56,7 +52,7 @@ class tool_excimer_profile_test extends advanced_testcase {
      * Quick & dirty profile generator
      *
      * @param int $iterations More iterations means more time is consumed.
-     * @return ExcimerLog
+     * @return \ExcimerLog
      */
     protected function quick_log(int $iterations): \ExcimerLog {
         $prof = new \ExcimerProfiler();
@@ -87,7 +83,7 @@ class tool_excimer_profile_test extends advanced_testcase {
     /**
      * Tests the functionality to keep only the N slowest profiles.
      *
-     * @throws dml_exception
+     * @throws \dml_exception
      */
     public function test_n_slowest_kept(): void {
         global $DB;
@@ -140,7 +136,7 @@ class tool_excimer_profile_test extends advanced_testcase {
     /**
      * Tests the functionality to keep only the N slowest profiles for each page.
      *
-     * @throws dml_exception
+     * @throws \dml_exception
      */
     public function test_n_slowest_kept_per_page(): void {
         global $DB, $SCRIPT;
@@ -303,7 +299,7 @@ class tool_excimer_profile_test extends advanced_testcase {
     /**
      * Tests the expiry of profiles.
      *
-     * @throws dml_exception
+     * @throws \dml_exception
      */
     public function test_purge_old_profiles(): void {
         global $DB;

@@ -25,8 +25,6 @@
 
 use tool_excimer\manager;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Hook to be run after initial site config.
  *

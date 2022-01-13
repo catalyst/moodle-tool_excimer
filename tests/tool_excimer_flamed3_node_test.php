@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_excimer;
+
 use tool_excimer\flamed3_node;
 
 defined('MOODLE_INTERNAL') || die();
@@ -55,7 +57,7 @@ class fake_log_entry {
     }
 }
 
-class tool_excimer_flamed3_node_test extends advanced_testcase {
+class tool_excimer_flamed3_node_test extends \advanced_testcase {
 
     /**
      * Set up before each test
