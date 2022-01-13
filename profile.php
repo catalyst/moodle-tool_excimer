@@ -70,9 +70,9 @@ $pluginname = get_string('pluginname', 'tool_excimer');
 
 $url = new moodle_url("/admin/tool/excimer/index.php");
 
-$profile = profile::getprofile($profileid);
+$profile = profile::get_profile($profileid);
 
-$PAGE->navbar->add($profile->request . $profile->pathinfo);
+$PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'));
 $PAGE->set_title($pluginname);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
@@ -82,23 +82,24 @@ $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
 $PAGE->requires->js('/admin/tool/excimer/lib/d3/dist/d3.min.js', true);
 $PAGE->requires->js('/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph.min.js', true);
 
-$user = $DB->get_record('user', ['id' => $profile->userid]);
+$user = $DB->get_record('user', ['id' => $profile->get('userid')]);
 
 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $profileid, 'returnurl' => $returnurl]);
 $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool_excimer'));
 $deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
 
-$deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php', ['script' => $profile->request, 'returnurl' => $returnurl]);
+$deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php',
+        ['script' => $profile->get('request'), 'returnurl' => $returnurl]);
 $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_script', 'tool_excimer'));
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
-$data = (array) $profile;
+$data = (array) $profile->as_object();
 $data['duration'] = format_time($data['duration']);
 
-$data['request'] = $profile->request . $profile->pathinfo;
-if (!empty($profile->parameters)) {
-    $parameters = $profile->parameters;
-    if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
+$data['request'] = $profile->get('request') . $profile->get('pathinfo');
+if (!empty($profile->get('parameters'))) {
+    $parameters = $profile->get('parameters');
+    if ($profile->get('scripttype') == profile::SCRIPTTYPE_CLI) {
         // For CLI scripts, request should look like `command.php --flag=value` as an example.
         $separator = ' ';
     } else {
@@ -110,15 +111,17 @@ if (!empty($profile->parameters)) {
 }
 
 // If GET request then it should be reproducable as a idempotent request (readonly).
-if ($profile->method === 'GET') {
-    $requesturl = new \moodle_url('/' . $profile->request . $profile->pathinfo . '?' . htmlentities($profile->parameters));
+if ($profile->get('method') === 'GET') {
+    $requesturl = new \moodle_url('/' . $profile->get('request') .
+            $profile->get('pathinfo') . '?' . htmlentities($profile->get('parameters')));
     $data['request'] = \html_writer::link(
-            $requesturl,
-            urldecode($data['request']),
-            [
-                'rel' => 'noreferrer noopener',
-                'target' => '_blank',
-            ]);
+        $requesturl,
+        urldecode($data['request']),
+        [
+            'rel' => 'noreferrer noopener',
+            'target' => '_blank',
+        ]
+    );
 }
 
 $data['script_type_display'] = function($text, $render) {
@@ -128,11 +131,11 @@ $data['reason_display'] = function($text, $render) {
     return helper::reason_display((int)$render($text));
 };
 
-$data['datasize'] = display_size($profile->datasize);
+$data['datasize'] = display_size($profile->get('datasize'));
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 
-$data['responsecode'] = helper::status_display($profile);
+$data['responsecode'] = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);

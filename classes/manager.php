@@ -22,7 +22,7 @@ defined('MOODLE_INTERNAL') || die();
  * Primary controller class for handling Excimer profiling.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -214,7 +214,6 @@ class manager {
         // the lower boundary for any new profiles of this page/request.
         $cachekey = $request;
         $cachefield = "min_duration_for_reason_$reason";
-        $result = false;
         $cache = \cache::make('tool_excimer', 'request_metadata');
         $result = $cache->get($cachekey);
 
@@ -358,11 +357,14 @@ class manager {
         $request = context::get_request();
         $reason = self::get_reasons($request, $duration);
         if ($reason !== profile::REASON_NONE) {
-            $id = profile::save($request, flamed3_node::from_excimer_log_entries($log), $reason,
-                    (int) $started, $duration, $isfinal ? (int) $current : 0);
-            if (!$isfinal) {
-                profile::$partialsaveid = $id;
-            }
+            $profile = profile::get_running_profile();
+            $profile->set('request', $request);
+            $profile->set('reason', $reason);
+            $profile->set('created', (int) $started);
+            $profile->set('duration', $duration);
+            $profile->set('finished', $isfinal ? (int) $current : 0);
+            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($log));
+            $profile->save_record();
         }
     }
 }

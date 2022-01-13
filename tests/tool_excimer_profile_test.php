@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/  <--change
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@ use tool_excimer\profile;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tests the profile storage.
+ * Defines names of plugin types and some strings used at the plugin managment
  *
- * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright 2021, Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    tool_excimer
+ * @author     Jason den Dulk<jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
+ * @copyright  2022 Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tool_excimer_profile_test extends advanced_testcase {
 
@@ -36,7 +36,6 @@ class tool_excimer_profile_test extends advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest();
-        profile::$partialsaveid = 0;
     }
 
     /**
@@ -74,6 +73,17 @@ class tool_excimer_profile_test extends advanced_testcase {
         return $prof->flush();
     }
 
+    public function quick_save(string $request, flamed3_node $node, int $reason, float $duration, int $created = 12345): int {
+        $profile = new profile();
+        $profile->set('request', $request);
+        $profile->set('reason', $reason);
+        $profile->set('flamedatad3', $node);
+        $profile->set('created', $created);
+        $profile->set('duration', $duration);
+        $profile->set('finished', $created + 2);
+        return $profile->save_record();
+    }
+
     /**
      * Tests the functionality to keep only the N slowest profiles.
      *
@@ -92,21 +102,21 @@ class tool_excimer_profile_test extends advanced_testcase {
         $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        profile::save('mock', $node, profile::REASON_MANUAL, 12345, 2.345);
-        profile::save('mock', $node, profile::REASON_FLAMEALL, 12345, 0.104);
+        $this->quick_save('mock', $node, profile::REASON_MANUAL, 2.345);
+        $this->quick_save('mock', $node, profile::REASON_FLAMEALL, 0.104);
 
         foreach ($times as $time) {
-            profile::save('mock', $node, profile::REASON_SLOW, 12345, $time);
+            $this->quick_save('mock', $node, profile::REASON_SLOW, $time);
         }
 
-        profile::save('mock', $node, profile::REASON_MANUAL, 12345, 0.001);
+        $this->quick_save('mock', $node, profile::REASON_MANUAL, 0.001);
 
-        $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals(count($times) + 3, $DB->count_records(profile::TABLE));
 
         // Should remove a few profiles.
         $numtokeep = 8;
         profile::purge_fastest($numtokeep);
-        $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
         $this->assertEquals($sortedtimes[0],
                 $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
@@ -114,7 +124,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         // Should remove a few more profiles.
         $numtokeep = 5;
         profile::purge_fastest($numtokeep);
-        $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
         $this->assertEquals($sortedtimes[0],
                 $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
@@ -122,7 +132,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         // Should remove no profiles.
         $numtokeepnew = 9;
         profile::purge_fastest($numtokeepnew);
-        $this->assertEquals($numtokeep + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
         $this->assertEquals($sortedtimes[0],
                 $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
     }
@@ -147,26 +157,26 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $SCRIPT = 'a';
-        profile::save('a', $node, profile::REASON_MANUAL, 12345, 2.345);
+        $this->quick_save('a', $node, profile::REASON_MANUAL, 2.345);
         $SCRIPT = 'b';
-        profile::save('b', $node, profile::REASON_FLAMEALL, 12345, 0.104);
+        $this->quick_save('b', $node, profile::REASON_FLAMEALL, 0.104);
 
         for ($i = 0; $i < count($times); ++$i) {
             $SCRIPT = $reqnames[$i];
-            profile::save($reqnames[$i], $node, profile::REASON_SLOW, 12345, $times[$i]);
+            $this->quick_save($reqnames[$i], $node, profile::REASON_SLOW, $times[$i]);
         }
 
         $SCRIPT = 'c';
-        profile::save('c', $node, profile::REASON_MANUAL, 12345, 0.001);
+        $this->quick_save('c', $node, profile::REASON_MANUAL, 0.001);
 
-        $this->assertEquals(count($times) + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals(count($times) + 3, $DB->count_records(profile::TABLE));
 
         // Should remove a few profiles.
         $numtokeep = 3;
         $expectedreqcount = [ 'a' => 3, 'b' => 1, 'c' => 3, 'd' => 2 ];
         $expectedfastest = [ 'a' => 0.456, 'b' => 0.234, 'c' => 0.123, 'd' => 0.14 ];
         profile::purge_fastest_by_page($numtokeep);
-        $this->assertEquals(array_sum($expectedreqcount) + 3, $DB->count_records('tool_excimer_profiles'));
+        $this->assertEquals(array_sum($expectedreqcount) + 3, $DB->count_records(profile::TABLE));
         $records = $DB->get_records_sql(
             "SELECT request, COUNT(*) AS c, MIN(duration) AS m
                FROM {tool_excimer_profiles}
@@ -181,26 +191,46 @@ class tool_excimer_profile_test extends advanced_testcase {
         }
     }
 
-    /**
-     * Tests profile::save()
-     *
-     * @throws dml_exception
-     */
+    public function test_set_flamedata(): void {
+        $profile = new profile();
+        $log = $this->quick_log(10);
+        $node = flamed3_node::from_excimer_log_entries($log);
+        $nodejson = json_encode($node);
+        $compressed = gzcompress($nodejson);
+        $size = strlen($compressed);
+
+        $profile->set('flamedatad3', $node);
+        $this->assertEquals($nodejson, $profile->get_flamedatad3json());
+        $this->assertEquals($compressed, $profile->raw_get('flamedatad3'));
+        $this->assertEquals($size, $profile->raw_get('datasize'));
+        $this->assertEquals($node->value, $profile->raw_get('numsamples'));
+    }
+
     public function test_save(): void {
-        global $DB, $CFG;
+        global $DB;
         $this->preventResetByRollback();
 
         $log = $this->quick_log(150);
-        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
-        $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3->value;
+        $node = flamed3_node::from_excimer_log_entries($log);
+        $flamedatad3json = json_encode($node);
+        $numsamples = $node->value;
         $datasize = strlen(gzcompress($flamedatad3json));
         $reason = profile::REASON_SLOW;
         $created = 56;
-        $duration = 0.123;
+        $duration = 1.123;
+        $finished = 57;
+        $request = 'mock';
 
-        $id = profile::save('mock', $flamedatad3, $reason, $created, $duration);
-        $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
+        $profile = new profile();
+        $profile->set('reason', $reason);
+        $profile->set('request', $request);
+        $profile->set('created', $created);
+        $profile->set('duration', $duration);
+        $profile->set('finished', $finished);
+        $profile->set('flamedatad3', $node);
+
+        $id = $profile->save_record();
+        $record = $DB->get_record(profile::TABLE, [ 'id' => $id ]);
 
         $this->assertEquals($id, $record->id);
         $this->assertEquals($reason, $record->reason);
@@ -210,27 +240,64 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals($flamedatad3json, gzuncompress($record->flamedatad3));
         $this->assertEquals($numsamples, $record->numsamples);
         $this->assertEquals($datasize, $record->datasize);
+        $this->assertEquals(getmypid(), $record->pid);
+    }
 
-        $log = $this->quick_log(1500);
-        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
-        $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3->value;
-        $datasize = strlen(gzcompress($flamedatad3json));
+    public function test_partial_save() {
+        global $DB;
+        $this->preventResetByRollback();
+
+        $log = $this->quick_log(1);
+        $node = flamed3_node::from_excimer_log_entries($log);
+        $flamedatad3json = json_encode($node);
         $reason = profile::REASON_SLOW;
-        $created = 120;
-        $duration = 0.456;
+        $created = 56;
+        $duration = 1.123;
+        $finished = 57;
+        $request = 'mock';
 
-        $id = profile::save('mock', $flamedatad3, $reason, $created, $duration);
-        $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
+        $profile = profile::get_running_profile();
+        $profile->set('reason', $reason);
+        $profile->set('request', $request);
+        $profile->set('created', $created);
+        $profile->set('duration', $duration);
+        $profile->set('finished', 0);
+        $profile->set('flamedatad3', $node);
+        $id = $profile->save_record();
 
-        $this->assertEquals($id, $record->id);
-        $this->assertEquals($reason, $record->reason);
-        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
-        $this->assertEquals($created, $record->created);
-        $this->assertEquals($duration, $record->duration);
-        $this->assertEquals($flamedatad3json, gzuncompress($record->flamedatad3));
-        $this->assertEquals($numsamples, $record->numsamples);
-        $this->assertEquals($datasize, $record->datasize);
+        $record = profile::get_profile($id);
+        $this->assertEquals($id, $record->get('id'));
+        $this->assertEquals($reason, $record->get('reason'));
+        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->get('scripttype'));
+        $this->assertEquals($created, $record->get('created'));
+        $this->assertEquals($duration, $record->get('duration'));
+        $this->assertEquals(0, $record->get('finished'));
+        $this->assertEquals($flamedatad3json, $record->get_flamedatad3json());
+        $this->assertEquals(getmypid(), $record->get('pid'));
+
+        $log = $this->quick_log(2);
+        $node = flamed3_node::from_excimer_log_entries($log);
+        $flamedatad3json = json_encode($node);
+        $duration = 2.123;
+        $finished = 58;
+
+        $profile = profile::get_running_profile();
+        $profile->set('duration', $duration);
+        $profile->set('finished', $finished);
+        $profile->set('flamedatad3', $node);
+        $id2 = $profile->save_record();
+        $this->assertEquals($id, $id2);
+
+        $record = profile::get_profile($id);
+        $this->assertEquals($id, $record->get('id'));
+        $this->assertEquals($request, $record->get('request'));
+        $this->assertEquals($reason, $record->get('reason'));
+        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->get('scripttype'));
+        $this->assertEquals($created, $record->get('created'));
+        $this->assertEquals($duration, $record->get('duration'));
+        $this->assertEquals($finished, $record->get('finished'));
+        $this->assertEquals($flamedatad3json, $record->get_flamedatad3json());
+        $this->assertEquals(getmypid(), $record->get('pid'));
     }
 
     /**
@@ -251,7 +318,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         $this->assertEquals(0, profile::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            profile::save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_MANUAL, $time, 0.2);
+            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_MANUAL, 0.2, $time);
             $this->assertEquals(++$expectedcount, profile::get_num_profiles());
         }
 
@@ -279,8 +346,8 @@ class tool_excimer_profile_test extends advanced_testcase {
         foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
-        $record = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
+        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 2.345);
+        $record = $DB->get_record(profile::TABLE, ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons.
         $recordedreason = (int) $record->reason;
@@ -301,14 +368,14 @@ class tool_excimer_profile_test extends advanced_testcase {
         foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = profile::save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 12345, 2.345);
-        $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
+        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 2.345);
+        $profile = $DB->get_record(profile::TABLE, ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
         // that the reason no longer exists on the profile after the change.
         foreach (profile::REASONS as $reason) {
             profile::remove_reason([$profile], $reason);
-            $profile = $DB->get_record('tool_excimer_profiles', ['id' => $id]);
+            $profile = $DB->get_record(profile::TABLE, ['id' => $id]);
             if ($profile) {
                 $remainingreason = (int) $profile->reason;
                 $this->assertFalse((bool) ($remainingreason & $reason));
@@ -317,67 +384,6 @@ class tool_excimer_profile_test extends advanced_testcase {
 
         // The profile should no longer exist once the reasons are all removed.
         $this->assertFalse($profile);
-    }
-
-    public function test_save_partial_profile(): void {
-        global $DB, $CFG;
-        $this->preventResetByRollback();
-
-        $log = $this->quick_log(1);
-        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
-        $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3->value;
-        $datasize = strlen(gzcompress($flamedatad3json));
-        $reason = profile::REASON_SLOW;
-        $created = 56;
-        $duration = 0.123;
-
-        $id = profile::save('mock', $flamedatad3, $reason, $created, $duration);
-        $record = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
-        profile::$partialsaveid = $id;
-
-        $this->assertEquals($id, $record->id);
-        $this->assertEquals($reason, $record->reason);
-        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
-        $this->assertEquals($created, $record->created);
-        $this->assertEquals($duration, $record->duration);
-        $this->assertEquals($flamedatad3json, gzuncompress($record->flamedatad3));
-        $this->assertEquals($numsamples, $record->numsamples);
-        $this->assertEquals($datasize, $record->datasize);
-
-        $log = $this->quick_log(2);
-        $flamedatad3 = flamed3_node::from_excimer_log_entries($log);
-        $flamedatad3json = json_encode($flamedatad3);
-        $numsamples = $flamedatad3->value;
-        $datasize = strlen(gzcompress($flamedatad3json));
-        $reason = profile::REASON_SLOW | profile::REASON_MANUAL;
-        $duration = 0.456;
-
-        $secondid = profile::save('mock', $flamedatad3, $reason, $created, $duration);
-        $this->assertEquals($id, $secondid);
-        $record2 = $DB->get_record('tool_excimer_profiles', [ 'id' => $id ]);
-
-        $this->assertEquals($id, $record2->id);
-        $this->assertEquals($reason, $record2->reason);
-        $this->assertEquals(profile::SCRIPTTYPE_CLI, $record2->scripttype);
-        $this->assertEquals($duration, $record2->duration);
-        $this->assertEquals($flamedatad3json, gzuncompress($record2->flamedatad3));
-        $this->assertEquals($numsamples, $record2->numsamples);
-        $this->assertEquals($datasize, $record2->datasize);
-
-        $this->assertEquals($record->id, $record2->id);
-        $this->assertEquals($record->created, $record2->created);
-        $this->assertEquals($record->pathinfo, $record2->pathinfo);
-        $this->assertEquals($record->sessionid, $record2->sessionid);
-        $this->assertEquals($record->cookies, $record2->cookies);
-        $this->assertEquals($record->parameters, $record2->parameters);
-        $this->assertEquals($record->buffering, $record2->buffering);
-        $this->assertEquals($record->request, $record2->request);
-        $this->assertEquals($record->contenttypevalue, $record2->contenttypevalue);
-        $this->assertEquals($record->contenttypecategory, $record2->contenttypecategory);
-        $this->assertEquals($record->contenttypekey, $record2->contenttypekey);
-        $this->assertEquals($record->request, $record2->request);
-        $this->assertEquals($record->userid, $record2->userid);
     }
 
     private function mock_profile_insertion_with_duration(float $duration) {
@@ -392,7 +398,7 @@ class tool_excimer_profile_test extends advanced_testcase {
         if ($reason !== profile::REASON_NONE) {
             $log = $profile->getLog();
             // Won't show DB writes count since saves are stored via another DB connection.
-            profile::save('mock', flamed3_node::from_excimer_log_entries($log), $reason, (int) $started, $finalduration);
+            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $reason, $finalduration, (int) $started);
         }
     }
 
