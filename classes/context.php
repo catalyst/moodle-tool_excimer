@@ -24,7 +24,7 @@ use core_filetypes;
  * Functions that extract information from the execution environment.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -119,8 +119,7 @@ class context {
      * Checks the current response headers and tries to resolve the content type
      * e.g. to store as part of the profile.
      *
-     * @param      string $request the request of the profile to be stored.
-     * @param      string $pathinfo the pathinfo of the profile to be stored.
+     * @param      profile $profile The profile being stored.
      * @return     array containing [value, key, category]
      *                   Where:
      *                   - value is the raw content type detected,
@@ -130,7 +129,9 @@ class context {
      * @author     Kevin Pham <kevinpham@catalyst-au.net>
      * @copyright  Catalyst IT, 2021
      */
-    public static function resolve_content_type(string $request, string $pathinfo) {
+    public static function resolve_content_type(profile $profile) {
+        $request = $profile->get('request');
+        $pathinfo = $profile->get('pathinfo');
         $contenttypevalue = null;
         $contenttypekey = null;
         $contenttypecategory = null;

@@ -56,8 +56,14 @@ class task_samples {
         $duration = $finishtime - $this->starttime;
         $reasons = manager::get_reasons($this->name, $duration);
         if ($reasons !== profile::REASON_NONE) {
-            $node = flamed3_node::from_excimer_log_entries($this->samples);
-            profile::save($this->name, $node, $reasons, (int) $this->starttime, $duration, $finishtime);
+            $profile = new profile();
+            $profile->set('request', $this->name);
+            $profile->set('reason', $reasons);
+            $profile->set('created', (int) $this->starttime);
+            $profile->set('duration', $duration);
+            $profile->set('finished', $finishtime);
+            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->samples));
+            $profile->save_record();
         }
     }
 }

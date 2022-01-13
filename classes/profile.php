@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/  <--change
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,14 +19,16 @@ namespace tool_excimer;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Functions relevant to profiles.
+ * Profile saving/loading and manipulation.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile {
+    const TABLE = 'tool_excimer_profiles';
+
 
     /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
     const REASON_MANUAL   = 0b0001;
@@ -59,88 +61,119 @@ class profile {
     const SCRIPTTYPE_WS = 3;
     const SCRIPTTYPE_TASK = 4;
 
-    /**
-     * Stores the ID of a saved profile, to indicate that it should be overwritten.
-     *
-     * @var int
-     */
-    public static $partialsaveid = 0;
 
-    /**
-     * Gets a single profile, including data.
-     *
-     * @param $id
-     * @return object
-     * @throws \dml_exception
-     */
-    public static function getprofile($id): object {
-        global $DB;
-        return $DB->get_record('tool_excimer_profiles', ['id' => $id], '*', MUST_EXIST);
-    }
+    private static $runningprofile = null;
 
-    /**
-     * (stub) Gets a URL link for the profile.
-     *
-     * @param $id
-     * @return string
-     */
-    public static function getaslink($id): string {
-        return '';
-    }
-
-    /**
-     * (stub) Gets a cURL command for the profile.
-     *
-     * @param $id
-     * @return string
-     */
-    public static function getascurl($id): string {
-        return '';
-    }
-
-    /**
-     * (stub) Gets HAR data for the profile.
-     *
-     * @param $id
-     * @return string
-     */
-    public static function getashar($id): string {
-        return '';
-    }
-
+    // TODO: try to find a way to eliminate the need for this function.
     public static function get_num_profiles(): int {
         global $DB;
-        return $DB->count_records('tool_excimer_profiles', []);
+        return $DB->count_records(self::TABLE, []);
     }
 
     /**
-     * Saves a snaphot of the profile into the database.
+     * Loads a profile from disk.
      *
-     * @param flamed3_node $node The profile data.
-     * @param int $reason Why the profile is being saved.
-     * @param int $created Timestamp of when the profile was started.
-     * @param float $duration The total time of the profiling, in seconds.
-     * @param int $finished Timestamp of when the profile finished, or zero if only partial.
-     * @return int The ID of the database entry.
-     *
+     * @param int $id The ID of the profile.
+     * @return profile
      * @throws \dml_exception
      */
-    public static function save(string $request, flamed3_node $node, int $reason,
-            int $created, float $duration, int $finished = 0): int {
+    public static function get_profile(int $id) {
+        global $DB;
+        $profile = new profile();
+        $profile->record = $DB->get_record(self::TABLE, ['id' => $id], '*', MUST_EXIST);
+        return $profile;
+    }
+
+    /**
+     * Gets the profile that is being used to save the data as execution is running.
+     * Creates a new one if it doesn't yet exist.
+     *
+     * @return profile
+     */
+    public static function get_running_profile(): profile {
+        if (!isset(self::$runningprofile)) {
+            self::$runningprofile = new profile();
+        }
+        return self::$runningprofile;
+    }
+
+    protected $record;
+
+    public function __construct() {
+        $this->record = new \stdClass();
+    }
+
+    /**
+     * Gets the raw data.
+     * TODO: There should probably be a better way to get a data dump.
+     *
+     * @return object
+     */
+    public function as_object(): object {
+        return $this->record;
+    }
+
+    /**
+     * Custom setter to set the flame data.
+     *
+     * @param flamed3_node $node
+     */
+    protected function set_flamedatad3(flamed3_node $node): void {
+        $flamedata = gzcompress(json_encode($node));
+        $this->raw_set('flamedatad3', $flamedata);
+        $this->raw_set('numsamples',  $node->value);
+        $this->raw_set('datasize', strlen($flamedata));
+    }
+
+    /**
+     * Special getter to obtain the flame data JSON.
+     *
+     * @return string
+     */
+    public function get_flamedatad3json(): string {
+        return gzuncompress($this->raw_get('flamedatad3'));
+    }
+
+    public function add_env(): void {
+        global $USER, $CFG;
+
+        $this->set('sessionid', substr(session_id(), 0, 10));
+        $this->set('scripttype', context::get_script_type());
+        $this->set('userid', $USER ? $USER->id : 0);
+        $this->set('pid', getmypid());
+        $this->set('hostname', gethostname());
+        $this->set('versionhash', $CFG->allversionshash);
+
+        $this->set('method', $_SERVER['REQUEST_METHOD'] ?? '');
+        $this->set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
+        $this->set('useragent', $_SERVER['HTTP_USER_AGENT'] ?? '');
+        $this->set('referer', $_SERVER['HTTP_REFERER'] ?? '');
+        $this->set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
+        $this->set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
+        $this->set('parameters', context::get_parameters($this->get('scripttype')));
+
+        list($contenttypevalue, $contenttypekey, $contenttypecategory) = context::resolve_content_type($this);
+        $this->set('contenttypevalue', $contenttypevalue);
+        $this->set('contenttypekey', $contenttypekey);
+        $this->set('contenttypecategory', $contenttypecategory);
+    }
+
+    /**
+     * Saves the record to the database. Any transaction is bypassed.
+     * Additional information is obtained and inserted into the profile before recording.
+     *
+     * @return int The database ID of the record.
+     * @throws \dml_exception
+     */
+    public function save_record(): int {
         global $DB, $USER, $CFG;
 
-        $numsamples = $node->value;
-        $flamedatad3json = json_encode($node);
-        $flamedatad3gzip = gzcompress($flamedatad3json);
-        $datasize = strlen($flamedatad3gzip);
-
         // Get DB ops (reads/writes).
-        $dbreads = $DB->perf_get_reads();
-        $dbwrites = $DB->perf_get_writes();
-        $dbreplicareads = 0;
-        if ($DB->want_read_slave()) {
-            $dbreplicareads = $DB->perf_get_reads_slave();
-        }
+        $this->raw_set('dbreads', $DB->perf_get_reads());
+        $this->raw_set('dbwrites', $DB->perf_get_writes());
+        $this->raw_set('dbreplicareads', $DB->want_read_slave() ? $DB->perf_get_reads_slave() : 0);
+
+        $this->raw_set('responsecode', http_response_code());
 
         $intrans = $DB->is_transaction_started();
 
@@ -158,62 +191,13 @@ class profile {
             $db2 = $DB;
         }
 
-        if (self::$partialsaveid === 0) {
-            $type = context::get_script_type();
-            $parameters = context::get_parameters($type);
-            $method = $_SERVER['REQUEST_METHOD'] ?? '';
-
-            // If set, it will trim off the leading '/' to normalise web & cli requests.
-            $pathinfo = $_SERVER['PATH_INFO'] ?? '';
-
-            list($contenttypevalue, $contenttypekey, $contenttypecategory) = context::resolve_content_type($request, $pathinfo);
-
-            $id = $db2->insert_record('tool_excimer_profiles', [
-                'sessionid' => substr(session_id(), 0, 10),
-                'reason' => $reason,
-                'pathinfo' => $pathinfo,
-                'scripttype' => $type,
-                'userid' => $USER ? $USER->id : 0,
-                'method' => $method,
-                'created' => $created,
-                'finished' => $finished,
-                'duration' => $duration,
-                'request' => $request,
-                'parameters' => $parameters,
-                'cookies' => !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES,
-                'buffering' => !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING,
-                'responsecode' => http_response_code(),
-                'referer' => $_SERVER['HTTP_REFERER'] ?? '',
-                'pid' => getmypid(),
-                'hostname' => gethostname(),
-                'useragent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-                'versionhash' => $CFG->allversionshash,
-                'datasize' => $datasize,
-                'numsamples' => $numsamples,
-                'flamedatad3' => $flamedatad3gzip,
-                'contenttypevalue' => $contenttypevalue,
-                'contenttypekey' => $contenttypekey,
-                'contenttypecategory' => $contenttypecategory,
-                'dbreads' => $dbreads,
-                'dbwrites' => $dbwrites,
-                'dbreplicareads' => $dbreplicareads,
-            ]);
+        if (!isset($this->record->id)) {
+            $this->add_env();
+            $this->record->id = $db2->insert_record(self::TABLE, $this->record);
         } else {
-            $db2->update_record('tool_excimer_profiles', (object) [
-                'id' => self::$partialsaveid,
-                'reason' => $reason,
-                'responsecode' => http_response_code(),
-                'finished' => $finished,
-                'duration' => $duration,
-                'datasize' => $datasize,
-                'numsamples' => $numsamples,
-                'flamedatad3' => $flamedatad3gzip,
-                'dbreads' => $dbreads,
-                'dbwrites' => $dbwrites,
-                'dbreplicareads' => $dbreplicareads,
-            ]);
-            $id = self::$partialsaveid;
+            $db2->update_record(self::TABLE, $this->record);
         }
+
         if ($intrans) {
             $db2->dispose();
         }
@@ -228,12 +212,66 @@ class profile {
         // hold correct values.
 
         // Updates the request_metadata and per reason cache with more recent values.
-        if ($reason & self::REASON_SLOW) {
-            manager::get_min_duration_for_request_and_reason($request, self::REASON_SLOW, false);
+        if ($this->get('reason') & self::REASON_SLOW) {
+            manager::get_min_duration_for_request_and_reason($this->get('request'), self::REASON_SLOW, false);
             manager::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
-        return $id;
+        return $this->raw_get('id');
+    }
+
+    /**
+     * Mimics persitent::set()
+     *
+     * @param string $property
+     * @param $value
+     * @return $this
+     */
+    final public function set(string $property, $value): profile {
+        $methodname = 'set_' . $property;
+        if (method_exists($this, $methodname)) {
+            $this->$methodname($value);
+            return $this;
+        } else {
+            $this->record->$property = $value;
+        }
+        return $this;
+    }
+
+    /**
+     * Mimics persistent::get()
+     *
+     * @param string $property
+     * @return mixed
+     */
+    final public function get(string $property) {
+        $methodname = 'get_' . $property;
+        if (method_exists($this, $methodname)) {
+            return $this->$methodname();
+        }
+        return $this->record->$property;
+    }
+
+    /**
+     * Mimics persistent::raw_set()
+     *
+     * @param string $property
+     * @param $value
+     * @return $this
+     */
+    public function raw_set(string $property, $value): profile {
+        $this->record->$property = $value;
+        return $this;
+    }
+
+    /**
+     * Mimics persistent::raw_get()
+     *
+     * @param string $property
+     * @return mixed
+     */
+    public function raw_get(string $property) {
+        return $this->record->$property;
     }
 
     /**
@@ -277,7 +315,7 @@ class profile {
         // Purge the profiles older than this time as they are no longer
         // relevant.
         $DB->delete_records_select(
-            'tool_excimer_profiles',
+            self::TABLE,
             'created < :cutoff',
             ['cutoff' => $cutoff]
         );
@@ -303,7 +341,7 @@ class profile {
                     $idstodelete[] = $profile->id;
                     continue;
                 }
-                $DB->update_record('tool_excimer_profiles', $profile, true);
+                $DB->update_record(self::TABLE, $profile, true);
                 $updateordelete = true;
             }
         }
@@ -312,7 +350,7 @@ class profile {
         // REASON_NONE, as they no longer have a reason to exist.
         if (!empty($idstodelete)) {
             list($insql, $inparams) = $DB->get_in_or_equal($idstodelete);
-            $DB->delete_records_select('tool_excimer_profiles', 'id ' . $insql, $inparams);
+            $DB->delete_records_select(self::TABLE, 'id ' . $insql, $inparams);
             $updateordelete = true;
         }
 
@@ -403,5 +441,4 @@ class profile {
             self::remove_reason($records, self::REASON_SLOW);
         }
     }
-
 }

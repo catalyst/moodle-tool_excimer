@@ -285,7 +285,7 @@ class profile_table extends \table_sql {
         if ($this->is_downloading()) {
             return $record->responsecode;
         } else {
-            return helper::status_display($record);
+            return helper::status_display($record->scripttype, $record->responsecode);
         }
     }
 

@@ -32,7 +32,7 @@ require_admin();
 
 $profileid = required_param('profileid', PARAM_INT);
 
-$record = profile::getprofile($profileid);
+$profile = profile::get_profile($profileid);
 
 header('Content-Type: application/json; charset: utf-8');
-echo gzuncompress($record->flamedatad3);
+echo $profile->get_flamedatad3json();
