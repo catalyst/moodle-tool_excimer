@@ -35,7 +35,7 @@ class script_metadata {
 
     /** List of parameters that are not to be recorded at all. */
     const DENYLIST = [
-        manager::MANUAL_PARAM_NAME,
+        manager::FLAME_ME_PARAM_NAME,
         manager::FLAME_ON_PARAM_NAME,
         manager::FLAME_OFF_PARAM_NAME,
     ];

@@ -31,8 +31,11 @@ class profile extends persistent {
     const TABLE = 'tool_excimer_profiles';
 
 
+    /** Reason - NONE - Default fallback reason value, this will not be stored. */
+    const REASON_NONE = 0b0000;
+
     /** Reason - MANUAL - Profiles are manually stored for the request using FLAMEME as a page param. */
-    const REASON_MANUAL   = 0b0001;
+    const REASON_FLAMEME   = 0b0001;
 
     /** Reason - SLOW - Set when conditions are met and these profiles are automatically stored. */
     const REASON_SLOW     = 0b0010;
@@ -40,18 +43,16 @@ class profile extends persistent {
     /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
     const REASON_FLAMEALL = 0b0100;
 
-    /** Reason - NONE - Default fallback reason value, this will not be stored. */
-    const REASON_NONE = 0b0000;
 
     /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
     const REASONS = [
-        self::REASON_MANUAL,
+        self::REASON_FLAMEME,
         self::REASON_SLOW,
         self::REASON_FLAMEALL,
     ];
 
     const REASON_STR_MAP = [
-        self::REASON_MANUAL => 'manual',
+        self::REASON_FLAMEME => 'manual',
         self::REASON_SLOW => 'slowest',
         self::REASON_FLAMEALL => 'flameall',
     ];
