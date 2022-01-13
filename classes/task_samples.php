@@ -16,8 +16,6 @@
 
 namespace tool_excimer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for storing samples copied over from the profiler to match a current task.
  *

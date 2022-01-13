@@ -16,8 +16,6 @@
 
 namespace tool_excimer\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Renderer class for the Excimer plugin
  *

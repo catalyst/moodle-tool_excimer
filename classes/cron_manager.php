@@ -16,8 +16,6 @@
 
 namespace tool_excimer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Manages the profiling of cron runs.
  *
