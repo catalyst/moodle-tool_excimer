@@ -42,10 +42,10 @@ class tool_excimer_manager_test extends \advanced_testcase {
     public function test_is_profiling(): void {
         $this->assertFalse(manager::is_profiling());
 
-        $_REQUEST[manager::MANUAL_PARAM_NAME] = 1;
+        $_REQUEST[manager::FLAME_ME_PARAM_NAME] = 1;
         $this->assertTrue(manager::is_profiling());
 
-        unset($_REQUEST[manager::MANUAL_PARAM_NAME]);
+        unset($_REQUEST[manager::FLAME_ME_PARAM_NAME]);
         $this->assertFalse(manager::is_profiling());
 
         $_REQUEST[manager::FLAME_ON_PARAM_NAME] = 1;

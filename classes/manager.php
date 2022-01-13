@@ -26,7 +26,7 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class manager {
-    const MANUAL_PARAM_NAME = 'FLAMEME';
+    const FLAME_ME_PARAM_NAME = 'FLAMEME';
     const FLAME_ON_PARAM_NAME = 'FLAMEALL';
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
     const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
@@ -70,7 +70,7 @@ class manager {
     public static function is_profiling(): bool {
         return !self::is_flag_set(self::NO_FLAME_PARAM_NAME) && (
                     self::is_flame_all() ||
-                    self::is_flag_set(self::MANUAL_PARAM_NAME) ||
+                    self::is_flag_set(self::FLAME_ME_PARAM_NAME) ||
                     (get_config('tool_excimer', 'enable_auto'))
                 );
     }
@@ -178,8 +178,8 @@ class manager {
         global $SESSION;
 
         $reason = profile::REASON_NONE;
-        if (self::is_flag_set(self::MANUAL_PARAM_NAME)) {
-            $reason |= profile::REASON_MANUAL;
+        if (self::is_flag_set(self::FLAME_ME_PARAM_NAME)) {
+            $reason |= profile::REASON_FLAMEME;
         }
         if (isset($SESSION->toolexcimerflameall)) {
             $reason |= profile::REASON_FLAMEALL;

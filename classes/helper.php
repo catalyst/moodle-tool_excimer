@@ -78,8 +78,8 @@ class helper {
         if ($reason & profile::REASON_FLAMEALL) {
             $reasonsmatched[] = get_string('reason_flameall', 'tool_excimer');
         }
-        if ($reason & profile::REASON_MANUAL) {
-            $reasonsmatched[] = get_string('reason_manual', 'tool_excimer');
+        if ($reason & profile::REASON_FLAMEME) {
+            $reasonsmatched[] = get_string('reason_flameme', 'tool_excimer');
         }
         return implode(',', $reasonsmatched);
     }

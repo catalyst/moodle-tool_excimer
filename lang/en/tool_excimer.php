@@ -112,7 +112,7 @@ $string['scripttype_ws'] = 'Service';
 $string['scripttype_task'] = 'Task';
 
 // Log reasons.
-$string['reason_manual'] = 'Manual';
+$string['reason_flameme'] = 'Flame Me';
 $string['reason_auto'] = 'Auto';
 $string['reason_slow'] = 'Slow';
 $string['reason_flameall'] = 'Flame All';

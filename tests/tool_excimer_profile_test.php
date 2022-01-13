@@ -99,14 +99,14 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        $this->quick_save('mock', $node, profile::REASON_MANUAL, 2.345);
+        $this->quick_save('mock', $node, profile::REASON_FLAMEME, 2.345);
         $this->quick_save('mock', $node, profile::REASON_FLAMEALL, 0.104);
 
         foreach ($times as $time) {
             $this->quick_save('mock', $node, profile::REASON_SLOW, $time);
         }
 
-        $this->quick_save('mock', $node, profile::REASON_MANUAL, 0.001);
+        $this->quick_save('mock', $node, profile::REASON_FLAMEME, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records(profile::TABLE));
 
@@ -154,7 +154,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $SCRIPT = 'a';
-        $this->quick_save('a', $node, profile::REASON_MANUAL, 2.345);
+        $this->quick_save('a', $node, profile::REASON_FLAMEME, 2.345);
         $SCRIPT = 'b';
         $this->quick_save('b', $node, profile::REASON_FLAMEALL, 0.104);
 
@@ -164,7 +164,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         }
 
         $SCRIPT = 'c';
-        $this->quick_save('c', $node, profile::REASON_MANUAL, 0.001);
+        $this->quick_save('c', $node, profile::REASON_FLAMEME, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records(profile::TABLE));
 
@@ -198,7 +198,6 @@ class tool_excimer_profile_test extends \advanced_testcase {
 
         $profile->set('flamedatad3', $node);
         $this->assertEquals($nodejson, $profile->get_flamedatad3json());
-        $this->assertEquals($compressed, $profile->get('flamedatad3'));
         $this->assertEquals($size, $profile->get('datasize'));
         $this->assertEquals($node->value, $profile->get('numsamples'));
     }
@@ -315,7 +314,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(0, profile::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_MANUAL, 0.2, $time);
+            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_FLAMEME, 0.2, $time);
             $this->assertEquals(++$expectedcount, profile::get_num_profiles());
         }
 
