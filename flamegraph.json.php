@@ -32,7 +32,7 @@ require_admin();
 
 $profileid = required_param('profileid', PARAM_INT);
 
-$profile = profile::get_profile($profileid);
+$profile = new profile($profileid);
 
 header('Content-Type: application/json; charset: utf-8');
 echo $profile->get_flamedatad3json();

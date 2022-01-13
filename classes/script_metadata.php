@@ -22,11 +22,12 @@ use core_filetypes;
  * Functions that extract information from the execution environment.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>, Kevin Pham <kevinpham@catalyst-au.net>
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Kevin Pham <kevinpham@catalyst-au.net>
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class context {
+class script_metadata {
 
     /** Request's fallback value for when the $SCRIPT is null */
     const REQUEST_UNKNOWN = 'UNKNOWN';
