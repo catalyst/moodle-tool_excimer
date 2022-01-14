@@ -39,4 +39,37 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $paramexpect = ['a' => '1', 'sesskey' => ''];
         $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
     }
+
+    public function test_get_groupby_value(): void {
+        $profile = new profile();
+        $profile->set('request', 'admin/index.php');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('admin/index.php', $group);
+        $profile->set('pathinfo', '/a/b/c');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('admin/index.php/a/b/c', $group);
+        $profile->set('parameters', 'a=b');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('admin/index.php/a/b/c?a=b', $group);
+        $profile->set('pathinfo', '');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('admin/index.php?a=b', $group);
+        $profile->set('parameters', '');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('admin/index.php', $group);
+
+        $profile = new profile();
+        $profile->set('request', 'sometask');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('sometask', $group);
+        $profile->set('pathinfo', '/a/b/c');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('sometask', $group);
+        $profile->set('parameters', 'a=b');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('sometask', $group);
+        $profile->set('pathinfo', '');
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals('sometask', $group);
+    }
 }

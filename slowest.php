@@ -30,8 +30,9 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 // The script can either be a URL, or a task name, or whatever may be used
-// for a request name. So we need to accept RAW input.
-$script = optional_param('script', '', PARAM_RAW);
+// for a request name. So we need to accept TEXT input.
+$script = optional_param('script', '', PARAM_TEXT);
+$group = optional_param('group', '', PARAM_TEXT);
 
 admin_externalpage_setup('tool_excimer_report_slowest');
 
@@ -42,5 +43,9 @@ $table->sortable(true, 'duration', SORT_DESC);
 if ($script) {
     $table->add_filter('request', $script);
     $url->params(['script' => $script]);
+}
+if ($group) {
+    $table->add_filter('groupby', $group);
+    $url->params(['group' => $group]);
 }
 profile_table_page::display($table, $url);

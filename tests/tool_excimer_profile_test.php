@@ -72,7 +72,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
 
     public function quick_save(string $request, flamed3_node $node, int $reason, float $duration, int $created = 12345): int {
         $profile = new profile();
-        $profile->set('request', $request);
+        $profile->add_env($request);
         $profile->set('reason', $reason);
         $profile->set('flamedatad3', $node);
         $profile->set('created', $created);
@@ -135,12 +135,12 @@ class tool_excimer_profile_test extends \advanced_testcase {
     }
 
     /**
-     * Tests the functionality to keep only the N slowest profiles for each page.
+     * Tests the functionality to keep only the N slowest profiles for each group.
      *
      * @throws \dml_exception
      */
-    public function test_n_slowest_kept_per_page(): void {
-        global $DB, $SCRIPT;
+    public function test_n_slowest_kept_per_group(): void {
+        global $DB;
         $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
@@ -153,17 +153,13 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $node = flamed3_node::from_excimer_log_entries($log);
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
-        $SCRIPT = 'a';
         $this->quick_save('a', $node, profile::REASON_FLAMEME, 2.345);
-        $SCRIPT = 'b';
         $this->quick_save('b', $node, profile::REASON_FLAMEALL, 0.104);
 
         for ($i = 0; $i < count($times); ++$i) {
-            $SCRIPT = $reqnames[$i];
             $this->quick_save($reqnames[$i], $node, profile::REASON_SLOW, $times[$i]);
         }
 
-        $SCRIPT = 'c';
         $this->quick_save('c', $node, profile::REASON_FLAMEME, 0.001);
 
         $this->assertEquals(count($times) + 3, $DB->count_records(profile::TABLE));
@@ -172,7 +168,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $numtokeep = 3;
         $expectedreqcount = [ 'a' => 3, 'b' => 1, 'c' => 3, 'd' => 2 ];
         $expectedfastest = [ 'a' => 0.456, 'b' => 0.234, 'c' => 0.123, 'd' => 0.14 ];
-        profile::purge_fastest_by_page($numtokeep);
+        profile::purge_fastest_by_group($numtokeep);
         $this->assertEquals(array_sum($expectedreqcount) + 3, $DB->count_records(profile::TABLE));
         $records = $DB->get_records_sql(
             "SELECT request, COUNT(*) AS c, MIN(duration) AS m
@@ -218,8 +214,8 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $request = 'mock';
 
         $profile = new profile();
+        $profile->add_env($request);
         $profile->set('reason', $reason);
-        $profile->set('request', $request);
         $profile->set('created', $created);
         $profile->set('duration', $duration);
         $profile->set('finished', $finished);
@@ -240,7 +236,6 @@ class tool_excimer_profile_test extends \advanced_testcase {
     }
 
     public function test_partial_save() {
-        global $DB;
         $this->preventResetByRollback();
 
         $log = $this->quick_log(1);
@@ -249,12 +244,11 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $reason = profile::REASON_SLOW;
         $created = 56;
         $duration = 1.123;
-        $finished = 57;
         $request = 'mock';
 
         $profile = profile::get_running_profile();
+        $profile->add_env($request);
         $profile->set('reason', $reason);
-        $profile->set('request', $request);
         $profile->set('created', $created);
         $profile->set('duration', $duration);
         $profile->set('finished', 0);
@@ -382,19 +376,28 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertFalse($profile);
     }
 
+    /**
+     * @param float $duration time in seconds.
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     private function mock_profile_insertion_with_duration(float $duration) {
         // Same handling with on_interval and on_flush of the manager
         // class, with a custom duration set.
-        $profile = new \ExcimerProfiler();
-        $started = microtime(true);
-        $finalduration = $duration / 1000;
+        $profiler = new \ExcimerProfiler();
+        $profile = new profile();
+        $profile->add_env('mock');
+        $profile->set('created', (int) microtime(false));
+        $profile->set('duration', $duration);
 
         // Divide by 1000 required, as microtime(true) returns the value in seconds.
-        $reason = manager::get_reasons('mock', $finalduration);
+        $reason = manager::get_reasons($profile);
         if ($reason !== profile::REASON_NONE) {
-            $log = $profile->getLog();
+            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($profiler->getLog()));
+            $profile->set('reason', $reason);
+
             // Won't show DB writes count since saves are stored via another DB connection.
-            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $reason, $finalduration, (int) $started);
+            $profile->save_record();
         }
     }
 
@@ -412,12 +415,12 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $startwrites = $DB->perf_get_writes();
 
         // Under triggerms - no R/Ws.
-        $this->mock_profile_insertion_with_duration(1);
+        $this->mock_profile_insertion_with_duration(0.001);
         $this->assertEquals(0, $DB->perf_get_reads() - $startreads);
         $this->assertEquals(0, $DB->perf_get_writes() - $startwrites);
 
         // Equal to triggerms - no R/Ws - value skipped if equal - must be greater.
-        $this->mock_profile_insertion_with_duration(2);
+        $this->mock_profile_insertion_with_duration(0.002);
         $this->assertEquals(0, $DB->perf_get_reads() - $startreads);
         $this->assertEquals(0, $DB->perf_get_writes() - $startwrites);
 
@@ -433,7 +436,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
             4, // Same as above, but for the request. Since min is 4 it won't be
                // added, but this will warm the cache.
         ] as $duration) {
-            $this->mock_profile_insertion_with_duration($duration);
+            $this->mock_profile_insertion_with_duration($duration / 1000);
         }
 
         $startwarmcachereads = $DB->perf_get_reads();
@@ -444,7 +447,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
             1, 2, 3, 4,
             1, 2, 3, 4,
         ] as $duration) {
-            $this->mock_profile_insertion_with_duration($duration);
+            $this->mock_profile_insertion_with_duration($duration / 1000);
         }
 
         $endreads = $DB->perf_get_reads();

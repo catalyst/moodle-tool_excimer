@@ -46,6 +46,19 @@ class script_metadata {
     ];
 
     /**
+     * List of script names that requires more infor for grouping.
+     * TODO: This list is incomplete.
+     */
+    const SCRIPT_NAMES_FOR_GROUP_REFINING = [
+        'admin/index.php',
+        'admin/settings.php',
+        'admin/search.php',
+        'admin/category.php',
+        'lib/javascript.php',
+        'lib/ajax/service.php',
+    ];
+
+    /**
      * Gets the script type of the request.
      *
      * @return int
@@ -79,7 +92,8 @@ class script_metadata {
     }
 
     /**
-     * Removes any parameter on profile::DENYLIST.
+     * Removes any parameter on DENYLIST.
+     * Redacts any parameters on REDACTLIST.
      *
      * @param array $parameters
      * @return array
@@ -189,5 +203,24 @@ class script_metadata {
         }
 
         return [$contenttypevalue, $contenttypekey, $contenttypecategory];
+    }
+
+    /**
+     * @param profile $profile
+     * @return string
+     * @throws \coding_exception
+     */
+    public static function get_groupby_value(profile $profile): string  {
+        $request = $profile->get('request');
+        if (in_array($request, self::SCRIPT_NAMES_FOR_GROUP_REFINING)) {
+            $val = $request . $profile->get('pathinfo');
+            $params = $profile->get('parameters');
+            if ($params != '') {
+                $val .= '?' . $params;
+            }
+            return $val;
+        } else {
+            return $request;
+        }
     }
 }

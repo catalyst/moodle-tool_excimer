@@ -34,7 +34,7 @@ class purge_fastest  extends \core\task\scheduled_task {
     }
 
     public function execute() {
-        profile::purge_fastest_by_page((int) get_config('tool_excimer', 'num_slowest_by_page'));
+        profile::purge_fastest_by_group((int) get_config('tool_excimer', 'num_slowest_by_page'));
         profile::purge_fastest((int) get_config('tool_excimer', 'num_slowest'));
     }
 }

@@ -34,7 +34,7 @@ $returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALUR
 $deleteall = optional_param('deleteall', 0, PARAM_BOOL);
 $deleteid = optional_param('deleteid', 0, PARAM_INT);
 
-$filter = optional_param('filter', 0, PARAM_RAW);
+$filter = optional_param('filter', 0, PARAM_TEXT);
 
 require_sesskey();
 

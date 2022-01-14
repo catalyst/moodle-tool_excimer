@@ -52,13 +52,13 @@ class task_samples {
      */
     public function process(float $finishtime): void {
         $duration = $finishtime - $this->starttime;
-        $reasons = manager::get_reasons($this->name, $duration);
+        $profile = new profile();
+        $profile->add_env($this->name);
+        $profile->set('created', (int) $this->starttime);
+        $profile->set('duration', $duration);
+        $reasons = manager::get_reasons($profile);
         if ($reasons !== profile::REASON_NONE) {
-            $profile = new profile();
-            $profile->set('request', $this->name);
             $profile->set('reason', $reasons);
-            $profile->set('created', (int) $this->starttime);
-            $profile->set('duration', $duration);
             $profile->set('finished', (int) $finishtime);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->samples));
             $profile->save_record();
