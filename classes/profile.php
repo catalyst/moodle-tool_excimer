@@ -77,7 +77,7 @@ class profile extends persistent {
      *
      * @return profile
      */
-    public static function get_running_profile(?string $request = null): profile {
+    public static function get_running_profile(): profile {
         if (!isset(self::$runningprofile)) {
             self::$runningprofile = new profile();
         }
