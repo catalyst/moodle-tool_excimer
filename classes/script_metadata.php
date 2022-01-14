@@ -210,7 +210,7 @@ class script_metadata {
      * @return string
      * @throws \coding_exception
      */
-    public static function get_groupby_value(profile $profile): string  {
+    public static function get_groupby_value(profile $profile): string {
         $request = $profile->get('request');
         if (in_array($request, self::SCRIPT_NAMES_FOR_GROUP_REFINING)) {
             $val = $request . $profile->get('pathinfo');
