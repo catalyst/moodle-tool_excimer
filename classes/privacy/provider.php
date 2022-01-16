@@ -61,7 +61,6 @@ class provider implements \core_privacy\local\metadata\provider,
      */
     public static function get_contexts_for_userid(int $userid) : contextlist {
         $contextlist = new contextlist();
-        $contextlist->add_user_context($userid);
         $contextlist->add_system_context();
         return $contextlist;
     }
