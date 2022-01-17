@@ -40,36 +40,27 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
     }
 
-    public function test_get_groupby_value(): void {
+    /**
+     * @dataProvider group_by_value_provider
+     * @throws \coding_exception
+     */
+    public function test_get_groupby_value($request, $pathinfo, $parameters, $expected): void {
         $profile = new profile();
-        $profile->set('request', 'admin/index.php');
+        $profile->set('request', $request);
+        $profile->set('pathinfo', $pathinfo);
+        $profile->set('parameters', $parameters);
         $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('admin/index.php', $group);
-        $profile->set('pathinfo', '/a/b/c');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('admin/index.php/a/b/c', $group);
-        $profile->set('parameters', 'a=b');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('admin/index.php/a/b/c?a=b', $group);
-        $profile->set('pathinfo', '');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('admin/index.php?a=b', $group);
-        $profile->set('parameters', '');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('admin/index.php', $group);
-
-        $profile = new profile();
-        $profile->set('request', 'sometask');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('sometask', $group);
-        $profile->set('pathinfo', '/a/b/c');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('sometask', $group);
-        $profile->set('parameters', 'a=b');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('sometask', $group);
-        $profile->set('pathinfo', '');
-        $group = script_metadata::get_groupby_value($profile);
-        $this->assertEquals('sometask', $group);
+        $this->assertEquals($expected, $group);
     }
+
+    public function group_by_value_provider(): array {
+        return [
+            ['admin/index.php', '', '', 'admin/index.php'],
+            ['admin/index.php', '/a/54/c', '', 'admin/index.php/a/x/c'],
+            ['admin/index.php', '', 'a=1&b&c=3', 'admin/index.php?a=&b&c='],
+            ['admin/index.php', '/1/2/3/', 'a=1&b&c=3', 'admin/index.php/x/x/x/?a=&b&c='],
+            ['pluginfile.php', '/12/mod/book/3242/3/tool.png', '', 'pluginfile.php/x/mod/book/xxx'],
+        ];
+    }
+
 }

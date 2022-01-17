@@ -56,6 +56,9 @@ class script_metadata {
         'admin/category.php',
         'lib/javascript.php',
         'lib/ajax/service.php',
+        'pluginfile.php',
+        'webservice/pluginfile.php',
+        'tokenpluginfile.php',
     ];
 
     /**
@@ -205,6 +208,12 @@ class script_metadata {
         return [$contenttypevalue, $contenttypekey, $contenttypecategory];
     }
 
+    const PLUGINFILE_SCRIPTS = [
+        'pluginfile.php',
+        'webservice/pluginfile.php',
+        'tokenpluginfile.php',
+    ];
+
     /**
      * @param profile $profile
      * @return string
@@ -213,14 +222,48 @@ class script_metadata {
     public static function get_groupby_value(profile $profile): string {
         $request = $profile->get('request');
         if (in_array($request, self::SCRIPT_NAMES_FOR_GROUP_REFINING)) {
-            $val = $request . $profile->get('pathinfo');
+            $pathinfo = $profile->get('pathinfo');
+            $val = $request;
+            if ($pathinfo) {
+                if (in_array($request, self::PLUGINFILE_SCRIPTS)) {
+                    $val .= self::redact_pluginfile_pathinfo($pathinfo);
+                } else {
+                    $val .= self::redact_pathinfo($pathinfo);
+                }
+            }
             $params = $profile->get('parameters');
             if ($params != '') {
-                $val .= '?' . $params;
+                $val .= '?' . self::redact_parameters($params);
             }
             return $val;
         } else {
             return $request;
         }
     }
+
+    public static function redact_parameters(string $parameters): string {
+        $parms = explode('&', $parameters);
+        foreach ($parms as &$v) {
+            $v = preg_replace('/=.*$/', '=', $v);
+        }
+        return implode('&', $parms);
+    }
+
+    public static function redact_pathinfo(string $pathinfo): string {
+        $segments = explode('/', ltrim($pathinfo, '/'));
+        foreach ($segments as &$v) {
+            if (ctype_digit($v)) {
+                $v = 'x';
+            }
+        }
+        return '/' . implode('/', $segments);
+    }
+
+    public static function redact_pluginfile_pathinfo(string $pathinfo): string {
+        $segments = explode('/', ltrim($pathinfo, '/'), 4);
+        $segments[0] = 'x';
+        $segments[3] = 'xxx';
+        return '/' . implode('/', $segments);
+    }
+
 }
