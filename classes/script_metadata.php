@@ -46,6 +46,22 @@ class script_metadata {
     ];
 
     /**
+     * List of script names that requires more infor for grouping.
+     * TODO: This list is incomplete.
+     */
+    const SCRIPT_NAMES_FOR_GROUP_REFINING = [
+        'admin/index.php',
+        'admin/settings.php',
+        'admin/search.php',
+        'admin/category.php',
+        'lib/javascript.php',
+        'lib/ajax/service.php',
+        'pluginfile.php',
+        'webservice/pluginfile.php',
+        'tokenpluginfile.php',
+    ];
+
+    /**
      * Gets the script type of the request.
      *
      * @return int
@@ -79,7 +95,8 @@ class script_metadata {
     }
 
     /**
-     * Removes any parameter on profile::DENYLIST.
+     * Removes any parameter on DENYLIST.
+     * Redacts any parameters on REDACTLIST.
      *
      * @param array $parameters
      * @return array
@@ -190,4 +207,81 @@ class script_metadata {
 
         return [$contenttypevalue, $contenttypekey, $contenttypecategory];
     }
+
+    const PLUGINFILE_SCRIPTS = [
+        'pluginfile.php',
+        'webservice/pluginfile.php',
+        'tokenpluginfile.php',
+    ];
+
+    /**
+     * @param profile $profile
+     * @return string
+     * @throws \coding_exception
+     */
+    public static function get_groupby_value(profile $profile): string {
+        $request = $profile->get('request');
+        if (in_array($request, self::SCRIPT_NAMES_FOR_GROUP_REFINING)) {
+            $pathinfo = $profile->get('pathinfo');
+            $val = $request;
+            if ($pathinfo) {
+                if (in_array($request, self::PLUGINFILE_SCRIPTS)) {
+                    $val .= self::redact_pluginfile_pathinfo($pathinfo);
+                } else {
+                    $val .= self::redact_pathinfo($pathinfo);
+                }
+            }
+            $params = $profile->get('parameters');
+            if ($params != '') {
+                $val .= '?' . self::redact_parameters($params);
+            }
+            return $val;
+        } else {
+            return $request;
+        }
+    }
+
+    /**
+     * Redacts values from a query string.
+     *
+     * @param string $parameters
+     * @return string
+     */
+    public static function redact_parameters(string $parameters): string {
+        $parms = explode('&', $parameters);
+        foreach ($parms as &$v) {
+            $v = preg_replace('/=.*$/', '=', $v);
+        }
+        return implode('&', $parms);
+    }
+
+    /**
+     * Redacts values from a pathinfo.
+     *
+     * @param string $pathinfo
+     * @return string
+     */
+    public static function redact_pathinfo(string $pathinfo): string {
+        $segments = explode('/', ltrim($pathinfo, '/'));
+        foreach ($segments as &$v) {
+            if (ctype_digit($v)) {
+                $v = 'x';
+            }
+        }
+        return '/' . implode('/', $segments);
+    }
+
+    /**
+     * Redacts values for a pathinfo. Specificly for pluginfile like scripts.
+     *
+     * @param string $pathinfo
+     * @return string
+     */
+    public static function redact_pluginfile_pathinfo(string $pathinfo): string {
+        $segments = explode('/', ltrim($pathinfo, '/'), 4);
+        $segments[0] = 'x';
+        $segments[3] = 'xxx';
+        return '/' . implode('/', $segments);
+    }
+
 }

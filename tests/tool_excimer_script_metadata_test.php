@@ -39,4 +39,35 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $paramexpect = ['a' => '1', 'sesskey' => ''];
         $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
     }
+
+    /**
+     * Test script_metadata::get_groupby_value().
+     *
+     * @dataProvider group_by_value_provider
+     * @throws \coding_exception
+     */
+    public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected): void {
+        $profile = new profile();
+        $profile->set('request', $request);
+        $profile->set('pathinfo', $pathinfo);
+        $profile->set('parameters', $parameters);
+        $group = script_metadata::get_groupby_value($profile);
+        $this->assertEquals($expected, $group);
+    }
+
+    /**
+     * Input values for test_get_groupby_value.
+     *
+     * @return \string[][]
+     */
+    public function group_by_value_provider(): array {
+        return [
+            ['admin/index.php', '', '', 'admin/index.php'],
+            ['admin/index.php', '/a/54/c', '', 'admin/index.php/a/x/c'],
+            ['admin/index.php', '', 'a=1&b&c=3', 'admin/index.php?a=&b&c='],
+            ['admin/index.php', '/1/2/3/', 'a=1&b&c=3', 'admin/index.php/x/x/x/?a=&b&c='],
+            ['pluginfile.php', '/12/mod/book/3242/3/tool.png', '', 'pluginfile.php/x/mod/book/xxx'],
+        ];
+    }
+
 }

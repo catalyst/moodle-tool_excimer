@@ -107,9 +107,10 @@ class profile extends persistent {
         return gzuncompress($this->raw_get('flamedatad3'));
     }
 
-    public function add_env(): void {
+    public function add_env(string $request): void {
         global $USER, $CFG;
 
+        $this->raw_set('request', $request);
         $this->raw_set('sessionid', substr(session_id(), 0, 10));
         $this->raw_set('scripttype', script_metadata::get_script_type());
         $this->raw_set('userid', $USER ? $USER->id : 0);
@@ -124,6 +125,7 @@ class profile extends persistent {
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
         $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
         $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
+        $this->raw_set('groupby', script_metadata::get_groupby_value($this));
 
         list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
         $this->raw_set('contenttypevalue', $contenttypevalue);
@@ -173,7 +175,6 @@ class profile extends persistent {
 
         if ($this->raw_get('id') <= 0) {
             $this->raw_set('timecreated', $now);
-            $this->add_env();
             $id = $db2->insert_record(self::TABLE, $this->to_record());
             $this->raw_set('id', $id);
         } else {
@@ -195,7 +196,7 @@ class profile extends persistent {
 
         // Updates the request_metadata and per reason cache with more recent values.
         if ($this->get('reason') & self::REASON_SLOW) {
-            manager::get_min_duration_for_request_and_reason($this->get('request'), self::REASON_SLOW, false);
+            manager::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
             manager::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
@@ -211,10 +212,10 @@ class profile extends persistent {
     public static function purge_profiles_before_epoch_time(int $cutoff): void {
         global $DB;
 
-        // Fetch unique requets and reasons that will be purged by the cutoff
+        // Fetch unique groupby and reasons that will be purged by the cutoff
         // datetime, so that we can selectively clear the cache.
-        $requests = $DB->get_fieldset_sql(
-            "SELECT DISTINCT request
+        $groups = $DB->get_fieldset_sql(
+            "SELECT DISTINCT groupby
                FROM {tool_excimer_profiles}
               WHERE created < :cutoff",
             ['cutoff' => $cutoff]
@@ -226,11 +227,11 @@ class profile extends persistent {
             ['cutoff' => $cutoff]
         );
 
-        // Clears the request_metadata cache for the specific request and
+        // Clears the request_metadata cache for the specific groups and
         // affected reasons.
-        if (!empty($requests)) {
+        if (!empty($groups)) {
             $cache = \cache::make('tool_excimer', 'request_metadata');
-            $cache->delete_many($requests);
+            $cache->delete_many($groups);
         }
         if ($reasons) {
             $combinedreasons = self::REASON_NONE;
@@ -301,12 +302,12 @@ class profile extends persistent {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function purge_fastest_by_page(int $numtokeep): void {
+    public static function purge_fastest_by_group(int $numtokeep): void {
         global $DB;
 
         $purgablereasons = $DB->sql_bitand('reason', self::REASON_SLOW);
         $records = $DB->get_records_sql(
-            "SELECT id, request, reason
+            "SELECT id, groupby, reason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
            ORDER BY duration ASC
@@ -315,12 +316,12 @@ class profile extends persistent {
 
         // Group profiles by request / page.
         $groupedprofiles = array_reduce($records, function ($acc, $record) {
-            $acc[$record->request] = $acc[$record->request] ?? [
+            $acc[$record->groupby] = $acc[$record->groupby] ?? [
                 'count' => 0,
                 'profiles' => [],
             ];
-            $acc[$record->request]['count']++;
-            $acc[$record->request]['profiles'][] = $record;
+            $acc[$record->groupby]['count']++;
+            $acc[$record->groupby]['profiles'][] = $record;
             return $acc;
         }, []);
 
@@ -379,32 +380,33 @@ class profile extends persistent {
         return [
             'reason' => ['type' => PARAM_INT],
             'scripttype' => ['type' => PARAM_INT],
-            'method' => ['type' => PARAM_ALPHA],
-            'created' => ['type' => PARAM_INT],
+            'method' => ['type' => PARAM_ALPHA, 'default' => ''],
+            'created' => ['type' => PARAM_INT, 'default' => 0],
             'finished' => ['type' => PARAM_INT, 'default' => 0],
-            'duration' => ['type' => PARAM_FLOAT],
-            'request' => ['type' => PARAM_TEXT],
-            'pathinfo' => ['type' => PARAM_SAFEPATH],
-            'parameters' => ['type' => PARAM_TEXT],
-            'sessionid' => ['type' => PARAM_ALPHANUM],
-            'userid' => ['type' => PARAM_INT],
+            'duration' => ['type' => PARAM_FLOAT, 'default' => 0],
+            'request' => ['type' => PARAM_TEXT, 'default' => ''],
+            'groupby' => ['type' => PARAM_TEXT, 'default' => ''],
+            'pathinfo' => ['type' => PARAM_SAFEPATH, 'default' => ''],
+            'parameters' => ['type' => PARAM_TEXT, 'default' => ''],
+            'sessionid' => ['type' => PARAM_ALPHANUM, 'default' => ''],
+            'userid' => ['type' => PARAM_INT, 'default' => 0],
             'cookies' => ['type' => PARAM_BOOL],
             'buffering' => ['type' => PARAM_BOOL],
-            'responsecode' => ['type' => PARAM_INT],
-            'referer' => ['type' => PARAM_URL],
-            'pid' => ['type' => PARAM_INT],
-            'hostname' => ['type' => PARAM_TEXT],
-            'useragent' => ['type' => PARAM_TEXT],
-            'versionhash' => ['type' => PARAM_TEXT],
-            'datasize' => ['type' => PARAM_INT],
-            'numsamples' => ['type' => PARAM_INT],
+            'responsecode' => ['type' => PARAM_INT, 'default' => 0],
+            'referer' => ['type' => PARAM_URL, 'default' => ''],
+            'pid' => ['type' => PARAM_INT, 'default' => 0],
+            'hostname' => ['type' => PARAM_TEXT, 'default' => ''],
+            'useragent' => ['type' => PARAM_TEXT, 'default' => ''],
+            'versionhash' => ['type' => PARAM_TEXT, 'default' => ''],
+            'datasize' => ['type' => PARAM_INT, 'default' => 0],
+            'numsamples' => ['type' => PARAM_INT, 'default' => 0],
             'flamedatad3' => ['type' => PARAM_RAW],
-            'contenttypecategory' => ['type' => PARAM_TEXT],
+            'contenttypecategory' => ['type' => PARAM_TEXT, 'default' => ''],
             'contenttypekey' => ['type' => PARAM_TEXT],
             'contenttypevalue' => ['type' => PARAM_TEXT],
-            'dbreads' => ['type' => PARAM_INT],
-            'dbwrites' => ['type' => PARAM_INT],
-            'dbreplicareads' => ['type' => PARAM_INT],
+            'dbreads' => ['type' => PARAM_INT, 'default' => 0],
+            'dbwrites' => ['type' => PARAM_INT, 'default' => 0],
+            'dbreplicareads' => ['type' => PARAM_INT, 'default' => 0],
         ];
     }
 }

@@ -128,7 +128,12 @@ class manager {
         $timer = new \ExcimerTimer();
         $timer->setPeriod($timerinterval);
 
+        $profile = profile::get_running_profile();
+        $profile->add_env(script_metadata::get_request());
+
         $started = microtime(true);
+
+        $profile->set('created', (int) $started);
 
         if (self::is_cron()) {
             $timer->setPeriod($sampleperiod);
@@ -170,11 +175,11 @@ class manager {
     /**
      * Retrieves all the reasons for saving a profile.
      *
-     * @param float $duration The duration of the script so far.
+     * @param profile $profile
      * @return int Reasons as bit flags.
      * @throws \dml_exception
      */
-    public static function get_reasons(string $request, float $duration): int {
+    public static function get_reasons(profile $profile): int {
         global $SESSION;
 
         $reason = profile::REASON_NONE;
@@ -185,7 +190,7 @@ class manager {
             $reason |= profile::REASON_FLAMEALL;
         }
 
-        if (self::is_considered_slow($request, $duration * 1000)) {
+        if (self::is_considered_slow($profile)) {
             $reason |= profile::REASON_SLOW;
         }
         return $reason;
@@ -203,7 +208,7 @@ class manager {
      *
      * @return float duration (in milliseconds) of the fastest profile for a given reason and request/page.
      */
-    public static function get_min_duration_for_request_and_reason(string $request, int $reason, bool $usecache = true): float {
+    public static function get_min_duration_for_group_and_reason(string $group, int $reason, bool $usecache = true): float {
         global $DB;
 
         $reasonstr = profile::REASON_STR_MAP[$reason];
@@ -211,7 +216,7 @@ class manager {
 
         // Grab the fastest profile for this page/request, and use that as
         // the lower boundary for any new profiles of this page/request.
-        $cachekey = $request;
+        $cachekey = $group;
         $cachefield = "min_duration_for_reason_$reason";
         $cache = \cache::make('tool_excimer', 'request_metadata');
         $result = $cache->get($cachekey);
@@ -225,12 +230,12 @@ class manager {
             $sql = "SELECT duration as min_duration
                       FROM {tool_excimer_profiles}
                      WHERE $reasons != ?
-                           AND request = ?
+                           AND groupby = ?
                   ORDER BY duration DESC
                      ";
             $resultset = $DB->get_records_sql($sql, [
                 profile::REASON_NONE,
-                $request,
+                $group,
             ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in milliseconds (avoids recalculation later).
             $minduration = (end($resultset)->min_duration ?? 0) * 1000;
@@ -299,17 +304,19 @@ class manager {
      * @param float duration of the current profile
      * @return bool whether or not the profile should stored with the REASON_SLOW reason.
      */
-    public static function is_considered_slow(string $request, float $duration): bool {
+    public static function is_considered_slow(profile $profile): bool {
+        $durationms = $profile->get('duration') * 1000; // Convert to ms.
+
         // First, check against the overall minimum duration value to ensure it meets the
         // minimum required duration for the profile to be considered slow.
-        if ($duration <= self::min_duration()) {
+        if ($durationms <= self::min_duration()) {
             return false;
         }
 
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
         $minduration = self::get_min_duration_for_reason(profile::REASON_SLOW);
-        if ($minduration && $duration <= $minduration) {
+        if ($minduration && $durationms <= $minduration) {
             return false;
         }
 
@@ -317,8 +324,8 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = self::get_min_duration_for_request_and_reason($request, profile::REASON_SLOW);
-        if ($requestminduration && $duration <= $requestminduration) {
+        $requestminduration = self::get_min_duration_for_group_and_reason($profile->get('groupby'), profile::REASON_SLOW);
+        if ($requestminduration && $durationms <= $requestminduration) {
             return false;
         }
 
@@ -351,16 +358,12 @@ class manager {
      * @throws \dml_exception
      */
     public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
+        $profile = profile::get_running_profile();
         $current = microtime(true);
-        $duration = $current - $started;
-        $request = script_metadata::get_request();
-        $reason = self::get_reasons($request, $duration);
+        $profile->set('duration', $current - $started);
+        $reason = self::get_reasons($profile);
         if ($reason !== profile::REASON_NONE) {
-            $profile = profile::get_running_profile();
-            $profile->set('request', $request);
             $profile->set('reason', $reason);
-            $profile->set('created', (int) $started);
-            $profile->set('duration', $duration);
             $profile->set('finished', $isfinal ? (int) $current : 0);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($log));
             $profile->save_record();

@@ -72,6 +72,7 @@ $string['field_contenttypecategory'] = 'Content Type (category)';
 $string['field_contenttypekey'] = 'Content Type (extension/key)';
 $string['field_contenttypevalue'] = 'Content Type (actual value)';
 $string['field_reason'] = 'Reason';
+$string['field_group'] = 'Group';
 $string['field_created'] = 'Created';
 $string['field_finished'] = 'Finished';
 $string['field_user'] = 'User';
