@@ -241,6 +241,12 @@ class script_metadata {
         }
     }
 
+    /**
+     * Redacts values from a query string.
+     *
+     * @param string $parameters
+     * @return string
+     */
     public static function redact_parameters(string $parameters): string {
         $parms = explode('&', $parameters);
         foreach ($parms as &$v) {
@@ -249,6 +255,12 @@ class script_metadata {
         return implode('&', $parms);
     }
 
+    /**
+     * Redacts values from a pathinfo.
+     *
+     * @param string $pathinfo
+     * @return string
+     */
     public static function redact_pathinfo(string $pathinfo): string {
         $segments = explode('/', ltrim($pathinfo, '/'));
         foreach ($segments as &$v) {
@@ -259,6 +271,12 @@ class script_metadata {
         return '/' . implode('/', $segments);
     }
 
+    /**
+     * Redacts values for a pathinfo. Specificly for pluginfile like scripts.
+     *
+     * @param string $pathinfo
+     * @return string
+     */
     public static function redact_pluginfile_pathinfo(string $pathinfo): string {
         $segments = explode('/', ltrim($pathinfo, '/'), 4);
         $segments[0] = 'x';

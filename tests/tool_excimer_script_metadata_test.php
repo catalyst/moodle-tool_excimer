@@ -41,10 +41,12 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     }
 
     /**
+     * Test script_metadata::get_groupby_value().
+     *
      * @dataProvider group_by_value_provider
      * @throws \coding_exception
      */
-    public function test_get_groupby_value($request, $pathinfo, $parameters, $expected): void {
+    public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected): void {
         $profile = new profile();
         $profile->set('request', $request);
         $profile->set('pathinfo', $pathinfo);
@@ -53,6 +55,11 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $this->assertEquals($expected, $group);
     }
 
+    /**
+     * Input values for test_get_groupby_value.
+     *
+     * @return \string[][]
+     */
     public function group_by_value_provider(): array {
         return [
             ['admin/index.php', '', '', 'admin/index.php'],
