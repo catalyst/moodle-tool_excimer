@@ -79,6 +79,11 @@ class flamed3_node {
      */
     public static function extract_name_from_trace(array $tracenode): string {
         global $CFG;
+
+        if (isset($tracenode['closure_line'])) {
+            return '{closure:' . $tracenode['file'] . '(' . $tracenode['closure_line'] . ')}';
+        }
+
         if (!isset($tracenode['function'])) {
             return str_replace($CFG->dirroot . DIRECTORY_SEPARATOR, '', $tracenode['file']);
         }
