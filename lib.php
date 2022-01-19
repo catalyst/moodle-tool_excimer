@@ -24,6 +24,7 @@
  */
 
 use tool_excimer\manager;
+use tool_excimer\check\slowest;
 
 /**
  * Hook to be run after initial site config.
@@ -33,10 +34,14 @@ use tool_excimer\manager;
  * request up to this point will not be captured by the profiler. This
  * eliminates the need for an auto_prepend_file/auto_append_file.
  */
-function tool_excimer_after_config() {
+function tool_excimer_after_config(): void {
     // TODO Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
     // TODO Do we want to check if in upgrade/install etc.
     if (class_exists('ExcimerProfiler') && manager::is_profiling()) {
         manager::init();
     }
+}
+
+function tool_excimer_performance_checks(): array {
+    return [new slowest()];
 }

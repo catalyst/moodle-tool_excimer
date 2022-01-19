@@ -146,81 +146,21 @@ class helper {
         }
     }
 
-    /**
-     * Checks the current response headers and tries to resolve the content type
-     * e.g. to store as part of the profile.
-     *
-     * @param      string $request the request of the profile to be stored.
-     * @param      string $pathinfo the pathinfo of the profile to be stored.
-     * @return     array containing [value, key, category]
-     *                   Where:
-     *                   - value is the raw content type detected,
-     *                   - key is the resolved filetype key or if not found, the
-     *                     detected extension.
-     *                   - category the general group it should fall under.
-     * @author     Kevin Pham <kevinpham@catalyst-au.net>
-     * @copyright  Catalyst IT, 2021
-     */
-    public static function resolve_content_type(string $request, string $pathinfo) {
-        $contenttypevalue = null;
-        $contenttypekey = null;
-        $contenttypecategory = null;
 
-        // Get 'Content-Type' header to perform further checks.
-        $headers = headers_list();
-        if (!empty($headers)) {
-            foreach ($headers as $header) {
-                $index = strpos(strtolower($header), 'content-type');
-                if ($index === 0) {
-                    list($contenttypewhole) = explode(';', $header, 2);
-                    list(, $contenttypevalue) = explode(': ', $contenttypewhole, 2);
-                    break;
-
-                }
+    public static function full_request(object $profile): string {
+        $displayedrequest = $profile->request . $profile->pathinfo;
+        if (!empty($profile->parameters)) {
+            if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
+                // For CLI scripts, request should look like `command.php --flag=value` as an example.
+                $separator = ' ';
+                $profile->parameters = escapeshellcmd($profile->parameters);
+            } else {
+                // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
+                $separator = '?';
+                $profile->parameters = urldecode($profile->parameters);
             }
+            $displayedrequest .= $separator . $profile->parameters;
         }
-
-        // If there is no Content-Type header detected, then bail since we
-        // aren't sure - it could be coming from CLI and thus needs no response
-        // headers, but the content type could vary (text/image) and there is no
-        // other checks for it at the moment.
-        // TODO: Should this check and prefill CLI based requests?
-
-        // Compare the value of 'Content-Type' to known values, to determine the content type fields.
-        $allfiletypes = core_filetypes::get_types();
-        // NOTE: This will stop on the FIRST match based on this list. It
-        // will also use the 'key' if the 'string' is not available.
-        foreach ($allfiletypes as $key => $filetype) {
-            if ($filetype['type'] === $contenttypevalue) {
-                $contenttypekey = $key;
-                $contenttypecategory = $filetype['string'] ?? $key;
-                break;
-            }
-        }
-
-        // If it cannot be determined via the core_filetypes, determine it based
-        // on known groups e.g. font.php, javascript.php, handlers, etc.
-        if (empty($contenttypekey)) {
-            $requestbasename = basename($request);
-            if (
-                $contenttypevalue === 'application/javascript' // Common, but not in filetypes as this exactly.
-                || $requestbasename === 'javascript.php'
-            ) {
-                $contenttypekey = 'js';
-                $contenttypecategory = 'js';
-            } else if ($requestbasename === 'font.php') {
-                list(, $trailingpathinfo) = explode('.', $pathinfo, 2);
-                list($extension) = explode('?', $trailingpathinfo, 2);
-
-                // Use the extension of the request to determine the 'key' (more
-                // or less analogous to the expected file extension anyways).
-                $contenttypekey = $extension;
-                $contenttypecategory = 'font';
-            }
-        }
-
-        return [$contenttypevalue, $contenttypekey, $contenttypecategory];
+        return $displayedrequest;
     }
-
-
 }
