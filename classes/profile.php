@@ -204,6 +204,22 @@ class profile extends persistent {
     }
 
     /**
+     * Returns the slowest profile on record.
+     *
+     * @return false|mixed The slowest profile, or false if no profiles are stored.
+     * @throws \dml_exception
+     */
+    public static function get_slowest_profile() {
+        global $DB;
+        return $DB->get_record_sql(
+            "SELECT id, request, duration, pathinfo, parameters, scripttype
+                FROM {tool_excimer_profiles}
+            ORDER BY duration DESC
+               LIMIT 1"
+        );
+    }
+
+    /**
      * Delete profiles created earlier than a given time.
      *
      * @param int $cutoff Epoch seconds

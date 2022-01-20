@@ -96,19 +96,7 @@ $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning',
 $data = (array) $profile->to_record();
 $data['duration'] = format_time($data['duration']);
 
-$data['request'] = $profile->get('request') . $profile->get('pathinfo');
-if (!empty($profile->get('parameters'))) {
-    $parameters = $profile->get('parameters');
-    if ($profile->get('scripttype') == profile::SCRIPTTYPE_CLI) {
-        // For CLI scripts, request should look like `command.php --flag=value` as an example.
-        $separator = ' ';
-    } else {
-        // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
-        $separator = '?';
-        $parameters = urldecode($parameters);
-    }
-    $data['request'] .= $separator . $parameters;
-}
+$data['request'] = helper::full_request($profile->to_record());
 
 // If GET request then it should be reproducable as a idempotent request (readonly).
 if ($profile->get('method') === 'GET') {
