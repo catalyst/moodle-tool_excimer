@@ -83,6 +83,16 @@ if ($hassiteconfig) {
         );
 
         $settings->add(
+            new admin_setting_configtext(
+                'tool_excimer/half_life_m',
+                get_string('half_life_m', 'tool_excimer'),
+                get_string('half_life_m_desc', 'tool_excimer'),
+                '10',
+                PARAM_INT
+            )
+        );
+
+        $settings->add(
             new admin_setting_configduration(
                 'tool_excimer/expiry_s',
                 get_string('expiry_s', 'tool_excimer'),

@@ -31,20 +31,18 @@ class cron_manager {
     /**
      * Sets callbacks to handle cron profiling.
      *
-     * @param \ExcimerProfiler $profiler
-     * @param \ExcimerTimer $timer
-     * @param float $started
+     * @param object $profiler
      * @throws \dml_exception
      */
-    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer): void {
-        $timer->setCallback(function() use ($profiler) {
-            cron_manager::on_interval($profiler);
+    public static function set_callbacks(object $profiler): void {
+        $profiler->timer->setCallback(function() use ($profiler) {
+            cron_manager::on_interval($profiler->profiler);
         });
 
         \core_shutdown_manager::register_function(
-            function() use ($profiler, $timer) {
-                $timer->stop();
-                $profiler->stop();
+            function() use ($profiler) {
+                $profiler->timer->stop();
+                $profiler->profiler->stop();
                 if (self::$currenttask) {
                     self::$currenttask->process(microtime(true));
                 }
