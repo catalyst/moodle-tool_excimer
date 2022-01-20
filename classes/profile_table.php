@@ -207,19 +207,7 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(object $record): string {
-        $displayedrequest = $record->request . $record->pathinfo;
-        if (!empty($record->parameters)) {
-            if ($record->scripttype == profile::SCRIPTTYPE_CLI) {
-                // For CLI scripts, request should look like `command.php --flag=value` as an example.
-                $separator = ' ';
-                $record->parameters = escapeshellcmd($record->parameters);
-            } else {
-                // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
-                $separator = '?';
-                $record->parameters = urldecode($record->parameters);
-            }
-            $displayedrequest .= $separator . $record->parameters;
-        }
+        $displayedrequest = helper::full_request($record);
 
         // Return plaintext for download table response format.
         if ($this->is_downloading()) {
