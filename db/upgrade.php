@@ -223,21 +223,21 @@ function xmldb_tool_excimer_upgrade($oldversion) {
 
         // Define field usermodified to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
-        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'dbreplicareads');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'dbreplicareads');
 
         // Conditionally launch add field usermodified.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'usermodified');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'usermodified');
 
         // Conditionally launch add field usermodified.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'timecreated');
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'timecreated');
 
         // Conditionally launch add field timemodified.
         if (!$dbman->field_exists($table, $field)) {
