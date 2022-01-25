@@ -37,7 +37,7 @@ use tool_excimer\check\slowest;
 function tool_excimer_after_config(): void {
     // TODO Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
     // TODO Do we want to check if in upgrade/install etc.
-    if (class_exists('ExcimerProfiler') && manager::is_profiling()) {
+    if (manager::is_profiling()) {
         manager::init();
     }
 }

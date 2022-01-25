@@ -72,7 +72,9 @@ class manager {
                     self::is_flame_all() ||
                     self::is_flag_set(self::FLAME_ME_PARAM_NAME) ||
                     (get_config('tool_excimer', 'enable_auto'))
-                );
+                ) &&
+                !moodle_needs_upgrading() &&
+                class_exists('\ExcimerProfiler');
     }
 
     /**
