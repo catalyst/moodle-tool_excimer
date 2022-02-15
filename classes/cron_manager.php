@@ -31,20 +31,23 @@ class cron_manager {
     /**
      * Sets callbacks to handle cron profiling.
      *
-     * @param \ExcimerProfiler $profiler
-     * @param \ExcimerTimer $timer
-     * @param float $started
+     * @param object $profiler
      * @throws \dml_exception
      */
-    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer): void {
-        $timer->setCallback(function() use ($profiler) {
-            cron_manager::on_interval($profiler);
+    public static function set_callbacks(object $profiler): void {
+        $profiler->timer->setCallback(function() use ($profiler) {
+            $profiler->timer->setPeriod($profiler->sampleperiod);
+            $profiler->timer->setCallback(function() use ($profiler) {
+                cron_manager::on_interval($profiler);
+            });
+            $profiler->timer->stop();
+            $profiler->timer->start();
         });
 
         \core_shutdown_manager::register_function(
-            function() use ($profiler, $timer) {
-                $timer->stop();
-                $profiler->stop();
+            function() use ($profiler) {
+                $profiler->timer->stop();
+                $profiler->profiler->stop();
                 if (self::$currenttask) {
                     self::$currenttask->process(microtime(true));
                 }
@@ -63,39 +66,35 @@ class cron_manager {
      *
      * We then check for a new task with the current sample.
      *
-     * @param \ExcimerProfiler $profiler
+     * @param object $profiler
      */
-    public static function on_interval(\ExcimerProfiler $profiler): void {
-        $log = $profiler->flush();
+    public static function on_interval(object $profiler): void {
+        $log = $profiler->profiler->flush();
 
         $log->rewind();
         if (!$log->valid()) {
             debugging('on_interval called with no profile');
             return;
         }
-        $sample = $log->current();
-        $log->next();
-        if ($log->valid()) {
-            debugging('extra profile sample found in on_interval');
+
+        foreach ($log as $sample) {
+            $taskname = self::findtaskname($sample);
+            $currenttime = $profiler->starttime + $sample->getTimestamp();
+            if (self::$currenttask && (self::$currenttask->name != $taskname)) {
+                self::$currenttask->process($currenttime);
+                self::$currenttask = null;
+            }
+
+            if ($taskname && (self::$currenttask == null)) {
+                self::$currenttask = new task_samples($taskname, self::$sampletime);
+            }
+
+            if (self::$currenttask) {
+                self::$currenttask->add_sample($sample);
+            }
+
+            self::$sampletime = $currenttime;
         }
-
-        $taskname = self::findtaskname($sample);
-        $currenttime = microtime(true);
-
-        if (self::$currenttask && (self::$currenttask->name != $taskname)) {
-            self::$currenttask->process($currenttime);
-            self::$currenttask = null;
-        }
-
-        if ($taskname && (self::$currenttask == null)) {
-            self::$currenttask = new task_samples($taskname, self::$sampletime);
-        }
-
-        if (self::$currenttask) {
-            self::$currenttask->add_sample($sample);
-        }
-
-        self::$sampletime = $currenttime;
     }
 
     /**

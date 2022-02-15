@@ -34,6 +34,8 @@ class manager {
     const ABS_MIN_PERIOD = 20; // The absolute minimum period that can be tolerated.
     const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
 
+    static $profiler = null;
+
     /**
      * Checks if the given flag is set
      *
@@ -118,58 +120,55 @@ class manager {
      * @throws \dml_exception
      */
     public static function init(): void {
-        $sampleperiod = self::sample_period();
+        self::$profiler = new \stdClass();
+        self::$profiler->timer = new \ExcimerTimer();
+        self::$profiler->sampleperiod = self::sample_period();
+
         $timerinterval = (int) get_config('tool_excimer', 'long_interval_s');
         if ($timerinterval < 1) {
             $timerinterval = self::EXCIMER_LONG_PERIOD;
         }
 
-        $prof = new \ExcimerProfiler();
-        $prof->setPeriod($sampleperiod);
-
-        $timer = new \ExcimerTimer();
-        $timer->setPeriod($timerinterval);
-
         $profile = profile::get_running_profile();
         $profile->add_env(script_metadata::get_request());
 
-        $started = microtime(true);
+        self::$profiler->started = microtime(true);
 
-        $profile->set('created', (int) $started);
+        $profile->set('created', (int) self::$profiler->started);
 
+        self::$profiler->profiler = new \ExcimerProfiler();
         if (self::is_cron()) {
-            $timer->setPeriod($sampleperiod);
-            cron_manager::set_callbacks($prof, $timer);
+            self::$profiler->timer->setPeriod(self::$profiler->sampleperiod * 0.3);
+            cron_manager::set_callbacks(self::$profiler);
         } else {
-            $timer->setPeriod($timerinterval);
-            self::set_callbacks($prof, $timer, $started);
+            self::$profiler->timer->setPeriod($timerinterval);
+            self::set_callbacks(self::$profiler);
         }
 
-        $prof->start();
-        $timer->start();
+        self::$profiler->profiler->setPeriod(self::$profiler->sampleperiod);
+        self::$profiler->profiler->start();
+        self::$profiler->timer->start();
     }
 
     /**
      * Sets callbacks to handle regular profiling.
      *
-     * @param \ExcimerProfiler $profiler
-     * @param \ExcimerTimer $timer
-     * @param float $started
+     * @param object $profiler
      * @throws \dml_exception
      */
-    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer, float $started): void {
-        $timer->setCallback(function($s) use ($profiler, $started) {
-            $log = $profiler->getLog();
-            self::process($log, $started, false);
+    public static function set_callbacks(object $profiler): void {
+        $profiler->timer->setCallback(function() use ($profiler) {
+            $log = $profiler->profiler->getLog();
+            self::process($log, $profiler->started, false);
         });
 
         // Stop the profiler as a part of the shutdown sequence.
         \core_shutdown_manager::register_function(
-            function() use ($profiler, $timer, $started) {
-                $timer->stop();
-                $profiler->stop();
-                $log = $profiler->flush();
-                self::process($log, $started, true);
+            function() use ($profiler) {
+                $profiler->timer->stop();
+                $profiler->profiler->stop();
+                $log = $profiler->profiler->flush();
+                self::process($log, $profiler->started, true);
             }
         );
     }
@@ -204,7 +203,7 @@ class manager {
      * Cost: 1 cache read (ideally)
      * Otherwise: 1 cache read, 1 DB read and 1 cache write.
      *
-     * @param  string $request holds the request url
+     * @param  string $group holds the request url
      * @param  int $reason the profile type or REASON_*
      * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
      *
