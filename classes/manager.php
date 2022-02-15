@@ -34,7 +34,7 @@ class manager {
     const ABS_MIN_PERIOD = 20; // The absolute minimum period that can be tolerated.
     const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
 
-    static $profiler = null;
+    private static $profiler = null;
 
     /**
      * Checks if the given flag is set
