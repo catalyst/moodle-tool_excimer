@@ -124,12 +124,6 @@ class manager {
             $timerinterval = self::EXCIMER_LONG_PERIOD;
         }
 
-        $prof = new \ExcimerProfiler();
-        $prof->setPeriod($sampleperiod);
-
-        $timer = new \ExcimerTimer();
-        $timer->setPeriod($timerinterval);
-
         $profile = profile::get_running_profile();
         $profile->add_env(script_metadata::get_request());
 
@@ -137,11 +131,15 @@ class manager {
 
         $profile->set('created', (int) $started);
 
+        $prof = new \ExcimerProfiler();
+        $prof->setPeriod($sampleperiod);
+
+        $timer = new \ExcimerTimer();
+        $timer->setPeriod($timerinterval);
+
         if (self::is_cron()) {
-            $timer->setPeriod($sampleperiod);
-            cron_manager::set_callbacks($prof, $timer);
+            cron_manager::set_callbacks($prof, $timer, $started);
         } else {
-            $timer->setPeriod($timerinterval);
             self::set_callbacks($prof, $timer, $started);
         }
 
