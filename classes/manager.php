@@ -138,14 +138,14 @@ class manager {
 
         self::$profiler->profiler = new \ExcimerProfiler();
         if (self::is_cron()) {
-            self::$profiler->timer->setPeriod(self::$profiler->sampleperiod * 0.3);
             cron_manager::set_callbacks(self::$profiler);
         } else {
-            self::$profiler->timer->setPeriod($timerinterval);
             self::set_callbacks(self::$profiler);
         }
 
         self::$profiler->profiler->setPeriod(self::$profiler->sampleperiod);
+        self::$profiler->timer->setPeriod($timerinterval);
+
         self::$profiler->profiler->start();
         self::$profiler->timer->start();
     }

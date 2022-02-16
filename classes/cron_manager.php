@@ -36,18 +36,14 @@ class cron_manager {
      */
     public static function set_callbacks(object $profiler): void {
         $profiler->timer->setCallback(function() use ($profiler) {
-            $profiler->timer->setPeriod($profiler->sampleperiod);
-            $profiler->timer->setCallback(function() use ($profiler) {
-                cron_manager::on_interval($profiler);
-            });
-            $profiler->timer->stop();
-            $profiler->timer->start();
+            cron_manager::on_interval($profiler);
         });
 
         \core_shutdown_manager::register_function(
             function() use ($profiler) {
                 $profiler->timer->stop();
                 $profiler->profiler->stop();
+                cron_manager::on_interval($profiler);
                 if (self::$currenttask) {
                     self::$currenttask->process(microtime(true));
                 }
@@ -71,15 +67,9 @@ class cron_manager {
     public static function on_interval(object $profiler): void {
         $log = $profiler->profiler->flush();
 
-        $log->rewind();
-        if (!$log->valid()) {
-            debugging('on_interval called with no profile');
-            return;
-        }
-
         foreach ($log as $sample) {
             $taskname = self::findtaskname($sample);
-            $currenttime = $profiler->starttime + $sample->getTimestamp();
+            $currenttime = $profiler->started + $sample->getTimestamp();
             if (self::$currenttask && (self::$currenttask->name != $taskname)) {
                 self::$currenttask->process($currenttime);
                 self::$currenttask = null;
