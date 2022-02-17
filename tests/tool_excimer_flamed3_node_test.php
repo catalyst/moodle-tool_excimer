@@ -18,6 +18,10 @@ namespace tool_excimer;
 
 use tool_excimer\flamed3_node;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__."/excimer_mockery.php"); // This is needed. File will not be automatically included.
+
 /**
  * Tests the flamed3_node class.
  *
@@ -26,49 +30,7 @@ use tool_excimer\flamed3_node;
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-class tool_excimer_flamed3_node_test extends \advanced_testcase {
-
-    /**
-     * Creates a stub for the ExcimerLogEntry class for testing purposes.
-     *
-     * Each element of tracedef defines a function. Either
-     * - x;12 - defines a closure file 'x', line 12.
-     * - m::n - defines a class method m::n
-     * - n    - defines a function
-     *
-     * @param array $tracedef
-     * @return \ExcimerLogEntry|mixed|\PHPUnit\Framework\MockObject\MockObject
-     */
-    protected function get_log_entry_stub(array $tracedef) {
-        $newtrace = [];
-        foreach (array_reverse($tracedef) as $fn) {
-            $node = [];
-            if (strpos($fn, ';') !== false) {
-                $fn = explode(';', $fn);
-                $node['file'] = $fn[0];
-                $node['closure_line'] = $fn[1];
-            } else {
-                $fn = explode('::', $fn);
-                if (isset($fn[1])) {
-                    $node['class'] = $fn[0];
-                    $node['function'] = $fn[1];
-                } else {
-                    $node['function'] = $fn[0];
-                }
-            }
-            $newtrace[] = $node;
-        }
-
-        $stub = $this->getMockBuilder(\ExcimerLogEntry::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $stub->method('getTrace')
-            ->willReturn($newtrace);
-
-        return $stub;
-    }
+class tool_excimer_flamed3_node_test extends excimer_mockery {
 
     /**
      * Set up before each test
