@@ -246,7 +246,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $duration = 1.123;
         $request = 'mock';
 
-        $profile = profile::get_running_profile();
+        $profile = new profile();
         $profile->add_env($request);
         $profile->set('reason', $reason);
         $profile->set('created', $created);
@@ -271,7 +271,6 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $duration = 2.123;
         $finished = 58;
 
-        $profile = profile::get_running_profile();
         $profile->set('duration', $duration);
         $profile->set('finished', $finished);
         $profile->set('flamedatad3', $node);
@@ -382,6 +381,8 @@ class tool_excimer_profile_test extends \advanced_testcase {
      * @throws \dml_exception
      */
     private function mock_profile_insertion_with_duration(float $duration) {
+        $manager = new manager(new regular_processor());
+
         // Same handling with on_interval and on_flush of the manager
         // class, with a custom duration set.
         $profiler = new \ExcimerProfiler();
@@ -391,7 +392,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $profile->set('duration', $duration);
 
         // Divide by 1000 required, as microtime(true) returns the value in seconds.
-        $reason = manager::get_reasons($profile);
+        $reason = $manager->get_reasons($profile);
         if ($reason !== profile::REASON_NONE) {
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($profiler->getLog()));
             $profile->set('reason', $reason);

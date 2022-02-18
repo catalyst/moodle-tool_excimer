@@ -284,4 +284,36 @@ class script_metadata {
         return '/' . implode('/', $segments);
     }
 
+    const TIMER_INTERVAL_MIN = 1;
+    const TIMER_INTERVAL_DEFAULT = 10;
+
+    /**
+     * Get the timer interval from config, and return it as seconds.
+     *
+     * @return float
+     * @throws \dml_exception
+     */
+    public static function get_timer_interval(): float {
+        $interval = (float) get_config('tool_excimer', 'long_interval_s');
+        if ($interval < self::TIMER_INTERVAL_MIN) {
+            return self::TIMER_INTERVAL_DEFAULT;
+        }
+        return $interval;
+    }
+
+    const SAMPLING_PERIOD_MIN = 0.01;
+    const SAMPLING_PERIOD_MAX = 1.0;
+    const SAMPLING_PERIOD_DEFAUILT = 0.1;
+    /**
+     * Get the sampling period, and return it as seconds.
+     *
+     * @return float
+     * @throws \dml_exception
+     */
+    public static function get_sampling_period(): float {
+        $period = get_config('tool_excimer', 'sample_ms') / 1000;
+        $insensiblerange = $period >= self::SAMPLING_PERIOD_MIN && $period <= self::SAMPLING_PERIOD_MAX;
+        return round($insensiblerange ? $period : self::SAMPLING_PERIOD_DEFAUILT, 3);
+    }
+
 }

@@ -80,11 +80,12 @@ class excimer_testcase extends \advanced_testcase {
      *
      * @param array $stacktraces A set of stack traces, representing samples.
      * @param float|int $period A time interval used to create timestamps.
+     * @param float $starttime Starting time for timestamps.
      * @return \ExcimerLog|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_log_stub(array $stacktraces, float $period = 0) {
+    protected function get_log_stub(array $stacktraces, float $period = 0, float $starttime = 0.0) {
         $logentries = [];
-        $time = 0.0;
+        $time = $starttime;
         foreach ($stacktraces as $stacktrace) {
             $time += $period;
             $logentries[] = $this->get_log_entry_stub($stacktrace, $time);
@@ -124,20 +125,48 @@ class excimer_testcase extends \advanced_testcase {
      *
      * @param array $stacktraces A set of stack traces, representing samples.
      * @param float|int $period A time interval used to create timestamps.
+     * @param float $starttime
      * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_profiler_stub(array $stacktraces, float $period = 0) {
+    protected function get_profiler_stub(array $stacktraces, float $period = 0, float $starttime = 0.0) {
         $stub = $this->getMockBuilder(\ExcimerProfiler::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $logstub = $this->get_log_stub($stacktraces, $period);
+        $logstub = $this->get_log_stub($stacktraces, $period, $starttime);
 
         $stub->method('flush')
             ->willReturn($logstub);
 
         $stub->method('getLog')
             ->willReturn($logstub);
+
+        return $stub;
+    }
+
+    /**
+     * Creates a stub for the manager class for testing purposes.
+     *
+     * @param processor $processor
+     * @param \ExcimerProfiler $profiler
+     * @param \ExcimerTimer $timer
+     * @param float $starttime
+     * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
+     */
+    protected function get_manager_stub(processor $processor, \ExcimerProfiler $profiler, \ExcimerTimer $timer, float $starttime) {
+
+        $stub = $this->getMockBuilder(manager::class)
+            ->setConstructorArgs([$processor])
+            ->getMock();
+
+        $stub->method('get_profiler')
+            ->willReturn($profiler);
+        $stub->method('get_timer')
+            ->willReturn($timer);
+        $stub->method('get_starttime')
+            ->willReturn($starttime);
+        $stub->method('get_reasons')
+            ->willReturn(profile::REASON_FLAMEME);
 
         return $stub;
     }

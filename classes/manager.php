@@ -17,7 +17,7 @@
 namespace tool_excimer;
 
 /**
- * Primary controller class for handling Excimer profiling.
+ * Manages Excimer profiling.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -31,8 +31,64 @@ class manager {
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
     const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
 
-    const ABS_MIN_PERIOD = 20; // The absolute minimum period that can be tolerated.
-    const EXCIMER_LONG_PERIOD = 10; // Default period for partial saves.
+    private $processor;
+    private $profiler;
+    private $timer;
+    private $starttime;
+
+    public function get_profiler(): \ExcimerProfiler {
+        return $this->profiler;
+    }
+
+    public function get_timer(): \ExcimerTimer {
+        return $this->timer;
+    }
+
+    public function get_starttime(): float {
+        return $this->starttime;
+    }
+
+    /**
+     * Initialises the manager.
+     *
+     * @param processor $processor
+     * @throws \coding_exception
+     */
+    public function __construct(processor $processor) {
+        $this->processor = $processor;
+    }
+
+    public function init() {
+        $sampleperiod = script_metadata::get_sampling_period();
+        $timerinterval = script_metadata::get_timer_interval();
+
+        $this->profiler = new \ExcimerProfiler();
+        $this->profiler->setPeriod($sampleperiod);
+
+        $this->timer = new \ExcimerTimer();
+        $this->timer->setPeriod($timerinterval);
+
+        $this->starttime = microtime(true);
+
+        $this->processor->init($this);
+
+        $this->profiler->start();
+        $this->timer->start();
+    }
+
+    /**
+     * Creates the manager object using the appropriate processor.
+     *
+     * @return manager
+     * @throws \coding_exception
+     */
+    public static function create(): manager {
+        if (self::is_cron()) {
+            return new manager(new cron_processor());
+        } else {
+            return new manager(new regular_processor());
+        }
+    }
 
     /**
      * Checks if the given flag is set
@@ -92,96 +148,14 @@ class manager {
     }
 
     /**
-     * Gets the minimum duration acceptable for a task/script.
-     *
-     * @return float Duration in milliseconds.
-     * @throws \dml_exception
-     */
-    public static function min_duration(): float {
-        if (self::is_cron()) {
-            $minduration = (float) get_config('tool_excimer', 'task_min_duration') * 1000;
-        } else {
-            $minduration = (float) get_config('tool_excimer', 'trigger_ms');
-        }
-        return $minduration;
-    }
-
-    public static function sample_period(): float {
-        $samplems = (int)get_config('tool_excimer', 'sample_ms');
-        $insensiblerange = $samplems >= self::ABS_MIN_PERIOD && $samplems < 10000;
-        return round(($insensiblerange ? $samplems : self::ABS_MIN_PERIOD) / 1000, 3);
-    }
-
-    /**
-     * Initialises the profiler and also sets up the shutdown callback.
-     *
-     * @throws \dml_exception
-     */
-    public static function init(): void {
-        $sampleperiod = self::sample_period();
-        $timerinterval = (int) get_config('tool_excimer', 'long_interval_s');
-        if ($timerinterval < 1) {
-            $timerinterval = self::EXCIMER_LONG_PERIOD;
-        }
-
-        $profile = profile::get_running_profile();
-        $profile->add_env(script_metadata::get_request());
-
-        $started = microtime(true);
-
-        $profile->set('created', (int) $started);
-
-        $prof = new \ExcimerProfiler();
-        $prof->setPeriod($sampleperiod);
-
-        $timer = new \ExcimerTimer();
-        $timer->setPeriod($timerinterval);
-
-        if (self::is_cron()) {
-            cron_manager::set_callbacks($prof, $timer, $started);
-        } else {
-            self::set_callbacks($prof, $timer, $started);
-        }
-
-        $prof->start();
-        $timer->start();
-    }
-
-    /**
-     * Sets callbacks to handle regular profiling.
-     *
-     * @param \ExcimerProfiler $profiler
-     * @param \ExcimerTimer $timer
-     * @param float $started
-     * @throws \dml_exception
-     */
-    public static function set_callbacks(\ExcimerProfiler $profiler, \ExcimerTimer $timer, float $started): void {
-        $timer->setCallback(function($s) use ($profiler, $started) {
-            $log = $profiler->getLog();
-            self::process($log, $started, false);
-        });
-
-        // Stop the profiler as a part of the shutdown sequence.
-        \core_shutdown_manager::register_function(
-            function() use ($profiler, $timer, $started) {
-                $timer->stop();
-                $profiler->stop();
-                $log = $profiler->flush();
-                self::process($log, $started, true);
-            }
-        );
-    }
-
-    /**
      * Retrieves all the reasons for saving a profile.
      *
      * @param profile $profile
      * @return int Reasons as bit flags.
      * @throws \dml_exception
      */
-    public static function get_reasons(profile $profile): int {
+    public function get_reasons(profile $profile): int {
         global $SESSION;
-
         $reason = profile::REASON_NONE;
         if (self::is_flag_set(self::FLAME_ME_PARAM_NAME)) {
             $reason |= profile::REASON_FLAMEME;
@@ -190,105 +164,12 @@ class manager {
             $reason |= profile::REASON_FLAMEALL;
         }
 
-        if (self::is_considered_slow($profile)) {
+        if ($this->is_considered_slow($profile)) {
             $reason |= profile::REASON_SLOW;
         }
         return $reason;
     }
 
-    /**
-     * Returns the minimum duration for profiles matching this reason and page/request.
-     *
-     * Cost: 1 cache read (ideally)
-     * Otherwise: 1 cache read, 1 DB read and 1 cache write.
-     *
-     * @param  string $request holds the request url
-     * @param  int $reason the profile type or REASON_*
-     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
-     *
-     * @return float duration (in milliseconds) of the fastest profile for a given reason and request/page.
-     */
-    public static function get_min_duration_for_group_and_reason(string $group, int $reason, bool $usecache = true): float {
-        global $DB;
-
-        $reasonstr = profile::REASON_STR_MAP[$reason];
-        $pagequota = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
-
-        // Grab the fastest profile for this page/request, and use that as
-        // the lower boundary for any new profiles of this page/request.
-        $cachekey = $group;
-        $cachefield = "min_duration_for_reason_$reason";
-        $cache = \cache::make('tool_excimer', 'request_metadata');
-        $result = $cache->get($cachekey);
-
-        if (!$usecache || $result === false || !isset($result[$cachefield])) {
-            // NOTE: Opting to query this way instead of using MIN due to
-            // the fact valid profiles will be added and the limits will be
-            // breached for 'some time'. This will keep the constraints as
-            // correct as possible.
-            $reasons = $DB->sql_bitand('reason', $reason);
-            $sql = "SELECT duration as min_duration
-                      FROM {tool_excimer_profiles}
-                     WHERE $reasons != ?
-                           AND groupby = ?
-                  ORDER BY duration DESC
-                     ";
-            $resultset = $DB->get_records_sql($sql, [
-                profile::REASON_NONE,
-                $group,
-            ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
-            // Cache the results in milliseconds (avoids recalculation later).
-            $minduration = (end($resultset)->min_duration ?? 0) * 1000;
-            // Updates the cache value if the calculated value is different.
-            if (!isset($result[$cachefield]) || $result[$cachefield] !== $minduration) {
-                $result[$cachefield] = $minduration;
-                $cache->set($cachekey, $result);
-            }
-        }
-        return (float)$result[$cachefield];
-    }
-
-    /**
-     * Returns the minimum duration for profiles matching this reason.
-     *
-     * Cost: Should be free as long as the cache exists in the config.
-     * Otherwise: 1 DB read, 1 cache write
-     *
-     * @param  int $reason the profile type or REASON_*
-     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
-     * @return float duration (in milliseconds) of the fastest profile for a given reason.
-     */
-    public static function get_min_duration_for_reason(int $reason, bool $usecache = true): float {
-        global $DB;
-
-        $reasonstr = profile::REASON_STR_MAP[$reason];
-        $quota = (int) get_config('tool_excimer', "num_$reasonstr");
-
-        $cachekey = 'profile_type_' . $reason . '_min_duration_ms';
-        $result = false;
-        $result = get_config('tool_excimer', $cachekey);
-
-        if (!$usecache || $result === false) {
-            // Get and set cache.
-            $reasons = $DB->sql_bitand('reason', $reason);
-            $sql = "SELECT duration as min_duration
-                      FROM {tool_excimer_profiles}
-                     WHERE $reasons != ?
-                  ORDER BY duration DESC
-                     ";
-            $resultset = $DB->get_records_sql($sql, [
-                profile::REASON_NONE,
-            ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
-            // Cache the results in milliseconds (avoids recalculation later).
-            $newvalue = (end($resultset)->min_duration ?? 0) * 1000;
-            // Updates the cache value if the calculated value is different.
-            if ($result !== $newvalue) {
-                $result = $newvalue;
-                set_config($cachekey, $result, 'tool_excimer');
-            }
-        }
-        return (float)$result;
-    }
 
     /**
      * Returns whether or not the profile should be stored based on the duration provided.
@@ -304,19 +185,19 @@ class manager {
      * @param float duration of the current profile
      * @return bool whether or not the profile should stored with the REASON_SLOW reason.
      */
-    public static function is_considered_slow(profile $profile): bool {
-        $durationms = $profile->get('duration') * 1000; // Convert to ms.
+    public function is_considered_slow(profile $profile): bool {
+        $duration = $profile->get('duration');
 
         // First, check against the overall minimum duration value to ensure it meets the
         // minimum required duration for the profile to be considered slow.
-        if ($durationms <= self::min_duration()) {
+        if ($duration <= $this->processor->get_min_duration()) {
             return false;
         }
 
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $minduration = self::get_min_duration_for_reason(profile::REASON_SLOW);
-        if ($minduration && $durationms <= $minduration) {
+        $minduration = profile::get_min_duration_for_reason(profile::REASON_SLOW);
+        if ($minduration && $duration <= $minduration) {
             return false;
         }
 
@@ -324,49 +205,13 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = self::get_min_duration_for_group_and_reason($profile->get('groupby'), profile::REASON_SLOW);
-        if ($requestminduration && $durationms <= $requestminduration) {
+        $requestminduration = profile::get_min_duration_for_group_and_reason($profile->get('groupby'), profile::REASON_SLOW);
+        if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }
 
         // By this stage, the duration provided should have exceeded the min
         // requirements for all the different timing types (if they exist).
         return true;
-    }
-
-    /**
-     * Clears the plugin cache for keys used for the provided reasons
-     *
-     * @param int $reason bitmap of reason(s)
-     */
-    public static function clear_min_duration_cache_for_reason(int $reason): void {
-        foreach (profile::REASONS as $basereason) {
-            if ($reason & $basereason) {
-                // Clear the plugin config cache for this profile's reason.
-                $cachekey = 'profile_type_' . $basereason . '_min_duration_ms';
-                unset_config($cachekey, 'tool_excimer');
-            }
-        }
-    }
-
-    /**
-     * Process a batch of Excimer logs.
-     *
-     * @param \ExcimerLog $log
-     * @param float $started
-     * @param bool $isfinal
-     * @throws \dml_exception
-     */
-    public static function process(\ExcimerLog $log, float $started, bool $isfinal): void {
-        $profile = profile::get_running_profile();
-        $current = microtime(true);
-        $profile->set('duration', $current - $started);
-        $reason = self::get_reasons($profile);
-        if ($reason !== profile::REASON_NONE) {
-            $profile->set('reason', $reason);
-            $profile->set('finished', $isfinal ? (int) $current : 0);
-            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($log));
-            $profile->save_record();
-        }
     }
 }

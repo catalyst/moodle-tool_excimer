@@ -112,4 +112,32 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
         $this->assertEquals('e', $node->children[2]->children[0]->children[0]->name);
         $this->assertEquals('{closure:l(12)}', $node->children[2]->children[1]->name);
     }
+
+    public function test_from_excimer_log_entries_counts(): void {
+        $entries = [
+            $this->get_log_entry_stub(['c::a', 'b']),
+            $this->get_log_entry_stub(['c::a', 'b']),
+            $this->get_log_entry_stub(['c::a', 'd']),
+            $this->get_log_entry_stub(['m']),
+            $this->get_log_entry_stub(['m']),
+            $this->get_log_entry_stub(['m']),
+        ];
+
+        $node = flamed3_node::from_excimer_log_entries($entries);
+
+        $this->assertEquals(6, $node->value);
+        $this->assertEquals(2, count($node->children));
+
+        $this->assertEquals('c::a', $node->children[0]->name);
+        $this->assertEquals(3, $node->children[0]->value);
+        $this->assertEquals(2, count($node->children[0]->children));
+
+        $this->assertEquals('b', $node->children[0]->children[0]->name);
+        $this->assertEquals(2, $node->children[0]->children[0]->value);
+        $this->assertEquals(0, count($node->children[0]->children[0]->children));
+
+        $this->assertEquals('m', $node->children[1]->name);
+        $this->assertEquals(3, $node->children[1]->value);
+        $this->assertEquals(0, count($node->children[1]->children));
+    }
 }

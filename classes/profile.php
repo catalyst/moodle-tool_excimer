@@ -63,25 +63,10 @@ class profile extends persistent {
     const SCRIPTTYPE_WS = 3;
     const SCRIPTTYPE_TASK = 4;
 
-    private static $runningprofile = null;
-
     // TODO: try to find a way to eliminate the need for this function.
     public static function get_num_profiles(): int {
         global $DB;
         return $DB->count_records(self::TABLE, []);
-    }
-
-    /**
-     * Gets the profile that is being used to save the data as execution is running.
-     * Creates a new one if it doesn't yet exist.
-     *
-     * @return profile
-     */
-    public static function get_running_profile(): profile {
-        if (!isset(self::$runningprofile)) {
-            self::$runningprofile = new profile();
-        }
-        return self::$runningprofile;
     }
 
     /**
@@ -95,6 +80,10 @@ class profile extends persistent {
         $this->raw_set('flamedatad3', $flamedata);
         $this->raw_set('numsamples',  $node->value);
         $this->raw_set('datasize', strlen($flamedata));
+    }
+
+    protected function get_flamedatad3(): string {
+        return json_decode($this->get_flamedatad3json());
     }
 
     /**
@@ -196,11 +185,119 @@ class profile extends persistent {
 
         // Updates the request_metadata and per reason cache with more recent values.
         if ($this->get('reason') & self::REASON_SLOW) {
-            manager::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
-            manager::get_min_duration_for_reason(self::REASON_SLOW, false);
+            self::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
+            self::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
         return (int) $this->raw_get('id');
+    }
+
+    /**
+     * Returns the minimum duration for profiles matching this reason and page/request.
+     *
+     * Cost: 1 cache read (ideally)
+     * Otherwise: 1 cache read, 1 DB read and 1 cache write.
+     *
+     * @param  string $request holds the request url
+     * @param  int $reason the profile type or REASON_*
+     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
+     *
+     * @return float duration (as seconds) of the fastest profile for a given reason and request/page.
+     */
+    public static function get_min_duration_for_group_and_reason(string $group, int $reason, bool $usecache = true): float {
+        global $DB;
+
+        $reasonstr = self::REASON_STR_MAP[$reason];
+        $pagequota = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
+
+        // Grab the fastest profile for this page/request, and use that as
+        // the lower boundary for any new profiles of this page/request.
+        $cachekey = $group;
+        $cachefield = 'min_duration_for_reason_' . $reason . '_s';
+        $cache = \cache::make('tool_excimer', 'request_metadata');
+        $result = $cache->get($cachekey);
+
+        if (!$usecache || $result === false || !isset($result[$cachefield])) {
+            // NOTE: Opting to query this way instead of using MIN due to
+            // the fact valid profiles will be added and the limits will be
+            // breached for 'some time'. This will keep the constraints as
+            // correct as possible.
+            $reasons = $DB->sql_bitand('reason', $reason);
+            $sql = "SELECT duration as min_duration
+                      FROM {tool_excimer_profiles}
+                     WHERE $reasons != ?
+                           AND groupby = ?
+                  ORDER BY duration DESC
+                     ";
+            $resultset = $DB->get_records_sql($sql, [
+                self::REASON_NONE,
+                $group,
+            ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
+            // Cache the results in milliseconds (avoids recalculation later).
+            $minduration = (end($resultset)->min_duration ?? 0.0);
+            // Updates the cache value if the calculated value is different.
+            if (!isset($result[$cachefield]) || $result[$cachefield] !== $minduration) {
+                $result[$cachefield] = $minduration;
+                $cache->set($cachekey, $result);
+            }
+        }
+        return (float)$result[$cachefield];
+    }
+
+    /**
+     * Returns the minimum duration for profiles matching this reason.
+     *
+     * Cost: Should be free as long as the cache exists in the config.
+     * Otherwise: 1 DB read, 1 cache write
+     *
+     * @param  int $reason the profile type or REASON_*
+     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
+     * @return float duration (as seconds) of the fastest profile for a given reason.
+     */
+    public static function get_min_duration_for_reason(int $reason, bool $usecache = true): float {
+        global $DB;
+
+        $reasonstr = self::REASON_STR_MAP[$reason];
+        $quota = (int) get_config('tool_excimer', "num_$reasonstr");
+
+        $cachekey = 'profile_type_' . $reason . '_min_duration_s';
+        $result = get_config('tool_excimer', $cachekey);
+
+        if (!$usecache || $result === false) {
+            // Get and set cache.
+            $reasons = $DB->sql_bitand('reason', $reason);
+            $sql = "SELECT duration as min_duration
+                      FROM {tool_excimer_profiles}
+                     WHERE $reasons != ?
+                  ORDER BY duration DESC
+                     ";
+            $resultset = $DB->get_records_sql($sql, [
+                self::REASON_NONE,
+            ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
+            // Cache the results in (avoids recalculation later).
+            $newvalue = (end($resultset)->min_duration ?? 0.0);
+            // Updates the cache value if the calculated value is different.
+            if ($result !== $newvalue) {
+                $result = $newvalue;
+                set_config($cachekey, $result, 'tool_excimer');
+            }
+        }
+        return (float)$result;
+    }
+
+    /**
+     * Clears the plugin cache for keys used for the provided reasons
+     *
+     * @param int $reason bitmap of reason(s)
+     */
+    public static function clear_min_duration_cache_for_reason(int $reason): void {
+        foreach (self::REASONS as $basereason) {
+            if ($reason & $basereason) {
+                // Clear the plugin config cache for this profile's reason.
+                $cachekey = 'profile_type_' . $basereason . '_min_duration_s';
+                unset_config($cachekey, 'tool_excimer');
+            }
+        }
     }
 
     /**
@@ -254,7 +351,7 @@ class profile extends persistent {
             foreach ($reasons as $reason) {
                 $combinedreasons |= $reason;
             }
-            manager::clear_min_duration_cache_for_reason($combinedreasons);
+            self::clear_min_duration_cache_for_reason($combinedreasons);
         }
 
         // Purge the profiles older than this time as they are no longer
@@ -306,7 +403,7 @@ class profile extends persistent {
             // Note: Slightly faster than array_unique since the values can be used as keys.
             $uniquerequests = array_flip(array_flip($requests));
             $cache->delete_many($uniquerequests);
-            manager::clear_min_duration_cache_for_reason($reason);
+            self::clear_min_duration_cache_for_reason($reason);
         }
     }
 
