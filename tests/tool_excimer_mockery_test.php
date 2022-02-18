@@ -35,10 +35,13 @@ class tool_excimer_mockery_test extends excimer_testcase {
      * Tests excimer_mockery::get_log_entry_stub()
      */
     public function test_log_entry(): void {
-        $stub = $this->get_log_entry_stub(['c::a', 'b', 'c']);
+        $stub = $this->get_log_entry_stub(['c::a', 'b', 'c'], 100.3);
+        $this->assertInstanceOf('\ExcimerLogEntry', $stub);
 
         $fns = $this->get_traces_from_entry($stub);
         $this->assertEquals(['c', 'b', 'c::a'], $fns);
+
+        $this->assertEquals(100.3, $stub->getTimestamp());
     }
 
     /**
@@ -96,9 +99,6 @@ class tool_excimer_mockery_test extends excimer_testcase {
      * @return string
      */
     protected function extract_name_from_trace(array $tracenode): string {
-        if (isset($tracenode['file'])) {
-            $tracenode['file'] = $tracenode['file'];
-        }
         if (isset($tracenode['closure_line'])) {
             return '{closure:' . $tracenode['file'] . '(' . $tracenode['closure_line'] . ')}';
         }

@@ -39,7 +39,7 @@ class excimer_testcase extends \advanced_testcase {
      * @param array $tracedef
      * @return \ExcimerLogEntry|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_log_entry_stub(array $tracedef) {
+    protected function get_log_entry_stub(array $tracedef, float $timestamp = 0) {
         $newtrace = [];
         foreach (array_reverse($tracedef) as $fn) {
             $node = [];
@@ -66,6 +66,9 @@ class excimer_testcase extends \advanced_testcase {
         $stub->method('getTrace')
             ->willReturn($newtrace);
 
+        $stub->method('getTimestamp')
+            ->willReturn($timestamp);
+
         return $stub;
     }
 
@@ -75,11 +78,13 @@ class excimer_testcase extends \advanced_testcase {
      * @param array $tracedefs
      * @return \ExcimerLog|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_log_stub(array $tracedefs) {
+    protected function get_log_stub(array $tracedefs, float $period = 0) {
 
         $logentries = [];
+        $time = 0.0;
         foreach ($tracedefs as $tracedef) {
-            $logentries[] = $this->get_log_entry_stub($tracedef);
+            $time += $period;
+            $logentries[] = $this->get_log_entry_stub($tracedef, $time);
         }
         $logentries = new \ArrayObject($logentries);
         $iterator = $logentries->getIterator();
@@ -117,16 +122,16 @@ class excimer_testcase extends \advanced_testcase {
      * @param array $tracedefs
      * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_profiler_stub(array $tracedefs) {
+    protected function get_profiler_stub(array $tracedefs, float $period = 0) {
         $stub = $this->getMockBuilder(\ExcimerProfiler::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $stub->method('flush')
-            ->willReturn($this->get_log_stub($tracedefs));
+            ->willReturn($this->get_log_stub($tracedefs, $period));
 
         $stub->method('getLog')
-            ->willReturn($this->get_log_stub($tracedefs));
+            ->willReturn($this->get_log_stub($tracedefs, $period));
 
         return $stub;
     }

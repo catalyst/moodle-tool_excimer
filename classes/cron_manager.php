@@ -76,7 +76,7 @@ class cron_manager {
             $sampletime = $started + $sample->getTimestamp();
 
             if (self::$currenttask && (self::$currenttask->name != $taskname)) {
-                self::$currenttask->process($sampletime);
+                self::$currenttask->process(self::$sampletime);
                 self::$currenttask = null;
             }
 
