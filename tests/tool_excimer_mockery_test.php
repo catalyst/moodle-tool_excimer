@@ -42,7 +42,7 @@ class tool_excimer_mockery_test extends excimer_testcase {
     }
 
     /**
-     * Tests excimer_mockery::get_log_stub()
+     * Tests excimer_testcase::get_log_stub()
      */
     public function test_log(): void {
         $log = $this->get_log_stub([
@@ -67,7 +67,7 @@ class tool_excimer_mockery_test extends excimer_testcase {
     }
 
     /**
-     * Tests excimer_mockery::get_profiler_stub()
+     * Tests excimer_testcase::get_profiler_stub()
      */
     public function test_profiler(): void {
         $profiler = $this->get_profiler_stub([
@@ -152,5 +152,3 @@ class tool_excimer_mockery_test extends excimer_testcase {
         return $ret;
     }
 }
-
-
