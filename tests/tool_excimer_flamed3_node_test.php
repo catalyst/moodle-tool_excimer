@@ -20,6 +20,8 @@ use tool_excimer\flamed3_node;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . "/excimer_testcase.php"); // This is needed. File will not be automatically included.
+
 /**
  * Tests the flamed3_node class.
  *
@@ -28,47 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-/**
- * Emulates the ExcimerLogEntry class for testing purposes.
- *
- * Each element defines a function. Either
- * - x;12 - defines a closure file 'x', line 12.
- * - m::n - defines a class method m::n
- * - n    - defines a function
- */
-class fake_log_entry {
-    public $trace = [];
-    public function __construct($trace) {
-        foreach (array_reverse($trace) as $fn) {
-            $node = [];
-            if (strpos($fn, ';') !== false) {
-                $fn = explode(';', $fn);
-                $node['file'] = $fn[0];
-                $node['closure_line'] = $fn[1];
-            } else {
-                $fn = explode('::', $fn);
-                if (isset($fn[1])) {
-                    $node['class'] = $fn[0];
-                    $node['function'] = $fn[1];
-                } else {
-                    $node['function'] = $fn[0];
-                }
-            }
-            $this->trace[] = $node;
-        }
-    }
-
-    /**
-     * Emulates the getTrace() function from ExcimerLogEntry.
-     * @return array
-     */
-    public function gettrace(): array {
-        return $this->trace;
-    }
-}
-
-class tool_excimer_flamed3_node_test extends \advanced_testcase {
+class tool_excimer_flamed3_node_test extends excimer_testcase {
 
     /**
      * Set up before each test
@@ -124,11 +86,11 @@ class tool_excimer_flamed3_node_test extends \advanced_testcase {
 
     public function test_from_excimer_log_entries(): void {
         $entries = [
-            new fake_log_entry(['c::a', 'b', 'c']),
-            new fake_log_entry(['c::a', 'd', 'e']),
-            new fake_log_entry(['m', 'n', 'e']),
-            new fake_log_entry(['M::m', 'n', 'e']),
-            new fake_log_entry(['M::m', 'l;12']),
+            $this->get_log_entry_stub(['c::a', 'b', 'c']),
+            $this->get_log_entry_stub(['c::a', 'd', 'e']),
+            $this->get_log_entry_stub(['m', 'n', 'e']),
+            $this->get_log_entry_stub(['M::m', 'n', 'e']),
+            $this->get_log_entry_stub(['M::m', 'l;12']),
         ];
 
         $node = flamed3_node::from_excimer_log_entries($entries);
