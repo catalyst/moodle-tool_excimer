@@ -19,7 +19,7 @@ namespace tool_excimer;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__."/excimer_mockery.php"); // This is needed. File will not be automatically included.
+require_once(__DIR__ . "/excimer_testcase.php"); // This is needed. File will not be automatically included.
 
 /**
  * Tests the excimer_mockry class.
@@ -29,7 +29,7 @@ require_once(__DIR__."/excimer_mockery.php"); // This is needed. File will not b
  * @copyright  2022, Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_mockery_test extends excimer_mockery {
+class tool_excimer_mockery_test extends excimer_testcase {
 
     /**
      * Tests excimer_mockery::get_log_entry_stub()

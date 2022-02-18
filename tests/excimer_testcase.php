@@ -26,7 +26,7 @@ use PHPUnit\Framework\TestCase;
  * @copyright  2022, Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class excimer_mockery extends \advanced_testcase {
+class excimer_testcase extends \advanced_testcase {
 
     /**
      * Creates a stub for the ExcimerLogEntry class for testing purposes.
@@ -88,45 +88,24 @@ class excimer_mockery extends \advanced_testcase {
             ->disableOriginalConstructor()
             ->getMock();
 
-        $stub->method('current')
-            ->willReturnCallback(function() use($iterator) {
-                return $iterator->current();
+        // These methods proxy the function names to $iterator for stubbing.
+        foreach (get_class_methods("\Iterator") as $methodname) {
+            $stub->method($methodname)->willReturnCallback(function() use($iterator, $methodname) {
+                return $iterator->$methodname();
             });
-
-        $stub->method('key')
-            ->willReturnCallback(function() use($iterator) {
-                return $iterator->key();
-            });
-
-        $stub->method('next')
-            ->willReturnCallback(function() use($iterator) {
-                return $iterator->next();
-            });
-
-        $stub->method('rewind')
-            ->willReturnCallback(function() use($iterator) {
-                return $iterator->rewind();
-            });
-
-        $stub->method('valid')
-            ->willReturnCallback(function() use($iterator) {
-                return $iterator->valid();
-            });
+        }
 
         $stub->method('count')
             ->willReturnCallback(function() use($logentries) {
                 return $logentries->count();
             });
 
-        $stub->method('offsetExists')
-            ->willReturnCallback(function($offset) use($logentries) {
-                return $logentries->offsetExists($offset);
+        // Don't use reflection here because not all methods need to be overridden.
+        foreach (['offsetExists', 'offsetGet'] as $methodname) {
+            $stub->method($methodname)->willReturnCallback(function($offset) use($logentries, $methodname) {
+                return $logentries->$methodname($offset);
             });
-
-        $stub->method('offsetGet')
-            ->willReturnCallback(function($offset) use($logentries) {
-                return $logentries->offsetGet($offset);
-            });
+        }
 
         return $stub;
     }
