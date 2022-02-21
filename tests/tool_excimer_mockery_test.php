@@ -35,10 +35,13 @@ class tool_excimer_mockery_test extends excimer_testcase {
      * Tests excimer_mockery::get_log_entry_stub()
      */
     public function test_log_entry(): void {
-        $stub = $this->get_log_entry_stub(['c::a', 'b', 'c']);
+        $stub = $this->get_log_entry_stub(['c::a', 'b', 'c'], 100.3);
+        $this->assertInstanceOf('\ExcimerLogEntry', $stub);
 
         $fns = $this->get_traces_from_entry($stub);
         $this->assertEquals(['c', 'b', 'c::a'], $fns);
+
+        $this->assertEquals(100.3, $stub->getTimestamp());
     }
 
     /**
@@ -90,15 +93,13 @@ class tool_excimer_mockery_test extends excimer_testcase {
     }
 
     /**
-     * Gets a string from a trace node array.
+     * Converts a trace node def to a string.
+     * See excimer_testcase::get_log_entry_stub() for info about string format.
      *
      * @param array $tracenode An assoc. array containing a trace node as returned by ExcimerLogEntry::getTrace().
      * @return string
      */
     protected function extract_name_from_trace(array $tracenode): string {
-        if (isset($tracenode['file'])) {
-            $tracenode['file'] = $tracenode['file'];
-        }
         if (isset($tracenode['closure_line'])) {
             return '{closure:' . $tracenode['file'] . '(' . $tracenode['closure_line'] . ')}';
         }
@@ -119,7 +120,7 @@ class tool_excimer_mockery_test extends excimer_testcase {
      * @param \ExcimerProfiler $profile
      * @return array
      */
-    protected function get_traces_from_profile(\ExcimerProfiler $profile) {
+    protected function get_traces_from_profile(\ExcimerProfiler $profile): array {
         return $this->get_traces_from_log($profile->getLog());
     }
 
@@ -129,7 +130,7 @@ class tool_excimer_mockery_test extends excimer_testcase {
      * @param \ExcimerLog $log
      * @return array
      */
-    protected function get_traces_from_log(\ExcimerLog $log) {
+    protected function get_traces_from_log(\ExcimerLog $log): array {
         $ret = [];
         foreach ($log as $entry) {
             $ret[] = $this->get_traces_from_entry($entry);
@@ -143,7 +144,7 @@ class tool_excimer_mockery_test extends excimer_testcase {
      * @param \ExcimerLogEntry $entry
      * @return array
      */
-    protected function get_traces_from_entry(\ExcimerLogEntry $entry) {
+    protected function get_traces_from_entry(\ExcimerLogEntry $entry): array {
         $ret = [];
         $trace = $entry->getTrace();
         foreach ($trace as $fn) {

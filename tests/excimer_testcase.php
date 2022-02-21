@@ -31,17 +31,20 @@ class excimer_testcase extends \advanced_testcase {
     /**
      * Creates a stub for the ExcimerLogEntry class for testing purposes.
      *
-     * Each element of tracedef defines a function. Either
+     * Each element of $stacktrace defines a function. Either
      * - x;12 - defines a closure file 'x', line 12.
      * - m::n - defines a class method m::n
      * - n    - defines a function
      *
-     * @param array $tracedef
+     * @param array $stacktrace A stack trace, ordered topmost to local.
+     * @param float|int $timestamp A timestamp to be returned by getTimestamp().
      * @return \ExcimerLogEntry|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_log_entry_stub(array $tracedef) {
+    protected function get_log_entry_stub(array $stacktrace, float $timestamp = 0) {
         $newtrace = [];
-        foreach (array_reverse($tracedef) as $fn) {
+        // ExcimerLogEntry stores the trace from most local to topmost.
+        foreach (array_reverse($stacktrace) as $fn) {
+            // Convert the trace node to the format used by ExcimerLogEntry.
             $node = [];
             if (strpos($fn, ';') !== false) {
                 $fn = explode(';', $fn);
@@ -66,20 +69,25 @@ class excimer_testcase extends \advanced_testcase {
         $stub->method('getTrace')
             ->willReturn($newtrace);
 
+        $stub->method('getTimestamp')
+            ->willReturn($timestamp);
+
         return $stub;
     }
 
     /**
      * Creates a stub for the ExcimerLog class for testing purposes.
      *
-     * @param array $tracedefs
+     * @param array $stacktraces A set of stack traces, representing samples.
+     * @param float|int $period A time interval used to create timestamps.
      * @return \ExcimerLog|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_log_stub(array $tracedefs) {
-
+    protected function get_log_stub(array $stacktraces, float $period = 0) {
         $logentries = [];
-        foreach ($tracedefs as $tracedef) {
-            $logentries[] = $this->get_log_entry_stub($tracedef);
+        $time = 0.0;
+        foreach ($stacktraces as $stacktrace) {
+            $time += $period;
+            $logentries[] = $this->get_log_entry_stub($stacktrace, $time);
         }
         $logentries = new \ArrayObject($logentries);
         $iterator = $logentries->getIterator();
@@ -114,19 +122,22 @@ class excimer_testcase extends \advanced_testcase {
     /**
      * Creates a stub for the ExcimerProfiler class for testing purposes.
      *
-     * @param array $tracedefs
+     * @param array $stacktraces A set of stack traces, representing samples.
+     * @param float|int $period A time interval used to create timestamps.
      * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_profiler_stub(array $tracedefs) {
+    protected function get_profiler_stub(array $stacktraces, float $period = 0) {
         $stub = $this->getMockBuilder(\ExcimerProfiler::class)
             ->disableOriginalConstructor()
             ->getMock();
 
+        $logstub = $this->get_log_stub($stacktraces, $period);
+
         $stub->method('flush')
-            ->willReturn($this->get_log_stub($tracedefs));
+            ->willReturn($logstub);
 
         $stub->method('getLog')
-            ->willReturn($this->get_log_stub($tracedefs));
+            ->willReturn($logstub);
 
         return $stub;
     }

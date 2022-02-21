@@ -65,5 +65,3 @@ class task_samples {
         }
     }
 }
-
-
