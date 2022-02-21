@@ -38,6 +38,9 @@ class tool_excimer_cron_manager_test extends excimer_testcase {
         $this->resetAfterTest();
     }
 
+    /**
+     * Tests cron_manager::findtastname().
+     */
     public function test_findtaskname(): void {
         $entry = $this->get_log_entry_stub(['c::a', 'b', 'c']);
         $taskname = cron_manager::findtaskname($entry);
@@ -52,6 +55,9 @@ class tool_excimer_cron_manager_test extends excimer_testcase {
         $this->assertNull($taskname);
     }
 
+    /**
+     * Tests cron_manager::on_interval().
+     */
     public function test_on_interval(): void {
         global $DB;
         $this->preventResetByRollback();
@@ -60,6 +66,7 @@ class tool_excimer_cron_manager_test extends excimer_testcase {
         $started = 100.0;
         $period = 50.0;
 
+        // Adding one sample.
         $profiler = $this->get_profiler_stub([
             ['c::a', 'b', 'c'],
         ], $period);
@@ -68,19 +75,21 @@ class tool_excimer_cron_manager_test extends excimer_testcase {
         $this->assertEquals($started + ($period * 1), cron_manager::$sampletime);
         $this->assertNull(cron_manager::$currenttask);
 
+        // Adding 3 more samples.
         $profiler = $this->get_profiler_stub([
             ['a', 'b'],
             ['cron_run_inner_scheduled_task', 'max::execute', 'read::john'],
             ['cron_run_inner_scheduled_task', 'max::execute'],
         ], $period);
         cron_manager::on_interval($profiler, cron_manager::$sampletime);
-
         $this->assertEquals($started + ($period * 4), cron_manager::$sampletime);
-        $this->assertNotNull(cron_manager::$currenttask);
 
+        // There should be a current sample set being recorded.
+        $this->assertNotNull(cron_manager::$currenttask);
         $this->assertEquals($started + ($period * 2), cron_manager::$currenttask->starttime);
         $this->assertEquals(2, count(cron_manager::$currenttask->samples));
 
+        // Adding four more samples. Should record two sample sets into the database.
         $profiler = $this->get_profiler_stub([
             ['cron_run_inner_scheduled_task', 'max::execute'],
             ['a', 'b'],
@@ -88,10 +97,12 @@ class tool_excimer_cron_manager_test extends excimer_testcase {
             ['a', 'b'],
         ], $period);
         cron_manager::on_interval($profiler,  cron_manager::$sampletime);
-
         $this->assertEquals($started + ($period * 8), cron_manager::$sampletime);
+
+        // There should not be a current sample set.
         $this->assertNull(cron_manager::$currenttask);
 
+        // Check to see if the tasks have been recorded.
         $records = array_values($DB->get_records(profile::TABLE, null, 'created'));
 
         $this->assertEquals(2, count($records));
