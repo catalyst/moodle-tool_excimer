@@ -63,27 +63,6 @@ class profile extends persistent {
     const SCRIPTTYPE_WS = 3;
     const SCRIPTTYPE_TASK = 4;
 
-    private static $runningprofile = null;
-
-    // TODO: try to find a way to eliminate the need for this function.
-    public static function get_num_profiles(): int {
-        global $DB;
-        return $DB->count_records(self::TABLE, []);
-    }
-
-    /**
-     * Gets the profile that is being used to save the data as execution is running.
-     * Creates a new one if it doesn't yet exist.
-     *
-     * @return profile
-     */
-    public static function get_running_profile(): profile {
-        if (!isset(self::$runningprofile)) {
-            self::$runningprofile = new profile();
-        }
-        return self::$runningprofile;
-    }
-
     /**
      * Custom setter to set the flame data.
      *
@@ -95,6 +74,10 @@ class profile extends persistent {
         $this->raw_set('flamedatad3', $flamedata);
         $this->raw_set('numsamples',  $node->value);
         $this->raw_set('datasize', strlen($flamedata));
+    }
+
+    protected function get_flamedatad3(): string {
+        return json_decode($this->get_flamedatad3json());
     }
 
     /**
@@ -196,8 +179,8 @@ class profile extends persistent {
 
         // Updates the request_metadata and per reason cache with more recent values.
         if ($this->get('reason') & self::REASON_SLOW) {
-            manager::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
-            manager::get_min_duration_for_reason(self::REASON_SLOW, false);
+            profile_helper::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
+            profile_helper::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
         return (int) $this->raw_get('id');
@@ -217,174 +200,6 @@ class profile extends persistent {
             ORDER BY duration DESC
                LIMIT 1"
         );
-    }
-
-    /**
-     * Delete profiles created earlier than a given time.
-     *
-     * @param int $cutoff Epoch seconds
-     * @return void
-     */
-    public static function purge_profiles_before_epoch_time(int $cutoff): void {
-        global $DB;
-
-        // Fetch unique groupby and reasons that will be purged by the cutoff
-        // datetime, so that we can selectively clear the cache.
-        $groups = $DB->get_fieldset_sql(
-            "SELECT DISTINCT groupby
-               FROM {tool_excimer_profiles}
-              WHERE created < :cutoff",
-            ['cutoff' => $cutoff]
-        );
-        $reasons = $DB->get_fieldset_sql(
-            "SELECT DISTINCT reason
-               FROM {tool_excimer_profiles}
-              WHERE created < :cutoff",
-            ['cutoff' => $cutoff]
-        );
-
-        // Clears the request_metadata cache for the specific groups and
-        // affected reasons.
-        if (!empty($groups)) {
-            $cache = \cache::make('tool_excimer', 'request_metadata');
-            $cache->delete_many($groups);
-        }
-        if ($reasons) {
-            $combinedreasons = self::REASON_NONE;
-            foreach ($reasons as $reason) {
-                $combinedreasons |= $reason;
-            }
-            manager::clear_min_duration_cache_for_reason($combinedreasons);
-        }
-
-        // Purge the profiles older than this time as they are no longer
-        // relevant.
-        $DB->delete_records_select(
-            self::TABLE,
-            'created < :cutoff',
-            ['cutoff' => $cutoff]
-        );
-
-    }
-
-    /**
-     * Remove the reason bitmask on profiles given a list of ids and a reason
-     * that should be removed.
-     *
-     * @param array  $profiles list of profiles to remove the reason for
-     * @param int    $reason the reason ( self::REASON_* )
-     */
-    public static function remove_reason(array $profiles, int $reason): void {
-        global $DB;
-        $idstodelete = [];
-        $updateordelete = false;
-        foreach ($profiles as $profile) {
-            // Ensuring we only remove a reason that exists on the profile provided.
-            if ($profile->reason & $reason) {
-                $profile->reason ^= $reason; // Remove the reason.
-                if ($profile->reason === self::REASON_NONE) {
-                    $idstodelete[] = $profile->id;
-                    continue;
-                }
-                $DB->update_record(self::TABLE, $profile, true);
-                $updateordelete = true;
-            }
-        }
-
-        // Remove profiles where the reason (after updating) would be
-        // REASON_NONE, as they no longer have a reason to exist.
-        if (!empty($idstodelete)) {
-            list($insql, $inparams) = $DB->get_in_or_equal($idstodelete);
-            $DB->delete_records_select(self::TABLE, 'id ' . $insql, $inparams);
-            $updateordelete = true;
-        }
-
-        if ($updateordelete) {
-            // Clear the request_metadata cache on insert/updates for affected profile requests.
-            $cache = \cache::make('tool_excimer', 'request_metadata');
-            $requests = array_column($profiles, 'request');
-            // Note: Slightly faster than array_unique since the values can be used as keys.
-            $uniquerequests = array_flip(array_flip($requests));
-            $cache->delete_many($uniquerequests);
-            manager::clear_min_duration_cache_for_reason($reason);
-        }
-    }
-
-    /**
-     * Removes excess REASON_SLOW profiles keep only up to $numtokeep records
-     * per page/request.
-     *
-     * @param int $numtokeep Number of profiles per request to keep.
-     * @throws \coding_exception
-     * @throws \dml_exception
-     */
-    public static function purge_fastest_by_group(int $numtokeep): void {
-        global $DB;
-
-        $purgablereasons = $DB->sql_bitand('reason', self::REASON_SLOW);
-        $records = $DB->get_records_sql(
-            "SELECT id, groupby, reason
-               FROM {tool_excimer_profiles}
-              WHERE $purgablereasons != ?
-           ORDER BY duration ASC
-               ", [self::REASON_NONE, $numtokeep]
-        );
-
-        // Group profiles by request / page.
-        $groupedprofiles = array_reduce($records, function ($acc, $record) {
-            $acc[$record->groupby] = $acc[$record->groupby] ?? [
-                'count' => 0,
-                'profiles' => [],
-            ];
-            $acc[$record->groupby]['count']++;
-            $acc[$record->groupby]['profiles'][] = $record;
-            return $acc;
-        }, []);
-
-        // For the requests found, loop through the aggregated ids, and remove
-        // the ones to keep from the final list, based on the provided
-        // $numtokeep.
-        $profilestoremovereason = [];
-        foreach ($groupedprofiles as $groupedprofile) {
-            if ($groupedprofile['count'] <= $numtokeep) {
-                continue;
-            }
-            $profiles = $groupedprofile['profiles'];
-            $remaining = array_splice($profiles, 0, -$numtokeep);
-            array_push($profilestoremovereason, ...$remaining);
-        }
-
-        // This will remove the REASON_SLOW bitmask on the record, and if the
-        // final record is REASON_NONE, it will do a final purge of all the
-        // affected records.
-        self::remove_reason($profilestoremovereason, self::REASON_SLOW);
-    }
-
-    /**
-     * Removes excess REASON_SLOW profiles to keep only up to $numtokeep
-     * profiles with this reason.
-     *
-     * Typically runs after purging records by request/page grouping first.
-     *
-     * @param int $numtokeep Overall number of profiles to keep.
-     * @throws \coding_exception
-     * @throws \dml_exception
-     */
-    public static function purge_fastest(int $numtokeep): void {
-        global $DB;
-        // Fetch all profiles with the reason REASON_SLOW and keep the number
-        // under $numtokeep by flipping the order, and making the offset start
-        // from the records after $numtokeep.
-        $purgablereasons = $DB->sql_bitand('reason', self::REASON_SLOW);
-        $records = $DB->get_records_sql(
-            "SELECT id, reason
-               FROM {tool_excimer_profiles}
-              WHERE $purgablereasons != ?
-           ORDER BY duration DESC", [self::REASON_NONE], $numtokeep);
-
-        if (!empty($records)) {
-            self::remove_reason($records, self::REASON_SLOW);
-        }
     }
 
     /**

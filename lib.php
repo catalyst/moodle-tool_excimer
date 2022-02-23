@@ -33,12 +33,13 @@ use tool_excimer\check\slowest;
  * having access to the database. It means that the initialisation of the
  * request up to this point will not be captured by the profiler. This
  * eliminates the need for an auto_prepend_file/auto_append_file.
+ *
+ * See also https://docs.moodle.org/dev/Login_callbacks#after_config.
  */
 function tool_excimer_after_config(): void {
-    // TODO Temp ref: https://docs.moodle.org/dev/Login_callbacks#after_config
-    // TODO Do we want to check if in upgrade/install etc.
     if (manager::is_profiling()) {
-        manager::init();
+        $manager = manager::create();
+        $manager->init();
     }
 }
 

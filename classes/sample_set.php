@@ -17,7 +17,7 @@
 namespace tool_excimer;
 
 /**
- * Class for storing samples copied over from the profiler to match a current task.
+ * Stores samples copied over from the profiler.
  *
  * @package    tool_excimer
  * @author     Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -25,10 +25,11 @@ namespace tool_excimer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class task_samples {
+class sample_set {
     public $name;
     public $samples = [];
     public $starttime;
+
 
     public function __construct($name, $starttime) {
         $this->name = $name;
@@ -42,26 +43,5 @@ class task_samples {
      */
     public function add_sample(\ExcimerLogEntry $sample): void {
         $this->samples[] = $sample;
-    }
-
-    /**
-     * Processes the stored samples to create a profile (if eligible).
-     *
-     * @param float $finishtime
-     * @throws \dml_exception
-     */
-    public function process(float $finishtime): void {
-        $duration = $finishtime - $this->starttime;
-        $profile = new profile();
-        $profile->add_env($this->name);
-        $profile->set('created', (int) $this->starttime);
-        $profile->set('duration', $duration);
-        $reasons = manager::get_reasons($profile);
-        if ($reasons !== profile::REASON_NONE) {
-            $profile->set('reason', $reasons);
-            $profile->set('finished', (int) $finishtime);
-            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->samples));
-            $profile->save_record();
-        }
     }
 }
