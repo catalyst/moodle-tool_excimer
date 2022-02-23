@@ -23,8 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\manager;
 use tool_excimer\profile;
+use tool_excimer\profile_helper;
 
 require_once(__DIR__ . '/../../../config.php');
 
@@ -50,7 +50,7 @@ if ($deleteall) {
     foreach (profile::REASONS as $reason) {
         $combinedreasons |= $reason;
     }
-    profile::clear_min_duration_cache_for_reason($combinedreasons);
+    profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
 
     // Delete all profile records.
     $DB->delete_records(profile::TABLE);
@@ -63,7 +63,7 @@ if ($deleteid) {
     $conditions = ['id' => $deleteid];
     $profile = $DB->get_record(profile::TABLE, $conditions, 'request, reason');
     $cache->delete($profile->request);
-    profile::clear_min_duration_cache_for_reason($profile->reason);
+    profile_helper::clear_min_duration_cache_for_reason($profile->reason);
     // Deletes the profile record.
     $DB->delete_records(profile::TABLE, $conditions);
     redirect($returnurl, get_string('profiledeleted', 'tool_excimer'));
@@ -89,7 +89,7 @@ if ($filter) {
             foreach ($reasons as $reason) {
                 $combinedreasons |= $reason;
             }
-            profile::clear_min_duration_cache_for_reason($combinedreasons);
+            profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
         }
 
         // Deletes affected profile records.

@@ -36,28 +36,47 @@ class manager {
     private $timer;
     private $starttime;
 
+    /**
+     * Generates the samples for the script.
+     *
+     * @return \ExcimerProfiler
+     */
     public function get_profiler(): \ExcimerProfiler {
         return $this->profiler;
     }
 
+    /**
+     * Timer to create events to process samples generated so far.
+     *
+     * @return \ExcimerTimer
+     */
     public function get_timer(): \ExcimerTimer {
         return $this->timer;
     }
 
+    /**
+     * Start time for the script.
+     *
+     * @return float
+     */
     public function get_starttime(): float {
         return $this->starttime;
     }
 
     /**
-     * Initialises the manager.
+     * Constructs the manager.
      *
-     * @param processor $processor
-     * @throws \coding_exception
+     * @param processor $processor The object that processes the samples generated.
      */
     public function __construct(processor $processor) {
         $this->processor = $processor;
     }
 
+    /**
+     * Initialises the manager. Creates and starts the profiler and timer.
+     *
+     * @throws \dml_exception
+     */
     public function init() {
         $sampleperiod = script_metadata::get_sampling_period();
         $timerinterval = script_metadata::get_timer_interval();
@@ -86,7 +105,7 @@ class manager {
         if (self::is_cron()) {
             return new manager(new cron_processor());
         } else {
-            return new manager(new regular_processor());
+            return new manager(new web_processor());
         }
     }
 
@@ -196,7 +215,7 @@ class manager {
 
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $minduration = profile::get_min_duration_for_reason(profile::REASON_SLOW);
+        $minduration = profile_helper::get_min_duration_for_reason(profile::REASON_SLOW);
         if ($minduration && $duration <= $minduration) {
             return false;
         }
@@ -205,7 +224,7 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = profile::get_min_duration_for_group_and_reason($profile->get('groupby'), profile::REASON_SLOW);
+        $requestminduration = profile_helper::get_min_duration_for_group_and_reason($profile->get('groupby'), profile::REASON_SLOW);
         if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }

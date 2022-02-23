@@ -16,11 +16,34 @@
 
 namespace tool_excimer;
 
+/**
+ * Class for processing cron and adhoc tasks.
+ *
+ * The main feature is that each task is profiled separately.
+ *
+ * @package   tool_excimer
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2022, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class cron_processor implements processor {
+
+    /**
+     * @var float $sampletime Timestamp updated after processing each sample.
+     */
     public $sampletime;
+
+    /**
+     * @var sample_set $currenttask A sample set recorded while processing a task.
+     */
     public $currenttask = null;
 
-    public function init(manager $manager): void {
+    /**
+     * Initialises the processor
+     *
+     * @param manager $manager The profiler manager object
+     */
+    public function init(manager $manager) {
         $this->sampletime = $manager->get_starttime();
 
         $manager->get_timer()->setCallback(function() use ($manager) {
@@ -38,7 +61,6 @@ class cron_processor implements processor {
             }
         );
     }
-
 
     /**
      * Gets the minimum duration required for a profile to be saved, as seconds.

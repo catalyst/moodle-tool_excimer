@@ -17,15 +17,20 @@
 namespace tool_excimer;
 
 /**
- * Processor for regular profiling.
+ * Processor for web script profiling.
+ *
+ * Makes one profile per run, with partial saving if the scripts runs long enough.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class regular_processor implements processor {
+class web_processor implements processor {
 
+    /**
+     * @var profile $profile The profile object for the run.
+     */
     protected $profile;
 
     /**
@@ -33,7 +38,7 @@ class regular_processor implements processor {
      *
      * @param manager $manager The profiler manager object
      */
-    public function init(manager $manager): void {
+    public function init(manager $manager) {
         $this->profile = new profile();
         $this->profile->add_env(script_metadata::get_request());
         $this->profile->set('created', (int) $manager->get_starttime());

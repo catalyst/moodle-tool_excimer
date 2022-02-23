@@ -25,7 +25,7 @@
 
 namespace tool_excimer\task;
 
-use tool_excimer\profile;
+use tool_excimer\profile_helper;
 
 class expire_logs extends \core\task\scheduled_task {
 
@@ -36,6 +36,6 @@ class expire_logs extends \core\task\scheduled_task {
     public function execute() {
         $expiry = (int)get_config('tool_excimer', 'expiry_s');
         $cutoff = time() - $expiry;
-        profile::purge_profiles_before_epoch_time($cutoff);
+        profile_helper::purge_profiles_before_epoch_time($cutoff);
     }
 }
