@@ -17,7 +17,7 @@
 namespace tool_excimer;
 
 /**
- * Stores samples copied over from the profiler.
+ * Stores samples copied over from the profiler, to be used in a profile.
  *
  * @package    tool_excimer
  * @author     Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -30,18 +30,53 @@ class sample_set {
     public $samples = [];
     public $starttime;
 
+    public $limit;
 
-    public function __construct($name, $starttime) {
+    public $filterrate = 1;
+    public $current = 0;
+
+    /**
+     * Constructs the sample set.
+     *
+     * @param string $name
+     * @param float $starttime
+     * @param float|null $limit
+     */
+    public function __construct(string $name, float $starttime, int $limit = null) {
         $this->name = $name;
         $this->starttime = $starttime;
+        $this->limit = $limit;
     }
 
     /**
-     * Add a sample the sample store.
+     * Add a sample to the sample store, applying any filters.
      *
      * @param array $sample
      */
     public function add_sample(\ExcimerLogEntry $sample): void {
-        $this->samples[] = $sample;
+        if (count($this->samples) === $this->limit) {
+            $this->apply_doubling();
+        }
+        $this->current += 1;
+        if ($this->current == $this->filterrate) {
+            $this->samples[] = $sample;
+            $this->current = 0;
+        }
+    }
+
+    /**
+     * Doubles the filter rate, and strips every second sample from the set.
+     */
+    public function apply_doubling() {
+        $this->filterrate *= 2;
+        $this->samples = array_values(
+            array_filter(
+                $this->samples,
+                function($key) {
+                    return ($key % 2);
+                },
+                ARRAY_FILTER_USE_KEY
+            )
+        );
     }
 }
