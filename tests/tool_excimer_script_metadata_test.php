@@ -26,6 +26,14 @@ namespace tool_excimer;
  */
 class tool_excimer_script_metadata_test extends \advanced_testcase {
 
+    /**
+     * Set up before each test
+     */
+    protected function setUp(): void {
+        parent::setUp();
+        $this->resetAfterTest();
+    }
+
     public function test_stripparamters(): void {
         $param = ['a' => '1', 'b' => 2, 'c' => 3];
         $paramexpect = $param;
@@ -70,4 +78,27 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Tests script_metadata::get_sampling_doublerate().
+     *
+     * @dataProvider sampling_doublerate_provider
+     * @param int $rate
+     * @param int $expected
+     * @throws \dml_exception
+     */
+    public function test_get_sampling_doublerate(int $rate, int $expected) {
+        $this->preventResetByRollback();
+        set_config('doublerate', $rate, 'tool_excimer');
+        $this->assertEquals($expected, script_metadata::get_sampling_doublerate());
+    }
+
+    public function sampling_doublerate_provider(): array {
+        return [
+            [ 0, 0 ],
+            [ 1, 1 ],
+            [ 1024, 1024 ],
+            [ 10000, 10000 ],
+            [ -1, 1024 ],
+        ];
+    }
 }

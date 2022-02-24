@@ -316,4 +316,15 @@ class script_metadata {
         return round($insensiblerange ? $period : self::SAMPLING_PERIOD_DEFAUILT, 3);
     }
 
+    /**
+     * Returns the sampling double rate.
+     *
+     * @return int
+     * @throws \dml_exception
+     */
+    public static function get_sampling_doublerate(): int {
+        $rate = (int)get_config('tool_excimer', 'doublerate');
+        $insensiblerange = $rate >= 0;
+        return $insensiblerange ? $rate : 1024;
+    }
 }

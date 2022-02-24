@@ -64,6 +64,8 @@ $string['long_interval_s'] = 'Partial save interval (seconds)';
 $string['long_interval_s_desc'] = 'For long running taks, save a partial profile every N seconds.';
 $string['task_min_duration'] = 'Task min duration (seconds)';
 $string['task_min_duration_desc'] = 'For scheduled and ad-hoc tasks, the minimum approx duration, in seconds.';
+$string['doublerate'] = 'Doubling rate';
+$string['doublerate_desc'] = 'The number of samples at which the rate of filtering doubles.';
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest - grouped';
