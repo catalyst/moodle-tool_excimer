@@ -34,14 +34,28 @@ class web_processor implements processor {
     protected $profile;
 
     /**
+     * @var sample_set
+     */
+    protected $sampleset;
+
+    public function __construct() {
+    }
+
+    /**
      * Initialises the processor
      *
      * @param manager $manager The profiler manager object
      */
     public function init(manager $manager) {
+        $this->sampleset = new sample_set(
+            script_metadata::get_request(),
+            (int) $manager->get_starttime(),
+            script_metadata::get_sampling_doublerate()
+        );
+
         $this->profile = new profile();
-        $this->profile->add_env(script_metadata::get_request());
-        $this->profile->set('created', (int) $manager->get_starttime());
+        $this->profile->add_env($this->sampleset->name);
+        $this->profile->set('created', $this->sampleset->starttime);
 
         $manager->get_timer()->setCallback(function($s) use ($manager) {
             $this->process($manager, false);
@@ -73,14 +87,17 @@ class web_processor implements processor {
      * @throws \dml_exception
      */
     public function process(manager $manager, bool $isfinal): void {
-        $log = $manager->get_profiler()->getLog();
+        $log = $manager->get_profiler()->flush();
+        foreach ($log as $entry) {
+            $this->sampleset->add_sample($entry);
+        }
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());
         $reason = $manager->get_reasons($this->profile);
         if ($reason !== profile::REASON_NONE) {
             $this->profile->set('reason', $reason);
             $this->profile->set('finished', $isfinal ? (int) $current : 0);
-            $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($log));
+            $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
             $this->profile->save_record();
         }
     }

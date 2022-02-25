@@ -98,7 +98,7 @@ class cron_processor implements processor {
             }
 
             if ($taskname && ($this->currenttask == null)) {
-                $this->currenttask = new sample_set($taskname, $this->sampletime);
+                $this->currenttask = new sample_set($taskname, $this->sampletime, script_metadata::get_sampling_doublerate());
             }
 
             if ($this->currenttask) {
