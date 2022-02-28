@@ -33,7 +33,7 @@ class profile_table extends \table_sql {
         'type',
         'created',
         'duration',
-        'user',
+        'userid',
     ];
 
     const NOSORT_COLUMNS = [
