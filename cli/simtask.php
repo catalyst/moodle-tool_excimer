@@ -58,5 +58,5 @@ for ($i = 0; $i < 28; ++$i) {
 }
 
 if (USE_TRANSACTIONS) {
-    $transaction->rollback(new Exception('x'));
+    $transaction->rollback(new Exception());
 }

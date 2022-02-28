@@ -64,8 +64,10 @@ $string['long_interval_s'] = 'Partial save interval (seconds)';
 $string['long_interval_s_desc'] = 'For long running taks, save a partial profile every N seconds.';
 $string['task_min_duration'] = 'Task min duration (seconds)';
 $string['task_min_duration_desc'] = 'For scheduled and ad-hoc tasks, the minimum approx duration, in seconds.';
-$string['doublerate'] = 'Doubling rate';
-$string['doublerate_desc'] = 'The number of samples at which the rate of filtering doubles.';
+$string['samplelimit'] = 'Sample limit';
+$string['samplelimit_desc'] = 'The maximum number of samples that will be recorded. This works by filtering the recording of
+    samples. Each time the limit is reached, the samples recorded so far are stripped of every second sample. Also, the filter rate
+    doubles, so that only every Nth sample is recorded at filter rate N. This has the same effect as doubling the sampling period.';
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest - grouped';

@@ -316,15 +316,28 @@ class script_metadata {
         return round($insensiblerange ? $period : self::SAMPLING_PERIOD_DEFAUILT, 3);
     }
 
+    const SAMPLELIMIT_DEFAUT = 1024;
+
     /**
-     * Returns the sampling double rate.
+     * Returns the sample limit. The maximum number of samples stored.
+     *
+     * This works by filtering the recording of samples. Each time the limit is reached, the samples that have
+     * been recorded so far are stripped of every second sample. Also, the filter rate doubles, so that only
+     * every Nth sample is recorded at filter rate N.
+     *
+     * This has the same effect as adjusting the sampling period so that the total number of samples never exceeds
+     * the limit.
+     *
+     * See also sample_set class
      *
      * @return int
      * @throws \dml_exception
      */
-    public static function get_sampling_doublerate(): int {
-        $rate = (int)get_config('tool_excimer', 'doublerate');
-        $insensiblerange = $rate >= 0;
-        return $insensiblerange ? $rate : 1024;
+    public static function get_samplelimit(): int {
+        $limit = (int)get_config('tool_excimer', 'samplelimit');
+        if ($limit <= 0) {
+            return self::SAMPLELIMIT_DEFAUT;
+        }
+        return $limit;
     }
 }

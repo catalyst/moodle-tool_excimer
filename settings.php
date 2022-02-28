@@ -84,9 +84,9 @@ if ($hassiteconfig) {
 
         $settings->add(
             new admin_setting_configtext(
-                'tool_excimer/doublerate',
-                get_string('doublerate', 'tool_excimer'),
-                get_string('doublerate_desc', 'tool_excimer'),
+                'tool_excimer/samplelimit',
+                get_string('samplelimit', 'tool_excimer'),
+                get_string('samplelimit_desc', 'tool_excimer'),
                 '1024',
                 PARAM_INT
             )

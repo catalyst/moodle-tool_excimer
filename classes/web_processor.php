@@ -28,18 +28,11 @@ namespace tool_excimer;
  */
 class web_processor implements processor {
 
-    /**
-     * @var profile $profile The profile object for the run.
-     */
+    /** @var profile $profile The profile object for the run. */
     protected $profile;
 
-    /**
-     * @var sample_set
-     */
+    /** @var sample_set */
     protected $sampleset;
-
-    public function __construct() {
-    }
 
     /**
      * Initialises the processor
@@ -50,7 +43,7 @@ class web_processor implements processor {
         $this->sampleset = new sample_set(
             script_metadata::get_request(),
             (int) $manager->get_starttime(),
-            script_metadata::get_sampling_doublerate()
+            script_metadata::get_samplelimit()
         );
 
         $this->profile = new profile();

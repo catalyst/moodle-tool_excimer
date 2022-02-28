@@ -27,73 +27,107 @@ namespace tool_excimer;
  */
 class tool_excimer_sample_set_test extends excimer_testcase {
 
+    /**
+     * Tests adding samples to the object.
+     */
     public function test_add_sample() {
-        $entries = [
+        $samples = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
             $this->get_log_entry_stub(['c']),
         ];
 
-        $set = new sample_set('a', 0);
+        $set = new sample_set('a', 0, 1024);
 
-        foreach ($entries as $entry) {
-            $set->add_sample(($entry));
+        foreach ($samples as $sample) {
+            $set->add_sample($sample);
         }
 
-        $this->assertEquals($entries, $set->samples);
+        $this->assertEquals($samples, $set->samples);
     }
 
+    /**
+     * Tests the effect of filtering while adding samples.
+     */
     public function test_filtering() {
-        $entries = [
+        $samples = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
             $this->get_log_entry_stub(['c']),
             $this->get_log_entry_stub(['d']),
         ];
+        // Is every 2nd element of $samples.
+        $expected1 = [
+            $samples[1],
+            $samples[3]
+        ];
+        // Is every 4th element of $samples.
+        $expected2 = [
+            $samples[3]
+        ];
 
-        $set = new sample_set('a', 0);
+        $set = new sample_set('a', 0, 1024);
+
+        // Each time this is called, the filter rate is doubled.
         $set->apply_doubling();
 
-        foreach ($entries as $entry) {
-            $set->add_sample(($entry));
+        foreach ($samples as $sample) {
+            $set->add_sample($sample);
         }
 
-        $this->assertEquals([$entries[1], $entries[3]], $set->samples);
+        // Only every 2nd sample should be recorded in sample set.
+        $this->assertEquals($expected1, $set->samples);
 
-        $set = new sample_set('a', 0);
+        $set = new sample_set('a', 0, 1024);
         $set->apply_doubling();
         $set->apply_doubling();
 
-        foreach ($entries as $entry) {
-            $set->add_sample(($entry));
+        foreach ($samples as $sample) {
+            $set->add_sample($sample);
         }
 
-        $this->assertEquals([$entries[3]], $set->samples);
+        // Only every 4th sample should be recorded in sample set.
+        $this->assertEquals($expected2, $set->samples);
     }
 
+    /**
+     * Tests stripping existing samples when calling apply_doubling.
+     */
     public function test_stripping() {
-        $entries = [
+        $samples = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
             $this->get_log_entry_stub(['c']),
             $this->get_log_entry_stub(['d']),
         ];
+        // Is $samples ofter being stripped once.
+        $expected1 = [
+            $samples[1],
+            $samples[3]
+        ];
+        // Is $samples ofter being stripped twice.
+        $expected2 = [
+            $samples[3]
+        ];
 
-        $set = new sample_set('a', 0);
+        $set = new sample_set('a', 0, 1024);
 
-        foreach ($entries as $entry) {
-            $set->add_sample(($entry));
+        foreach ($samples as $sample) {
+            $set->add_sample($sample);
         }
 
         $set->apply_doubling();
-        $this->assertEquals([$entries[1], $entries[3]], $set->samples);
+        $this->assertEquals($expected1, $set->samples);
 
         $set->apply_doubling();
-        $this->assertEquals([$entries[3]], $set->samples);
+        $this->assertEquals($expected2, $set->samples);
     }
 
+    /**
+     * Tests the invoking of apply_doubling from within add_sample.
+     */
     public function test_doubling() {
-        $entries1 = [
+        $samples1 = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
             $this->get_log_entry_stub(['c']),
@@ -101,7 +135,14 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['e']),
             $this->get_log_entry_stub(['f']),
         ];
-        $entries2 = [
+        // Is every second element of $samples1.
+        $expected1 = [
+            $samples1[1],
+            $samples1[3],
+            $samples1[5]
+        ];
+
+        $samples2 = [
             $this->get_log_entry_stub(['g']),
             $this->get_log_entry_stub(['h']),
             $this->get_log_entry_stub(['i']),
@@ -109,19 +150,27 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['k']),
             $this->get_log_entry_stub(['l']),
         ];
+        // Is every 4th element of $sample1 + $sample2.
+        $expected2 = [
+            $samples1[3],
+            $samples2[1],
+            $samples2[5]
+        ];
 
         $set = new sample_set('a', 0, 4);
 
-        foreach ($entries1 as $entry) {
-            $set->add_sample(($entry));
+        foreach ($samples1 as $sample) {
+            $set->add_sample($sample);
         }
 
-        $this->assertEquals([$entries1[1], $entries1[3], $entries1[5]], $set->samples);
+        // By this point apply_doubling should have been invoked once.
+        $this->assertEquals($expected1, $set->samples);
 
-        foreach ($entries2 as $entry) {
-            $set->add_sample(($entry));
+        foreach ($samples2 as $sample) {
+            $set->add_sample($sample);
         }
 
-        $this->assertEquals([$entries1[3], $entries2[1], $entries2[5]], $set->samples);
+        // By this point apply_doubling should have been invoked a second time.
+        $this->assertEquals($expected2, $set->samples);
     }
 }

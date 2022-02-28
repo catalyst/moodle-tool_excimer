@@ -27,25 +27,29 @@ namespace tool_excimer;
 
 class sample_set {
     public $name;
-    public $samples = [];
     public $starttime;
 
-    public $limit;
+    public $samples = [];
 
-    public $filterrate = 1;
-    public $current = 0;
+    public $samplelimit;
+
+    /** @var int If $filterrate is R, then only each Rth sample is recorded. */
+    private $filterrate = 1;
+
+    /** @var int Internal counter to help with filtering. */
+    private $counter = 0;
 
     /**
      * Constructs the sample set.
      *
      * @param string $name
      * @param float $starttime
-     * @param float|null $limit
+     * @param int $samplelimit
      */
-    public function __construct(string $name, float $starttime, int $limit = null) {
+    public function __construct(string $name, float $starttime, int $samplelimit) {
         $this->name = $name;
         $this->starttime = $starttime;
-        $this->limit = $limit;
+        $this->samplelimit = $samplelimit;
     }
 
     /**
@@ -54,18 +58,23 @@ class sample_set {
      * @param array $sample
      */
     public function add_sample(\ExcimerLogEntry $sample): void {
-        if (count($this->samples) === $this->limit) {
+        if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
-        $this->current += 1;
-        if ($this->current == $this->filterrate) {
+        $this->counter += 1;
+        if ($this->counter === $this->filterrate) {
             $this->samples[] = $sample;
-            $this->current = 0;
+            $this->counter = 0;
         }
     }
 
     /**
      * Doubles the filter rate, and strips every second sample from the set.
+     * Called when the sample limit is reached.
+     *
+     * We have two options here. Either double the sampling period, or apply a filter to record only the
+     * Nth sample passed to sample_set. By using a filter and keeping the sampling period the same, we avoid
+     * spilling over into the next task.
      */
     public function apply_doubling() {
         $this->filterrate *= 2;
