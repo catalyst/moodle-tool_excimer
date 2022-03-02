@@ -72,7 +72,6 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $set->apply_doubling();
 
         // Filter rate should be 2, thus, only every 2nd sample should be recorded in sample set.
-
         foreach ($samples as $sample) {
             $set->add_sample($sample);
         }
@@ -85,7 +84,6 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $set->apply_doubling();
 
         // Filter rate should be 4, thus, only every 4th sample should be recorded in sample set.
-
         foreach ($samples as $sample) {
             $set->add_sample($sample);
         }
@@ -119,14 +117,12 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $set->add_sample($sample);
         }
 
+        // Every 2nd sample should be stripped after doubling.
         $set->apply_doubling();
-
-        // Half of the samples should be stripped (every 2nd).
         $this->assertEquals($expected1, $set->samples);
 
-        $set->apply_doubling();
-
         // Half of the samples should be stripped again, leaving every 4th from the original.
+        $set->apply_doubling();
         $this->assertEquals($expected2, $set->samples);
     }
 

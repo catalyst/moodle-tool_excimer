@@ -34,7 +34,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $this->resetAfterTest();
     }
 
-    public function test_stripparamters() {
+    public function test_strip_parameters() {
         $param = ['a' => '1', 'b' => 2, 'c' => 3];
         $paramexpect = $param;
         $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
@@ -86,10 +86,10 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param int $expected
      * @throws \dml_exception
      */
-    public function test_get_samplelimit(int $limit, int $expected) {
+    public function test_get_sample_limit(int $limit, int $expected) {
         $this->preventResetByRollback();
         set_config('samplelimit', $limit, 'tool_excimer');
-        $this->assertEquals($expected, script_metadata::get_samplelimit());
+        $this->assertEquals($expected, script_metadata::get_sample_limit());
     }
 
     /**

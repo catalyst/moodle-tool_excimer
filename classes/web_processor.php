@@ -43,19 +43,19 @@ class web_processor implements processor {
         $this->sampleset = new sample_set(
             script_metadata::get_request(),
             (int) $manager->get_starttime(),
-            script_metadata::get_samplelimit()
+            script_metadata::get_sample_limit()
         );
 
         $this->profile = new profile();
         $this->profile->add_env($this->sampleset->name);
         $this->profile->set('created', $this->sampleset->starttime);
 
-        $manager->get_timer()->setCallback(function($s) use ($manager) {
+        $manager->get_timer()->setCallback(function () use ($manager) {
             $this->process($manager, false);
         });
 
         \core_shutdown_manager::register_function(
-            function() use ($manager) {
+            function () use ($manager) {
                 $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
                 $this->process($manager, true);

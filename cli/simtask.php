@@ -24,6 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace tool_excimer;
+
 define('CLI_SCRIPT', true);
 define('USE_TRANSACTIONS', false); // Set this to true to test with a transaction.
 

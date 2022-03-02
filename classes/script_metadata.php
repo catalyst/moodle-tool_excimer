@@ -61,6 +61,15 @@ class script_metadata {
         'tokenpluginfile.php',
     ];
 
+    const SAMPLING_PERIOD_MIN = 0.01;
+    const SAMPLING_PERIOD_MAX = 1.0;
+    const SAMPLING_PERIOD_DEFAUILT = 0.1;
+
+    const TIMER_INTERVAL_MIN = 1;
+    const TIMER_INTERVAL_DEFAULT = 10;
+
+    const SAMPLE_LIMIT_DEFAULT = 1024;
+
     /**
      * Gets the script type of the request.
      *
@@ -284,9 +293,6 @@ class script_metadata {
         return '/' . implode('/', $segments);
     }
 
-    const TIMER_INTERVAL_MIN = 1;
-    const TIMER_INTERVAL_DEFAULT = 10;
-
     /**
      * Get the timer interval from config, and return it as seconds.
      *
@@ -301,9 +307,6 @@ class script_metadata {
         return $interval;
     }
 
-    const SAMPLING_PERIOD_MIN = 0.01;
-    const SAMPLING_PERIOD_MAX = 1.0;
-    const SAMPLING_PERIOD_DEFAUILT = 0.1;
     /**
      * Get the sampling period, and return it as seconds.
      *
@@ -315,8 +318,6 @@ class script_metadata {
         $insensiblerange = $period >= self::SAMPLING_PERIOD_MIN && $period <= self::SAMPLING_PERIOD_MAX;
         return round($insensiblerange ? $period : self::SAMPLING_PERIOD_DEFAUILT, 3);
     }
-
-    const SAMPLELIMIT_DEFAUT = 1024;
 
     /**
      * Returns the sample limit. The maximum number of samples stored.
@@ -333,10 +334,10 @@ class script_metadata {
      * @return int
      * @throws \dml_exception
      */
-    public static function get_samplelimit(): int {
-        $limit = (int)get_config('tool_excimer', 'samplelimit');
+    public static function get_sample_limit(): int {
+        $limit = (int) get_config('tool_excimer', 'samplelimit');
         if ($limit <= 0) {
-            return self::SAMPLELIMIT_DEFAUT;
+            return self::SAMPLE_LIMIT_DEFAULT;
         }
         return $limit;
     }
