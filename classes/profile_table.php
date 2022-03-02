@@ -33,7 +33,7 @@ class profile_table extends \table_sql {
         'type',
         'created',
         'duration',
-        'user',
+        'userid',
     ];
 
     const NOSORT_COLUMNS = [
@@ -248,7 +248,7 @@ class profile_table extends \table_sql {
      * @param object $record
      * @return string
      */
-    public function col_user(object $record): string {
+    public function col_userid(object $record): string {
         if ($record->userid == 0) {
             return '-';
         } else {
@@ -256,7 +256,7 @@ class profile_table extends \table_sql {
             if ($this->is_downloading()) {
                 return $fullname;
             } else {
-                return \html_writer::link('/user/profile.php?id=' . $record->userid, $fullname);
+                return \html_writer::link(new \moodle_url('/user/profile.php', ['id' => $record->userid]), $fullname);
             }
         }
     }
