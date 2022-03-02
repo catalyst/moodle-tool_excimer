@@ -29,6 +29,8 @@ define('USE_TRANSACTIONS', false); // Set this to true to test with a transactio
 
 require(__DIR__.'/../../../../config.php');
 
+const NUM_REPEAT = 28; // Number of times the busy function is called. Higher means more samples. Value is arbitrary.
+
 $cache = \cache::make('tool_excimer', 'request_metadata');
 
 /**
@@ -53,7 +55,7 @@ if (USE_TRANSACTIONS) {
     $transaction = $DB->start_delegated_transaction();
 }
 
-for ($i = 0; $i < 28; ++$i) {
+for ($i = 0; $i < NUM_REPEAT; ++$i) {
     $bf(1000, 10000);
 }
 

@@ -56,12 +56,12 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['c']),
             $this->get_log_entry_stub(['d']),
         ];
-        // Is every 2nd element of $samples.
+        // This is every 2nd element of $samples.
         $expected1 = [
             $samples[1],
             $samples[3]
         ];
-        // Is every 4th element of $samples.
+        // This is every 4th element of $samples.
         $expected2 = [
             $samples[3]
         ];
@@ -70,6 +70,8 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
         // Each time this is called, the filter rate is doubled.
         $set->apply_doubling();
+
+        // Filter rate should be 2, thus, only every 2nd sample should be recorded in sample set.
 
         foreach ($samples as $sample) {
             $set->add_sample($sample);
@@ -82,11 +84,12 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $set->apply_doubling();
         $set->apply_doubling();
 
+        // Filter rate should be 4, thus, only every 4th sample should be recorded in sample set.
+
         foreach ($samples as $sample) {
             $set->add_sample($sample);
         }
 
-        // Only every 4th sample should be recorded in sample set.
         $this->assertEquals($expected2, $set->samples);
     }
 
@@ -100,12 +103,12 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['c']),
             $this->get_log_entry_stub(['d']),
         ];
-        // Is $samples ofter being stripped once.
+        // This is $samples ofter being stripped once.
         $expected1 = [
             $samples[1],
             $samples[3]
         ];
-        // Is $samples ofter being stripped twice.
+        // This is $samples ofter being stripped twice.
         $expected2 = [
             $samples[3]
         ];
@@ -117,9 +120,13 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         }
 
         $set->apply_doubling();
+
+        // Half of the samples should be stripped (every 2nd).
         $this->assertEquals($expected1, $set->samples);
 
         $set->apply_doubling();
+
+        // Half of the samples should be stripped again, leaving every 4th from the original.
         $this->assertEquals($expected2, $set->samples);
     }
 
@@ -135,7 +142,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['e']),
             $this->get_log_entry_stub(['f']),
         ];
-        // Is every second element of $samples1.
+        // This is every second element of $samples1.
         $expected1 = [
             $samples1[1],
             $samples1[3],
@@ -150,7 +157,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['k']),
             $this->get_log_entry_stub(['l']),
         ];
-        // Is every 4th element of $sample1 + $sample2.
+        // This is every 4th element of $sample1 + $sample2.
         $expected2 = [
             $samples1[3],
             $samples2[1],
