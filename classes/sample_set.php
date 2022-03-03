@@ -56,7 +56,7 @@ class sample_set {
      *
      * @param array $sample
      */
-    public function add_sample(\ExcimerLogEntry $sample): void {
+    public function add_sample(\ExcimerLogEntry $sample) {
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
@@ -64,6 +64,17 @@ class sample_set {
         if ($this->counter === $this->filterrate) {
             $this->samples[] = $sample;
             $this->counter = 0;
+        }
+    }
+
+    /**
+     * Add a number of samples.
+     *
+     * @param iterable $samples
+     */
+    public function add_many_samples(iterable $samples) {
+        foreach ($samples as $sample) {
+            $this->add_sample($sample);
         }
     }
 

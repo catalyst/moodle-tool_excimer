@@ -39,9 +39,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
         $set = new sample_set('a', 0, 1024);
 
-        foreach ($samples as $sample) {
-            $set->add_sample($sample);
-        }
+        $set->add_many_samples($samples);
 
         $this->assertEquals($samples, $set->samples);
     }
@@ -72,9 +70,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $set->apply_doubling();
 
         // Filter rate should be 2, thus, only every 2nd sample should be recorded in sample set.
-        foreach ($samples as $sample) {
-            $set->add_sample($sample);
-        }
+        $set->add_many_samples($samples);
 
         // Only every 2nd sample should be recorded in sample set.
         $this->assertEquals($expected1, $set->samples);
@@ -84,9 +80,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $set->apply_doubling();
 
         // Filter rate should be 4, thus, only every 4th sample should be recorded in sample set.
-        foreach ($samples as $sample) {
-            $set->add_sample($sample);
-        }
+        $set->add_many_samples($samples);
 
         $this->assertEquals($expected2, $set->samples);
     }
@@ -113,9 +107,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
         $set = new sample_set('a', 0, 1024);
 
-        foreach ($samples as $sample) {
-            $set->add_sample($sample);
-        }
+        $set->add_many_samples($samples);
 
         // Every 2nd sample should be stripped after doubling.
         $set->apply_doubling();
@@ -162,16 +154,12 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
         $set = new sample_set('a', 0, 4);
 
-        foreach ($samples1 as $sample) {
-            $set->add_sample($sample);
-        }
+        $set->add_many_samples($samples1);
 
         // By this point apply_doubling should have been invoked once.
         $this->assertEquals($expected1, $set->samples);
 
-        foreach ($samples2 as $sample) {
-            $set->add_sample($sample);
-        }
+        $set->add_many_samples($samples2);
 
         // By this point apply_doubling should have been invoked a second time.
         $this->assertEquals($expected2, $set->samples);

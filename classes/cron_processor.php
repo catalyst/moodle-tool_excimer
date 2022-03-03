@@ -85,7 +85,7 @@ class cron_processor implements processor {
      *
      * @param manager $manager
      */
-    public function on_interval(manager $manager): void {
+    public function on_interval(manager $manager) {
         $profiler = $manager->get_profiler();
         $log = $profiler->flush();
         foreach ($log as $sample) {

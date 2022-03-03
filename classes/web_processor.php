@@ -79,11 +79,10 @@ class web_processor implements processor {
      * @param bool $isfinal
      * @throws \dml_exception
      */
-    public function process(manager $manager, bool $isfinal): void {
+    public function process(manager $manager, bool $isfinal) {
         $log = $manager->get_profiler()->flush();
-        foreach ($log as $entry) {
-            $this->sampleset->add_sample($entry);
-        }
+        $this->sampleset->add_many_samples($log);
+
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());
         $reason = $manager->get_reasons($this->profile);
