@@ -28,6 +28,7 @@ class sample_set {
     public $name;
     public $starttime;
 
+    /** array An array of \ExcimerLogEntry objects. */
     public $samples = [];
 
     public $samplelimit;

@@ -121,7 +121,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
     /**
      * Tests the invoking of apply_doubling from within add_sample.
      */
-    public function test_doubling() {
+    public function test_automatic_doubling_when_adding_samples() {
         $samples1 = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
