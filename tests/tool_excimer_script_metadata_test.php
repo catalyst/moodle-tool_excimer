@@ -26,7 +26,15 @@ namespace tool_excimer;
  */
 class tool_excimer_script_metadata_test extends \advanced_testcase {
 
-    public function test_stripparamters(): void {
+    /**
+     * Set up before each test
+     */
+    protected function setUp(): void {
+        parent::setUp();
+        $this->resetAfterTest();
+    }
+
+    public function test_strip_parameters() {
         $param = ['a' => '1', 'b' => 2, 'c' => 3];
         $paramexpect = $param;
         $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
@@ -46,7 +54,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @dataProvider group_by_value_provider
      * @throws \coding_exception
      */
-    public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected): void {
+    public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected) {
         $profile = new profile();
         $profile->set('request', $request);
         $profile->set('pathinfo', $pathinfo);
@@ -70,4 +78,32 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Tests script_metadata::get_samplelimit().
+     *
+     * @dataProvider sampling_limit_provider
+     * @param int $limit
+     * @param int $expected
+     * @throws \dml_exception
+     */
+    public function test_get_sample_limit(int $limit, int $expected) {
+        $this->preventResetByRollback();
+        set_config('samplelimit', $limit, 'tool_excimer');
+        $this->assertEquals($expected, script_metadata::get_sample_limit());
+    }
+
+    /**
+     * Input values for test_get_samplelimit().
+     *
+     * @return \int[][]
+     */
+    public function sampling_limit_provider(): array {
+        return [
+            [ 0, 1024 ],
+            [ 1, 1 ],
+            [ 1024, 1024 ],
+            [ 10000, 10000 ],
+            [ -1, 1024 ],
+        ];
+    }
 }

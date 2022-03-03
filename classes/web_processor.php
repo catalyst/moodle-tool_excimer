@@ -28,10 +28,11 @@ namespace tool_excimer;
  */
 class web_processor implements processor {
 
-    /**
-     * @var profile $profile The profile object for the run.
-     */
+    /** @var profile $profile The profile object for the run. */
     protected $profile;
+
+    /** @var sample_set */
+    protected $sampleset;
 
     /**
      * Initialises the processor
@@ -39,16 +40,22 @@ class web_processor implements processor {
      * @param manager $manager The profiler manager object
      */
     public function init(manager $manager) {
-        $this->profile = new profile();
-        $this->profile->add_env(script_metadata::get_request());
-        $this->profile->set('created', (int) $manager->get_starttime());
+        $this->sampleset = new sample_set(
+            script_metadata::get_request(),
+            (int) $manager->get_starttime(),
+            script_metadata::get_sample_limit()
+        );
 
-        $manager->get_timer()->setCallback(function($s) use ($manager) {
+        $this->profile = new profile();
+        $this->profile->add_env($this->sampleset->name);
+        $this->profile->set('created', $this->sampleset->starttime);
+
+        $manager->get_timer()->setCallback(function () use ($manager) {
             $this->process($manager, false);
         });
 
         \core_shutdown_manager::register_function(
-            function() use ($manager) {
+            function () use ($manager) {
                 $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
                 $this->process($manager, true);
@@ -72,15 +79,17 @@ class web_processor implements processor {
      * @param bool $isfinal
      * @throws \dml_exception
      */
-    public function process(manager $manager, bool $isfinal): void {
-        $log = $manager->get_profiler()->getLog();
+    public function process(manager $manager, bool $isfinal) {
+        $log = $manager->get_profiler()->flush();
+        $this->sampleset->add_many_samples($log);
+
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());
         $reason = $manager->get_reasons($this->profile);
         if ($reason !== profile::REASON_NONE) {
             $this->profile->set('reason', $reason);
             $this->profile->set('finished', $isfinal ? (int) $current : 0);
-            $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($log));
+            $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
             $this->profile->save_record();
         }
     }

@@ -46,12 +46,12 @@ class cron_processor implements processor {
     public function init(manager $manager) {
         $this->sampletime = $manager->get_starttime();
 
-        $manager->get_timer()->setCallback(function() use ($manager) {
+        $manager->get_timer()->setCallback(function () use ($manager) {
             $this->on_interval($manager);
         });
 
         \core_shutdown_manager::register_function(
-            function() use ($manager) {
+            function () use ($manager) {
                 $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
                 $this->on_interval($manager);
@@ -85,7 +85,7 @@ class cron_processor implements processor {
      *
      * @param manager $manager
      */
-    public function on_interval(manager $manager): void {
+    public function on_interval(manager $manager) {
         $profiler = $manager->get_profiler();
         $log = $profiler->flush();
         foreach ($log as $sample) {
@@ -98,7 +98,7 @@ class cron_processor implements processor {
             }
 
             if ($taskname && ($this->currenttask == null)) {
-                $this->currenttask = new sample_set($taskname, $this->sampletime);
+                $this->currenttask = new sample_set($taskname, $this->sampletime, script_metadata::get_sample_limit());
             }
 
             if ($this->currenttask) {

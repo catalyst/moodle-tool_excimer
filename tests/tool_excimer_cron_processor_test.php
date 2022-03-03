@@ -41,7 +41,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
     /**
      * Tests cron_manager::findtaskname().
      */
-    public function test_findtaskname(): void {
+    public function test_findtaskname() {
         $processor = new cron_processor();
         $entry = $this->get_log_entry_stub(['c::a', 'b', 'c']);
         $taskname = $processor->findtaskname($entry);
@@ -59,7 +59,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
     /**
      * Tests cron_manager::on_interval().
      */
-    public function test_on_interval(): void {
+    public function test_on_interval() {
         global $DB;
         $this->preventResetByRollback();
 

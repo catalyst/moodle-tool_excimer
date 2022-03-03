@@ -61,6 +61,15 @@ class script_metadata {
         'tokenpluginfile.php',
     ];
 
+    const SAMPLING_PERIOD_MIN = 0.01;
+    const SAMPLING_PERIOD_MAX = 1.0;
+    const SAMPLING_PERIOD_DEFAUILT = 0.1;
+
+    const TIMER_INTERVAL_MIN = 1;
+    const TIMER_INTERVAL_DEFAULT = 10;
+
+    const SAMPLE_LIMIT_DEFAULT = 1024;
+
     /**
      * Gets the script type of the request.
      *
@@ -284,9 +293,6 @@ class script_metadata {
         return '/' . implode('/', $segments);
     }
 
-    const TIMER_INTERVAL_MIN = 1;
-    const TIMER_INTERVAL_DEFAULT = 10;
-
     /**
      * Get the timer interval from config, and return it as seconds.
      *
@@ -301,9 +307,6 @@ class script_metadata {
         return $interval;
     }
 
-    const SAMPLING_PERIOD_MIN = 0.01;
-    const SAMPLING_PERIOD_MAX = 1.0;
-    const SAMPLING_PERIOD_DEFAUILT = 0.1;
     /**
      * Get the sampling period, and return it as seconds.
      *
@@ -316,4 +319,26 @@ class script_metadata {
         return round($insensiblerange ? $period : self::SAMPLING_PERIOD_DEFAUILT, 3);
     }
 
+    /**
+     * Returns the sample limit. The maximum number of samples stored.
+     *
+     * This works by filtering the recording of samples. Each time the limit is reached, the samples that have
+     * been recorded so far are stripped of every second sample. Also, the filter rate doubles, so that only
+     * every Nth sample is recorded at filter rate N.
+     *
+     * This has the same effect as adjusting the sampling period so that the total number of samples never exceeds
+     * the limit.
+     *
+     * See also sample_set class
+     *
+     * @return int
+     * @throws \dml_exception
+     */
+    public static function get_sample_limit(): int {
+        $limit = (int) get_config('tool_excimer', 'samplelimit');
+        if ($limit <= 0) {
+            return self::SAMPLE_LIMIT_DEFAULT;
+        }
+        return $limit;
+    }
 }
