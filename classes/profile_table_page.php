@@ -40,7 +40,7 @@ class profile_table_page {
         $PAGE->set_url($url);
 
         $output = $PAGE->get_renderer('tool_excimer');
-        $pluginname = get_string('pluginname', 'tool_excimer');
+        $pluginname = get_string('reportname', 'tool_excimer');
 
         $table->is_downloading($download, 'profile', 'profile_record');
         $table->define_baseurl($url);
