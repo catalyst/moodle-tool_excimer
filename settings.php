@@ -27,8 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
 
-    $ADMIN->add('modules', new admin_category('tool_excimer_settings', get_string('adminname','tool_excimer')));
-    $ADMIN->add('development', new admin_category('tool_excimer_reports', get_string('adminname','tool_excimer')));
+    $ADMIN->add('modules', new admin_category('tool_excimer_settings', get_string('adminname', 'tool_excimer')));
+    $ADMIN->add('development', new admin_category('tool_excimer_reports', get_string('adminname', 'tool_excimer')));
 
     $settings = new admin_settingpage(
         'tool_excimer',
