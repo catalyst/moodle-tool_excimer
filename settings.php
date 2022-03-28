@@ -40,7 +40,7 @@ if ($hassiteconfig) {
         'tool_excimer_reports',
         get_string('reportname', 'tool_excimer')
     );
-  
+
     if ($ADMIN->fulltree) {
 
         // Ensure if particular setting(s) are updated, the cache for profile
@@ -205,11 +205,4 @@ if ($hassiteconfig) {
             'moodle/site:config'
         )
     );
-
-
-
-
-
-
-  
 }
