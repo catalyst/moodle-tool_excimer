@@ -24,18 +24,20 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Excimer sampling profiler';
-
+$string['pluginname'] = 'Profiler settings';
+$string['reportname'] = 'Profiler reports';
+$string['adminname'] = 'Excimer profiler';
+  
 // Admin Tree.
-$string['report_slowest'] = 'Profile list - slowest';
-$string['report_slowest_grouped'] = 'Profile list - slowest, grouped by request';
-$string['report_recent'] = 'Profile list - recent';
-$string['report_unfinished'] = 'Profile list - unfinished';
+$string['report_slowest'] = 'Slowest profiles';
+$string['report_slowest_grouped'] = 'Slowest scripts';
+$string['report_recent'] = 'Recently profiled';
+$string['report_unfinished'] = 'Currently profiling';
 
 // Check API.
 $string['checkslowest'] = 'Excimer profiles';
 $string['checkslowest:none'] = 'No profiles recorded.';
-$string['checkslowest:action'] = 'Slowest profiles list';
+$string['checkslowest:action'] = 'Slowest profiles';
 $string['checkslowest:summary'] = 'Slowest profile is "{$a->request}" at {$a->duration}';
 $string['checkslowest:details'] = 'The longest running Excimer profile recorded is for the script/task "{$a->request}" at {$a->duration}.';
 
@@ -71,7 +73,7 @@ $string['samplelimit_desc'] = 'The maximum number of samples that will be record
     so that the total number of samples never exceeds the limit.';
 
 // Tabs.
-$string['slowest_grouped'] = 'Slowest - grouped';
+$string['slowest_grouped'] = 'Slowest scripts';
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
 $string['unfinished'] = 'Unfinished';

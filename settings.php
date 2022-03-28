@@ -27,14 +27,20 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
 
-    $ADMIN->add('development', new admin_category('tool_excimer_reports', 'Excimer'));
+    $ADMIN->add('modules', new admin_category('tool_excimer_settings', get_string('adminname','tool_excimer')));
+    $ADMIN->add('development', new admin_category('tool_excimer_reports', get_string('adminname','tool_excimer')));
 
     $settings = new admin_settingpage(
         'tool_excimer',
         get_string('pluginname', 'tool_excimer')
     );
-    $ADMIN->add('tool_excimer_reports', $settings);
+    $ADMIN->add('tool_excimer_settings', $settings);
 
+    $reports = new admin_settingpage(
+        'tool_excimer_reports',
+        get_string('reportname', 'tool_excimer')
+    );
+  
     if ($ADMIN->fulltree) {
 
         // Ensure if particular setting(s) are updated, the cache for profile
@@ -159,6 +165,7 @@ if ($hassiteconfig) {
 
     }
 
+
     $ADMIN->add(
         'tool_excimer_reports',
         new admin_externalpage(
@@ -199,4 +206,10 @@ if ($hassiteconfig) {
         )
     );
 
+
+
+
+
+
+  
 }
