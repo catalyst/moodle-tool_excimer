@@ -27,7 +27,7 @@
 $string['pluginname'] = 'Profiler settings';
 $string['reportname'] = 'Profiler reports';
 $string['adminname'] = 'Excimer profiler';
-  
+
 // Admin Tree.
 $string['report_slowest'] = 'Slowest profiles';
 $string['report_slowest_grouped'] = 'Slowest scripts';
