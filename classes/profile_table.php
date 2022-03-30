@@ -27,12 +27,12 @@ namespace tool_excimer;
 class profile_table extends \table_sql {
 
     const COLUMNS = [
+        'duration',
         'responsecode',
         'request',
         'reason',
         'type',
         'created',
-        'duration',
         'userid',
     ];
 
