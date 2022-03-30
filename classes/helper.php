@@ -92,8 +92,21 @@ class helper {
      * @throws \Exception
      */
     public static function duration_display(float $duration, bool $markup = true): string {
-        $str = format_time(intval($duration));
-        return ($str === get_string('now') ? '' : $str);
+        // Variable $markup allows a different format when downloaded vs viewed. It is currently unused.
+        if (intval($duration) > 10) {
+            // Use whole seconds.
+            $usetime = intval($duration);
+        } else {
+            // Add one decimal place.
+            $usetime = round($duration, 1);
+            // Fallback case to prevent format_time() returning the translated string 'now' when $usetime is less than 100ms.
+            // It will still appear if less than 1ms rounded. Discuss.
+            if ($usetime < 0.1) {
+                $usetime = round($duration, 3);
+            }
+        }
+        // This currently works with floats, but relies on undocumented behaviour of format_time(), which normally takes an int.
+        return format_time($usetime);
     }
 
     /**
