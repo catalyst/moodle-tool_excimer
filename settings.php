@@ -126,7 +126,7 @@ if ($hassiteconfig) {
             'tool_excimer/trigger_ms',
             get_string('request_ms', 'tool_excimer'),
             get_string('request_ms_desc', 'tool_excimer'),
-            '100',
+            '1000',
             PARAM_INT
         );
         $item->set_updatedcallback($clearprofiletimingscachecallback);
