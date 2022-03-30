@@ -27,11 +27,11 @@ namespace tool_excimer;
 class grouped_profile_table extends profile_table {
 
     const COLUMNS = [
+        'maxduration',
         'group',
         'requestcount',
         'maxcreated',
         'mincreated',
-        'maxduration',
         'minduration',
     ];
 

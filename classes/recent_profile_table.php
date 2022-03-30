@@ -14,26 +14,41 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_excimer;
+
 /**
- * Recent Excimer profiling data in a table.
+ * Display table for profile report index page.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class recent_profile_table extends profile_table {
 
-use tool_excimer\recent_profile_table;
-use tool_excimer\profile_table_page;
+    const COLUMNS = [
+        'created',
+        'responsecode',
+        'request',
+        'reason',
+        'type',
+        'duration',
+        'userid',
+    ];
+
+    /**
+     * returns the columns defined for the table.
+     *
+     * @return string[]
+     */
+    protected function get_columns(): array {
+        $columns = self::COLUMNS;
+        if (!$this->is_downloading()) {
+            $columns[] = 'actions';
+        }
+        return $columns;
+    }
 
 
-require_once('../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
 
-admin_externalpage_setup('tool_excimer_report_recent');
-
-$url = new moodle_url("/admin/tool/excimer/recent.php");
-
-$table = new recent_profile_table('profile_table_recent');
-$table->sortable(true, 'created', SORT_DESC);
-profile_table_page::display($table, $url);
+}
