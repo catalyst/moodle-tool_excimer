@@ -103,7 +103,7 @@ if ($hassiteconfig) {
                 'tool_excimer/expiry_s',
                 get_string('expiry_s', 'tool_excimer'),
                 get_string('expiry_s_desc', 'tool_excimer'),
-                WEEKSECS
+                30 * DAYSECS
             )
         );
 
