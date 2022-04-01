@@ -42,8 +42,10 @@ class profile_table extends \table_sql {
 
     protected $filters = []; // Where clause filters.
 
+    protected $scripttypes = []; // Filter by specific and/or multiple scripttypes.
+
     /**
-     * Add a filter to limit the profiles eing listed.
+     * Add a filter to limit the profiles being listed.
      *
      * @param string $field
      * @param mixed $value
@@ -59,6 +61,15 @@ class profile_table extends \table_sql {
      */
     public function get_filters(): array {
         return $this->filters;
+    }
+
+    /**
+     * Add specific scripttypes to filter
+     *
+     * @param array $arr
+     */
+    public function set_scripttypes(array $arr): void {
+        $this->scripttypes = $arr;
     }
 
     /**
@@ -100,6 +111,9 @@ class profile_table extends \table_sql {
      * Sets the SQL for the table.
      */
     protected function put_sql(): void {
+        global $DB;
+
+        $filterstring = '';
         $filter = [];
         $filterparams = [];
         if (count($this->filters)) {
@@ -107,9 +121,15 @@ class profile_table extends \table_sql {
                 $filter[] = $i . ' = ?';
                 $filterparams[] = $v;
             }
-            $filter = implode(' and ', $filter);
+            $filterstring = implode(' and ', $filter);
         } else {
-            $filter = '1=1';
+            $filterstring = '1=1';
+        }
+
+        if ($this->scripttypes) {
+            list($query, $params) = $DB->get_in_or_equal($this->scripttypes);
+            $filterstring .= " and scripttype $query";
+            $filterparams = array_merge($filterparams, $params);
         }
 
         $fields = [
@@ -139,7 +159,7 @@ class profile_table extends \table_sql {
         $this->set_sql(
             $fieldsstr,
             '{tool_excimer_profiles} LEFT JOIN {user} ON {user}.id = {tool_excimer_profiles}.userid',
-            $filter,
+            $filterstring,
             $filterparams
         );
     }
