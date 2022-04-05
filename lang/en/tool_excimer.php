@@ -31,6 +31,8 @@ $string['adminname'] = 'Excimer profiler';
 // Admin Tree.
 $string['report_slowest'] = 'Slowest profiles';
 $string['report_slowest_grouped'] = 'Slowest scripts';
+$string['report_slowest_web'] = 'Slowest web';
+$string['report_slowest_other'] = 'Slowest other';
 $string['report_recent'] = 'Recently profiled';
 $string['report_unfinished'] = 'Currently profiling';
 
@@ -76,6 +78,8 @@ $string['samplelimit_desc'] = 'The maximum number of samples that will be record
 $string['slowest_grouped'] = 'Slowest scripts';
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
+$string['slowest_web'] = 'Slowest web';
+$string['slowest_other'] = 'Slowest other';
 $string['unfinished'] = 'Unfinished';
 
 // Profile table.

@@ -34,12 +34,12 @@ require_once($CFG->libdir.'/adminlib.php');
 $script = optional_param('script', '', PARAM_TEXT);
 $group = optional_param('group', '', PARAM_TEXT);
 
-admin_externalpage_setup('tool_excimer_report_slowest');
+admin_externalpage_setup('tool_excimer_report_slowest_other');
 
-$url = new moodle_url("/admin/tool/excimer/slowest.php");
+$url = new moodle_url("/admin/tool/excimer/slowest_other.php");
 
-$table = new profile_table('profile_table_slowest');
-$table->set_scripttypes([SCRIPTTYPE_WEB, SCRIPTTYPE_AJAX]);
+$table = new profile_table('profile_table_slowest_other');
+$table->set_scripttypes([SCRIPTTYPE_CLI, SCRIPTTYPE_TASK, SCRIPTTYPE_WS]);
 $table->sortable(true, 'duration', SORT_DESC);
 if ($script) {
     $table->add_filter('request', $script);

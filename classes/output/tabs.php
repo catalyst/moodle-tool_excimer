@@ -46,15 +46,21 @@ class tabs implements \templatable {
     public function export_for_template(\renderer_base $output): array {
         $tabs = [
             'tabs' => [
+
+                [
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
+                    'title' => get_string('report_slowest_web', 'tool_excimer'),
+                    'text' => get_string('slowest_web', 'tool_excimer'),
+                ],
                 [
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_grouped.php') ]],
                     'title' => get_string('report_slowest_grouped', 'tool_excimer'),
                     'text' => get_string('slowest_grouped', 'tool_excimer'),
                 ],
                 [
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
-                    'title' => get_string('report_slowest', 'tool_excimer'),
-                    'text' => get_string('slowest', 'tool_excimer'),
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_other.php') ]],
+                    'title' => get_string('report_slowest_other', 'tool_excimer'),
+                    'text' => get_string('slowest_other', 'tool_excimer'),
                 ],
                 [
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/recent.php') ]],
