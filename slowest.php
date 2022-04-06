@@ -23,6 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_excimer\profile;
 use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
 
@@ -39,7 +40,7 @@ admin_externalpage_setup('tool_excimer_report_slowest');
 $url = new moodle_url("/admin/tool/excimer/slowest.php");
 
 $table = new profile_table('profile_table_slowest');
-$table->set_scripttypes([SCRIPTTYPE_WEB, SCRIPTTYPE_AJAX]);
+$table->set_scripttypes([profile::SCRIPTTYPE_WEB, profile::SCRIPTTYPE_AJAX]);
 $table->sortable(true, 'duration', SORT_DESC);
 if ($script) {
     $table->add_filter('request', $script);
