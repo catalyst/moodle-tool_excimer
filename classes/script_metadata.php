@@ -62,8 +62,8 @@ class script_metadata {
     ];
 
     const SAMPLING_PERIOD_MIN = 0.01;
-    const SAMPLING_PERIOD_MAX = 1.0;
-    const SAMPLING_PERIOD_DEFAUILT = 0.1;
+    const SAMPLING_PERIOD_MAX = 100.0;
+    const SAMPLING_PERIOD_DEFAULT = 0.1;
 
     const TIMER_INTERVAL_MIN = 1;
     const TIMER_INTERVAL_DEFAULT = 10;
@@ -316,7 +316,11 @@ class script_metadata {
     public static function get_sampling_period(): float {
         $period = get_config('tool_excimer', 'sample_ms') / 1000;
         $insensiblerange = $period >= self::SAMPLING_PERIOD_MIN && $period <= self::SAMPLING_PERIOD_MAX;
-        return round($insensiblerange ? $period : self::SAMPLING_PERIOD_DEFAUILT, 3);
+        if (! $insensiblerange) {
+            set_config('sample_ms', self::SAMPLING_PERIOD_DEFAULT * 1000, 'tool_excimer');
+            $period = self::SAMPLING_PERIOD_DEFAULT;
+        }
+        return round($period, 3);
     }
 
     /**
