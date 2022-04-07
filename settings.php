@@ -23,6 +23,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_excimer\script_metadata;
+
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
@@ -72,7 +74,8 @@ if ($hassiteconfig) {
             new admin_setting_configtext(
                 'tool_excimer/sample_ms',
                 get_string('period_ms', 'tool_excimer'),
-                get_string('period_ms_desc', 'tool_excimer'),
+                get_string('period_ms_desc', 'tool_excimer',
+                    [ 'min' => script_metadata::SAMPLING_PERIOD_MIN * 1000, 'max' => script_metadata::SAMPLING_PERIOD_MAX * 1000]),
                 '100',
                 PARAM_INT
             )
