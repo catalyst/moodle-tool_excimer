@@ -173,7 +173,7 @@ if ($hassiteconfig) {
         'tool_excimer_reports',
         new admin_externalpage(
             'tool_excimer_report_slowest',
-            get_string('report_slowest', 'tool_excimer'),
+            get_string('report_slowest_web', 'tool_excimer'),
             new moodle_url('/admin/tool/excimer/slowest.php'),
             'moodle/site:config'
         )
@@ -185,6 +185,16 @@ if ($hassiteconfig) {
             'tool_excimer_report_slowest_grouped',
             get_string('report_slowest_grouped', 'tool_excimer'),
             new moodle_url('/admin/tool/excimer/slowest_grouped.php'),
+            'moodle/site:config'
+        )
+    );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_report_slowest_other',
+            get_string('report_slowest_other', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/slowest_other.php'),
             'moodle/site:config'
         )
     );
