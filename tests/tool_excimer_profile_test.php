@@ -95,29 +95,6 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals($node->value, $profile->get('numsamples'));
     }
 
-    /**
-     * Test to make sure that the parameters value is truncated if it is too long.
-     *
-     * @throws \coding_exception
-     */
-    public function test_set_parameters() {
-        $profile = new profile();
-
-        $exactstring = str_repeat('a', profile::MAX_STR_LEN);
-        $profile->set('parameters', $exactstring);
-        $this->assertEquals($exactstring, $profile->get('parameters'));
-
-        $expectedstring = str_repeat('a', profile::MAX_STR_LEN - 4) . ' ...';
-
-        $longstring = str_repeat('a', profile::MAX_STR_LEN + 1);
-        $profile->set('parameters', $longstring);
-        $this->assertEquals($expectedstring, $profile->get('parameters'));
-
-        $verylongstring = str_repeat('a', profile::MAX_STR_LEN * 5);
-        $profile->set('parameters', $verylongstring);
-        $this->assertEquals($expectedstring, $profile->get('parameters'));
-    }
-
     public function test_save(): void {
         global $DB;
         $this->preventResetByRollback();

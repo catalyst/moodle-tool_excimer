@@ -63,9 +63,6 @@ class profile extends persistent {
     const SCRIPTTYPE_WS = 3;
     const SCRIPTTYPE_TASK = 4;
 
-    /** @var int Maximum length of string allowed into a char database field */
-    const MAX_STR_LEN = 256;
-
     /**
      * Custom setter to set the flame data.
      *
@@ -81,21 +78,6 @@ class profile extends persistent {
 
     protected function get_flamedatad3(): string {
         return json_decode($this->get_flamedatad3json());
-    }
-
-    /**
-     * Set the parameters field. Will be truncated if longer than MAX_STR_LEN bytes.
-     *
-     * @param string $parameters
-     * @throws \coding_exception
-     */
-    protected function set_parameters(string $parameters) {
-        /* The database field can only store MAX_STR_LEN bytes. So if the string is longer, we chop it off and add
-         * an ellipsis. */
-        if (strlen($parameters) > self::MAX_STR_LEN) {
-            $parameters = substr($parameters, 0, self::MAX_STR_LEN - 4) . " ...";
-        }
-        $this->raw_set('parameters', $parameters);
     }
 
     /**
@@ -125,7 +107,7 @@ class profile extends persistent {
         $this->raw_set('referer', $_SERVER['HTTP_REFERER'] ?? '');
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
         $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
-        $this->set('parameters', script_metadata::get_parameters($this->get('scripttype')));
+        $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
         $this->raw_set('groupby', script_metadata::get_groupby_value($this));
 
         list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
