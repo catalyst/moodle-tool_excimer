@@ -44,12 +44,12 @@ class sample_set {
      *
      * @param string $name
      * @param float $starttime
-     * @param int $samplelimit
+     * @param ?int $samplelimit
      */
-    public function __construct(string $name, float $starttime, int $samplelimit) {
+    public function __construct(string $name, float $starttime, ?int $samplelimit = null) {
         $this->name = $name;
         $this->starttime = $starttime;
-        $this->samplelimit = $samplelimit;
+        $this->samplelimit = is_null($samplelimit) ? script_metadata::get_sample_limit() : $samplelimit;
     }
 
     /**
