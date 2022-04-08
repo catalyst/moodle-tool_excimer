@@ -42,8 +42,8 @@ class web_processor implements processor {
     public function init(manager $manager) {
         $this->sampleset = new sample_set(
             script_metadata::get_request(),
-            (int) $manager->get_starttime(),
-            script_metadata::get_sample_limit()
+            (int) $manager->get_starttime()
+        );
         );
 
         $this->profile = new profile();
