@@ -28,15 +28,11 @@ namespace tool_excimer;
  */
 class cron_processor implements processor {
 
-    /**
-     * @var float $sampletime Timestamp updated after processing each sample.
-     */
+    /** @var float $sampletime Timestamp updated after processing each sample */
     public $sampletime;
 
-    /**
-     * @var sample_set $currenttask A sample set recorded while processing a task.
-     */
-    public $currenttask = null;
+    /** @var sample_set $tasksampleset A sample set recorded while processing a task */
+    public $tasksampleset = null;
 
     /**
      * Initialises the processor
@@ -55,7 +51,7 @@ class cron_processor implements processor {
                 $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
                 $this->on_interval($manager);
-                if ($this->currenttask) {
+                if ($this->tasksampleset) {
                     $this->process($manager, microtime(true));
                 }
             }
@@ -92,17 +88,20 @@ class cron_processor implements processor {
             $taskname = $this->findtaskname($sample);
             $sampletime = $manager->get_starttime() + $sample->getTimestamp();
 
-            if ($this->currenttask && ($this->currenttask->name != $taskname)) {
+            // If there is a task and the current task name is different from the previous, then store the profile.
+            if ($this->tasksampleset && ($this->tasksampleset->name != $taskname)) {
                 $this->process($manager, $this->sampletime);
-                $this->currenttask = null;
+                $this->tasksampleset = null;
             }
 
-            if ($taskname && ($this->currenttask == null)) {
-                $this->currenttask = new sample_set($taskname, $this->sampletime);
+            // If there exists a current task, and the sampleset for it is not created yet, create it.
+            if ($taskname && ($this->tasksampleset === null)) {
+                $this->tasksampleset = new sample_set($taskname, $this->sampletime);
             }
 
-            if ($this->currenttask) {
-                $this->currenttask->add_sample($sample);
+            // If the sampleset exists, add the current sample to it.
+            if ($this->tasksampleset) {
+                $this->tasksampleset->add_sample($sample);
             }
 
             // Instances of task_sample are always created with the previous sample's timestamp.
@@ -142,16 +141,17 @@ class cron_processor implements processor {
      * @throws \dml_exception
      */
     public function process(manager $manager, float $finishtime): void {
-        $duration = $finishtime - $this->currenttask->starttime;
+        $duration = $finishtime - $this->tasksampleset->starttime;
         $profile = new profile();
-        $profile->add_env($this->currenttask->name);
-        $profile->set('created', (int) $this->currenttask->starttime);
+        $profile->add_env($this->tasksampleset->name);
+        $profile->set('created', (int) $this->tasksampleset->starttime);
         $profile->set('duration', $duration);
         $reasons = $manager->get_reasons($profile);
         if ($reasons !== profile::REASON_NONE) {
             $profile->set('reason', $reasons);
             $profile->set('finished', (int) $finishtime);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->currenttask->samples));
+            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
             $profile->save_record();
         }
     }
