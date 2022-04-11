@@ -34,6 +34,9 @@ class cron_processor implements processor {
     /** @var sample_set $tasksampleset A sample set recorded while processing a task */
     public $tasksampleset = null;
 
+    /** @var sample_set A sample set for memory usage recorded while processing a task */
+    protected $memoryusagesampleset;
+
     /**
      * Initialises the processor
      *
@@ -84,6 +87,7 @@ class cron_processor implements processor {
     public function on_interval(manager $manager) {
         $profiler = $manager->get_profiler();
         $log = $profiler->flush();
+        $memoryusage = memory_get_usage();  // Record and set initial memory usage at this point.
         foreach ($log as $sample) {
             $taskname = $this->findtaskname($sample);
             $sampletime = $manager->get_starttime() + $sample->getTimestamp();
@@ -97,11 +101,23 @@ class cron_processor implements processor {
             // If there exists a current task, and the sampleset for it is not created yet, create it.
             if ($taskname && ($this->tasksampleset === null)) {
                 $this->tasksampleset = new sample_set($taskname, $this->sampletime);
+                $this->memoryusagesampleset = new sample_set($taskname, $this->sampletime);
+                if ($memoryusage) { // Ensure this only adds the mem usage for the initial base sample due to accuracy.
+                    $this->memoryusagesampleset->add_sample(['sampleindex' => 0, 'value' => $memoryusage]);
+                    $memoryusage = 0;
+                }
             }
 
             // If the sampleset exists, add the current sample to it.
             if ($this->tasksampleset) {
                 $this->tasksampleset->add_sample($sample);
+
+                // Add memory usage:
+                // Note that due to the looping this is probably inaccurate.
+                $this->memoryusagesampleset->add_sample([
+                    'sampleindex' => $this->tasksampleset->total_added() + $this->memoryusagesampleset->count() - 1,
+                    'value' => memory_get_usage()
+                ]);
             }
 
             // Instances of task_sample are always created with the previous sample's timestamp.
@@ -150,7 +166,7 @@ class cron_processor implements processor {
         if ($reasons !== profile::REASON_NONE) {
             $profile->set('reason', $reasons);
             $profile->set('finished', (int) $finishtime);
-            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->currenttask->samples));
+            $profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
             $profile->save_record();
         }
