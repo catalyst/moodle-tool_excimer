@@ -28,9 +28,10 @@ class sample_set {
     public $name;
     public $starttime;
 
-    /** array An array of \ExcimerLogEntry objects. */
+    /** @var array $samples An array of \ExcimerLogEntry objects. */
     public $samples = [];
 
+    /** @var ?int $samplelimit */
     public $samplelimit;
 
     /** @var int If $filterrate is R, then only each Rth sample is recorded. */
@@ -38,6 +39,9 @@ class sample_set {
 
     /** @var int Internal counter to help with filtering. */
     private $counter = 0;
+
+    /** @var int Internal counter of how many samples were added (regardless of how many are currently held). */
+    private $total_added = 0;
 
     /**
      * Constructs the sample set.
@@ -55,9 +59,9 @@ class sample_set {
     /**
      * Add a sample to the sample store, applying any filters.
      *
-     * @param array $sample
+     * @param array|\ExcimerLogEntry $sample
      */
-    public function add_sample(\ExcimerLogEntry $sample) {
+    public function add_sample($sample) {
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
@@ -66,6 +70,7 @@ class sample_set {
             $this->samples[] = $sample;
             $this->counter = 0;
         }
+        $this->total_added++;
     }
 
     /**
@@ -98,5 +103,13 @@ class sample_set {
                 ARRAY_FILTER_USE_KEY
             )
         );
+    }
+
+    public function total_added() {
+        return $this->total_added;
+    }
+
+    public function count() {
+        return count($this->samples);
     }
 }

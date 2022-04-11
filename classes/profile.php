@@ -90,6 +90,35 @@ class profile extends persistent {
         return gzuncompress($this->raw_get('flamedatad3'));
     }
 
+    /**
+     * Custom setter to set the memory usage d3 data.
+     *
+     * @param array $node
+     * @throws \coding_exception
+     */
+    protected function set_memoryusagedatad3(array $node): void {
+        $memoryusagejson = json_encode($node);
+        $this->raw_set('memoryusagedatad3', gzcompress($memoryusagejson));
+    }
+
+    protected function get_memoryusagedatad3(): string {
+        return json_decode($this->get_uncompressed_json('memoryusagedatad3'));
+    }
+
+    /**
+     * Special getter to obtain the uncompressed stored JSON.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_uncompressed_json($fieldname): string {
+        $rawdata = $this->raw_get($fieldname);
+        if (isset($rawdata)) {
+            return gzuncompress($rawdata);
+        }
+        return json_encode(null);
+    }
+
     public function add_env(string $request): void {
         global $USER, $CFG;
 
@@ -231,6 +260,7 @@ class profile extends persistent {
             'versionhash' => ['type' => PARAM_TEXT, 'default' => ''],
             'datasize' => ['type' => PARAM_INT, 'default' => 0],
             'numsamples' => ['type' => PARAM_INT, 'default' => 0],
+            'memoryusagedatad3' => ['type' => PARAM_RAW],
             'flamedatad3' => ['type' => PARAM_RAW],
             'contenttypecategory' => ['type' => PARAM_TEXT, 'default' => ''],
             'contenttypekey' => ['type' => PARAM_TEXT],

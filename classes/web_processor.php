@@ -33,6 +33,10 @@ class web_processor implements processor {
 
     /** @var sample_set */
     protected $sampleset;
+    protected $memoryusagesampleset;
+
+    /** @var int $memoryusagesampleindex */
+    protected $memoryusagesampleindex;
 
     /**
      * Initialises the processor
@@ -40,11 +44,21 @@ class web_processor implements processor {
      * @param manager $manager The profiler manager object
      */
     public function init(manager $manager) {
-        $this->sampleset = new sample_set(
-            script_metadata::get_request(),
-            (int) $manager->get_starttime()
-        );
-        );
+
+        // Record and set initial memory usage at this point.
+        $memoryusage = memory_get_usage();
+
+        $request = script_metadata::get_request();
+        $starttime = (int) $manager->get_starttime();
+        $this->sampleset = new sample_set($request, $starttime);
+        $this->memoryusagesampleset = new sample_set($request, $starttime);
+
+
+        $this->memoryusagesampleset->add_sample([
+            // Value of the data.
+            'sampleindex' => 0,
+            'value' => $memoryusage,
+        ]);
 
         $this->profile = new profile();
         $this->profile->add_env($this->sampleset->name);
@@ -83,12 +97,19 @@ class web_processor implements processor {
         $log = $manager->get_profiler()->flush();
         $this->sampleset->add_many_samples($log);
 
+        // Note: the label can probably be determined via the JS lib).
+        $this->memoryusagesampleset->add_sample([
+            // Value of the data.
+            'sampleindex' => $this->sampleset->total_added() + $this->memoryusagesampleset->count() - 1,
+            'value' => memory_get_usage()
+        ]);
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());
         $reason = $manager->get_reasons($this->profile);
         if ($reason !== profile::REASON_NONE) {
             $this->profile->set('reason', $reason);
             $this->profile->set('finished', $isfinal ? (int) $current : 0);
+            $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
             $this->profile->save_record();
         }

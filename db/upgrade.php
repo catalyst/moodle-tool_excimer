@@ -272,7 +272,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022011400, 'tool', 'excimer');
     }
 
-    if ($oldversion < 2022040802) {
+    if ($oldversion < 2022041300) {
 
         // Change field 'parameters' into a text field.
         $table = new xmldb_table('tool_excimer_profiles');
@@ -282,8 +282,16 @@ function xmldb_tool_excimer_upgrade($oldversion) {
             $dbman->change_field_type($table, $field);
         }
 
+        // Define field memoryusagedatad3 to be added to tool_excimer_profiles.
+        $field = new xmldb_field('memoryusagedatad3', XMLDB_TYPE_BINARY, null, null, null, null, null, 'flamedatad3');
+
+        // Conditionally launch add field memoryusagedatad3.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Excimer savepoint reached.
-        upgrade_plugin_savepoint(true, 2022040802, 'tool', 'excimer');
+        upgrade_plugin_savepoint(true, 2022041300, 'tool', 'excimer');
     }
 
     return true;
