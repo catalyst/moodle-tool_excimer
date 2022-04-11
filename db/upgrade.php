@@ -294,5 +294,20 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022041300, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2022022502) {
+
+        // Define field memoryusagemax to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('memoryusagemax', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'timemodified');
+
+        // Conditionally launch add field memoryusagemax.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022022502, 'tool', 'excimer');
+    }
+
     return true;
 }

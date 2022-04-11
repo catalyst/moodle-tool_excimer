@@ -120,6 +120,7 @@ $data['reason_display'] = function($text, $render) {
 };
 
 $data['datasize'] = display_size($profile->get('datasize'));
+$data['memoryusagemax'] = display_size($profile->get('memoryusagemax'));
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 
