@@ -30,6 +30,7 @@
         <FIELD NAME="datasize" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Size of the profile data (in bytes)"/>
         <FIELD NAME="numsamples" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Number of samples taken"/>
         <FIELD NAME="flamedatad3" TYPE="binary" NOTNULL="false" SEQUENCE="false" COMMENT="Compressed JSON structure compatible with d3-flame-graph."/>
+        <FIELD NAME="memoryusagedatad3" TYPE="binary" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="contenttypecategory" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="core_filetypes' resolved string value"/>
         <FIELD NAME="contenttypekey" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="core_filetypes's key from the types available."/>
         <FIELD NAME="contenttypevalue" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="Raw content type as returned from the content-type response header, if available"/>
