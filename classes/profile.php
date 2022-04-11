@@ -158,6 +158,9 @@ class profile extends persistent {
     public function save_record(): int {
         global $DB, $USER;
 
+        // Get max memory usage.
+        $this->raw_set('memoryusagemax', memory_get_peak_usage());
+
         // Get DB ops (reads/writes).
         $this->raw_set('dbreads', $DB->perf_get_reads());
         $this->raw_set('dbwrites', $DB->perf_get_writes());
@@ -261,6 +264,7 @@ class profile extends persistent {
             'datasize' => ['type' => PARAM_INT, 'default' => 0],
             'numsamples' => ['type' => PARAM_INT, 'default' => 0],
             'memoryusagedatad3' => ['type' => PARAM_RAW],
+            'memoryusagemax' => ['type' => PARAM_INT],
             'flamedatad3' => ['type' => PARAM_RAW],
             'contenttypecategory' => ['type' => PARAM_TEXT, 'default' => ''],
             'contenttypekey' => ['type' => PARAM_TEXT],
