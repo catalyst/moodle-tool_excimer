@@ -89,7 +89,35 @@ div.tooltip {
 </style>
 
 <script type="text/javascript">
+
+/**
+ * Generate the display for file size
+ * @param int size The size to convert to human readable form
+ * @return string
+ */
+const display_size = function(size) {
+    // This is snippet of code (with some changes) is from the display_size function in moodlelib.
+    var gb = "{{#str}} sizegb, moodle {{/str}}",
+        mb = "{{#str}} sizemb, moodle {{/str}}",
+        kb = "{{#str}} sizekb, moodle {{/str}}",
+        b  = "{{#str}} sizeb, moodle {{/str}}"
+
+    if (size >= 1073741824) {
+        size = Math.round(size / 1073741824 * 10) / 10 + gb;
+    } else if (size >= 1048576) {
+        size = Math.round(size / 1048576 * 10) / 10 + mb;
+    } else if (size >= 1024) {
+        size = Math.round(size / 1024 * 10) / 10 + kb;
+    } else {
+        size = parseInt(size, 10) + ' ' + b;
+    }
+
+    return size;
+}
+
 let excimerData;
+let memoryusagedetails = document.getElementById("memoryusagedetails");
+
 const memUsageInit = async () => {
 
     const setLoading = (yn) => {
@@ -118,7 +146,6 @@ memUsageInit();
 window.addEventListener('resize', memUsageInit);
 
 // Get the data
-// d3.csv('/admin/tool/excimer/memoryusagegraph.json.php?profileid={{id}}')
 function processGraph(id, data) {
     let existingSvg = document.querySelector(`#${id} svg`);
     if (existingSvg !== null) {
@@ -129,19 +156,18 @@ function processGraph(id, data) {
     let graph = document.getElementById(id);
     const chartWidth = Math.max(graph.offsetWidth - 15, 500);
     // NOTE: left=70 is used to display the numerical range, but it will not line up with the flame chart samples so is removed
-    var margin = {top: 0, right: 0, bottom: 30, left: 0},
-        // width = 960 - margin.left - margin.right,
+    var margin = {top: 10, right: 5, bottom: 30, left: 5},
         width = chartWidth,
         height = 200;
 
     // set the ranges
     // var x = d3.scaleTime().range([0, width]); // if dates
-    var x = d3.scaleBand().range([0, width]); // if ordinal scale (such as samples vs mem-usage)
+    var x = d3.scaleLinear().range([0, width]); // if ordinal scale (such as samples vs mem-usage)
     var y = d3.scaleLinear().range([height, 0]);
 
     // define the line
     var valueline = d3.line()
-        .x(function(d) { return x(d.close); })
+        .x(function(d) { return x(d.sampleindex); })
         .y(function(d) { return y(d.value); });
 
     // append the svg obgect to the body of the page
@@ -158,7 +184,6 @@ function processGraph(id, data) {
 
 
   // format the data
-  let counter = 1
   data.forEach(function(d) {
       d.sampleindex;
       d.value = +d.value;
@@ -170,44 +195,15 @@ function processGraph(id, data) {
       .style("opacity", 0);
 
   // Scale the range of the data
-  // x.domain(d3.extent(data, function(d) { return d.sampleindex; }));
-  x.domain(data.map(function(d) { return d.sampleindex; }));
+  x.domain([0, d3.max(data, function(d) { return d.sampleindex; })]);
   y.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-  x.paddingInner(0)
-      .paddingOuter(0)
-      .align(0)
 
   // Add the valueline path.
   svg.append('path')
-      // .data([data])
+      .data([data])
       .datum(data)
       .attr('class', 'memory-usage-line')
       .attr('d', valueline);
-
-  // add the dots with tooltips
-  svg.selectAll("dot")
-     .data(data)
-   .enter().append("circle")
-     .attr("r", 5)
-     .attr("cx", function(d) { return x(d.sampleindex); })
-     .attr("cy", function(d) { return y(d.value); })
-     .on("mouseover", function(event, d) {
-       div.transition()
-         .duration(200)
-         .style("opacity", .9);
-       div.html(`
-           Sample #${d.sampleindex} <br/>
-           Bytes: ${d.value}
-       `)
-         .style("left", (event.pageX) + "px")
-         .style("top", (event.pageY - 28) + "px");
-       })
-     .on("mouseout", function(d) {
-       div.transition()
-         .duration(500)
-         .style("opacity", 0);
-       });
 
   // Add the x Axis
   svg.append('g')
@@ -218,34 +214,35 @@ function processGraph(id, data) {
   svg.append('g')
       .call(d3.axisLeft(y));
 
-  // // What happens when the mouse move -> show the annotations at the right positions.
-  // const mouseover = () => {
-  //   focus.style("opacity", 1)
-  //   focusText.style("opacity",1)
-  // }
-  //
-  // const mousemove = () => {
-  //   // recover coordinate we need
-  //   var x0 = x.invert(d3.pointer(this)[0]);
-  //   var i = bisect(data, x0, 1);
-  //   selectedData = data[i]
-  //   focus
-  //     .attr("cx", x(selectedData.x))
-  //     .attr("cy", y(selectedData.y))
-  //   focusText
-  //     .html("x:" + selectedData.x + "  -  " + "y:" + selectedData.y)
-  //     .attr("x", x(selectedData.x)+15)
-  //     .attr("y", y(selectedData.y))
-  // }
-  //
-  // const mouseout = () => {
-  //   focus.style("opacity", 0)
-  //   focusText.style("opacity", 0)
-  // }
-  //
-  // svg.on('mouseover', mouseover)
-  //   .on('mousemove', mousemove)
-  //   .on('mouseout', mouseout);
+  // add the dots with tooltips
+  svg.selectAll("dot")
+      .data(data)
+  .enter().append("circle")
+      .attr("r", 5)
+      .attr("cx", function(d) { return x(d.sampleindex); })
+      .attr("cy", function(d) { return y(d.value); })
+      .on("mouseover", function(event, d) {
+          div.transition()
+              .duration(200)
+              .style("opacity", .9);
+
+          div.html(`
+              Sample #${d.sampleindex} <br/>
+              Memory: ${display_size(d.value)}
+          `)
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+
+          memoryusagedetails.innerHTML = `
+              Sample #${d.sampleindex}, Memory Usage: ${display_size(d.value)}
+          `
+       })
+     .on("mouseout", function(d) {
+       div.transition()
+         .duration(100)
+         .style("opacity", 0);
+         memoryusagedetails.innerHTML = null
+       });
 
 }
 
