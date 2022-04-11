@@ -35,9 +35,6 @@ class web_processor implements processor {
     protected $sampleset;
     protected $memoryusagesampleset;
 
-    /** @var int $memoryusagesampleindex */
-    protected $memoryusagesampleindex;
-
     /**
      * Initialises the processor
      *
@@ -51,14 +48,10 @@ class web_processor implements processor {
         $request = script_metadata::get_request();
         $starttime = (int) $manager->get_starttime();
         $this->sampleset = new sample_set($request, $starttime);
+
+        // Add sampleset for memory usage - this sets the baseline for the profile.
         $this->memoryusagesampleset = new sample_set($request, $starttime);
-
-
-        $this->memoryusagesampleset->add_sample([
-            // Value of the data.
-            'sampleindex' => 0,
-            'value' => $memoryusage,
-        ]);
+        $this->memoryusagesampleset->add_sample(['sampleindex' => 0, 'value' => $memoryusage]);
 
         $this->profile = new profile();
         $this->profile->add_env($this->sampleset->name);
@@ -97,9 +90,7 @@ class web_processor implements processor {
         $log = $manager->get_profiler()->flush();
         $this->sampleset->add_many_samples($log);
 
-        // Note: the label can probably be determined via the JS lib).
         $this->memoryusagesampleset->add_sample([
-            // Value of the data.
             'sampleindex' => $this->sampleset->total_added() + $this->memoryusagesampleset->count() - 1,
             'value' => memory_get_usage()
         ]);
