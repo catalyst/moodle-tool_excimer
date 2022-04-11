@@ -1,5 +1,14 @@
 # moodle-tool_excimer
 
+* [What is this plugin?](#what-is-this-plugin)
+* [What this plugin is not](#what-this-plugin-is-not)
+* [Design principles](#design-principles)
+* [Branches](#branches)
+* [Installation](#installation)
+* [Troubleshooting](#troubleshooting)
+* [Support](#support)
+* [Credits](#credits)
+
 NOTE: This plugin currently in early stage development and is NOT production ready yet, stay tuned!
 
 ## What is this plugin?
@@ -78,6 +87,13 @@ about. As you make changes improvements to code it should be smart enough to pri
 what matters.
 
 
+## Branches
+
+| Moodle version    | Branch       | PHP  | excimer    |
+| ----------------- | ------------ | ---- | ---------- |
+| Moodle ?+         | main         | ??   | ?    |
+| Totara 12+        | ???          | ??   | ?    |
+
 ## Installation
 
 ### PHP Extension
@@ -110,8 +126,6 @@ Then login as admin (it should detect the extension), and click through the upgr
 **ExcimerProfiler class does not exist**.
 If you use containers, and install the package via apt/PECL, you may see this error. When this happens, you may need to stop and start up the container again, as it sometimes does not load installed packages fully whilst running, and afterwards it should work.
 
-
-## Configuration
 
 ## Support
 
