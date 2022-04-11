@@ -41,7 +41,6 @@ class web_processor implements processor {
      * @param manager $manager The profiler manager object
      */
     public function init(manager $manager) {
-
         // Record and set initial memory usage at this point.
         $memoryusage = memory_get_usage();
 

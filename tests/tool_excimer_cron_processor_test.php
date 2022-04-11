@@ -80,7 +80,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         $processor->on_interval($manager);
 
         $this->assertEquals($started + ($period * 1), $processor->sampletime);
-        $this->assertNull($processor->currenttask);
+        $this->assertNull($processor->tasksampleset);
 
         // Adding 3 more samples.
         $profiler = $this->get_profiler_stub([
@@ -94,9 +94,9 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         $this->assertEquals($started + ($period * 4), $processor->sampletime);
 
         // There should be a current sample set being recorded.
-        $this->assertNotNull($processor->currenttask);
-        $this->assertEquals($started + ($period * 2), $processor->currenttask->starttime);
-        $this->assertEquals(2, count($processor->currenttask->samples));
+        $this->assertNotNull($processor->tasksampleset);
+        $this->assertEquals($started + ($period * 2), $processor->tasksampleset->starttime);
+        $this->assertEquals(2, count($processor->tasksampleset->samples));
 
         // Adding four more samples. Should record two sample sets into the database.
         $profiler = $this->get_profiler_stub([
@@ -111,7 +111,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         $this->assertEquals($started + ($period * 8), $processor->sampletime);
 
         // There should not be a current sample set.
-        $this->assertNull($processor->currenttask);
+        $this->assertNull($processor->tasksampleset);
 
         // Check to see if the tasks have been recorded.
         $records = array_values($DB->get_records(profile::TABLE, null, 'created'));
