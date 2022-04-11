@@ -1,0 +1,252 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_excimer/profile_page
+
+    Markup for displaying a flame graph.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * id - The id of the profile
+    * request - The request url (with pathinfo and parameters)
+    * sessionid - The session ID
+    * userid - ID of the user who loaded the page
+    * scripttype - The script type
+    * created - Unix timestamp of profile creation
+    * duration - Profile duration in seconds.
+    * resposnecode - HTTP response code
+    * cookies - Is cookies enabled?
+    * buffering - Is buffering enabled?
+    * fullname - Full nane of user represented by userid.
+    * userlink - Link to user's profile page, or null if no user.
+    * tabs - Tabs markup.
+
+    Example context (json):
+    {
+        "id" : 3,
+        "request" : "/my/index.php/another/deeper/path?time=day&duration=week",
+        "sessionid" : "9842abcdef",
+        "scripttype" : 2,
+        "created" : 1638244603,
+        "duration" : 0.153,
+        "resposnecode" : 200,
+        "cookies" : 1,
+        "buffering" : 1,
+        "fullname" : "Admin User",
+        "userlink" : "https://some.domain://user/profile?id=1',
+        "tabs" : "<ul></ul>"
+    }
+}}
+
+<h4>Memory Usage</h4>
+
+<div id="loadingmemoryusagegraph">
+    Loading...
+</div>
+
+<div id="memoryusagegraph" style="margin-top: 1rem;"></div>
+<div id="memoryusagedetails" style="min-height: 1.5rem; clear: both;"></div>
+
+
+<style>
+.memory-usage-line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 150px;
+    height: 40px;
+    padding: 5px 10px;
+    font: 12px sans-serif;
+    background: black;
+    color: white;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+</style>
+
+<script type="text/javascript">
+let excimerData;
+const memUsageInit = async () => {
+
+    const setLoading = (yn) => {
+        document.getElementById('loadingmemoryusagegraph').style.display = yn ? 'block' : 'none';
+    }
+
+    let graph = document.getElementById('memoryusagegraph');
+    let details = document.getElementById('memoryusagedetails');
+    if (excimerData === undefined) {
+        setLoading(true);
+        try {
+            const data = await d3.json('/admin/tool/excimer/memoryusagegraph.json.php?profileid={{id}}')
+            setLoading(false);
+            excimerData = data;
+            processGraph('memoryusagegraph', excimerData);
+        } catch (error) {
+            console.warn(error);
+        }
+    } else {
+        processGraph('memoryusagegraph', excimerData);
+    }
+}
+
+// Main execution.
+memUsageInit();
+window.addEventListener('resize', memUsageInit);
+
+// Get the data
+// d3.csv('/admin/tool/excimer/memoryusagegraph.json.php?profileid={{id}}')
+function processGraph(id, data) {
+    let existingSvg = document.querySelector(`#${id} svg`);
+    if (existingSvg !== null) {
+        existingSvg.remove();
+    }
+
+    // Prep
+    let graph = document.getElementById(id);
+    const chartWidth = Math.max(graph.offsetWidth - 15, 500);
+    // NOTE: left=70 is used to display the numerical range, but it will not line up with the flame chart samples so is removed
+    var margin = {top: 0, right: 0, bottom: 30, left: 0},
+        // width = 960 - margin.left - margin.right,
+        width = chartWidth,
+        height = 200;
+
+    // set the ranges
+    // var x = d3.scaleTime().range([0, width]); // if dates
+    var x = d3.scaleBand().range([0, width]); // if ordinal scale (such as samples vs mem-usage)
+    var y = d3.scaleLinear().range([height, 0]);
+
+    // define the line
+    var valueline = d3.line()
+        .x(function(d) { return x(d.close); })
+        .y(function(d) { return y(d.value); });
+
+    // append the svg obgect to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3
+      .select(`#${id}`)
+      .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform',
+              'translate(' + margin.left + ',' + margin.top + ')');
+
+
+  // format the data
+  let counter = 1
+  data.forEach(function(d) {
+      d.sampleindex;
+      d.value = +d.value;
+  });
+
+  // Tooltip DOM element
+  var div = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+  // Scale the range of the data
+  // x.domain(d3.extent(data, function(d) { return d.sampleindex; }));
+  x.domain(data.map(function(d) { return d.sampleindex; }));
+  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+  x.paddingInner(0)
+      .paddingOuter(0)
+      .align(0)
+
+  // Add the valueline path.
+  svg.append('path')
+      // .data([data])
+      .datum(data)
+      .attr('class', 'memory-usage-line')
+      .attr('d', valueline);
+
+  // add the dots with tooltips
+  svg.selectAll("dot")
+     .data(data)
+   .enter().append("circle")
+     .attr("r", 5)
+     .attr("cx", function(d) { return x(d.sampleindex); })
+     .attr("cy", function(d) { return y(d.value); })
+     .on("mouseover", function(event, d) {
+       div.transition()
+         .duration(200)
+         .style("opacity", .9);
+       div.html(`
+           Sample #${d.sampleindex} <br/>
+           Bytes: ${d.value}
+       `)
+         .style("left", (event.pageX) + "px")
+         .style("top", (event.pageY - 28) + "px");
+       })
+     .on("mouseout", function(d) {
+       div.transition()
+         .duration(500)
+         .style("opacity", 0);
+       });
+
+  // Add the x Axis
+  svg.append('g')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(d3.axisBottom(x));
+
+  // Add the y Axis
+  svg.append('g')
+      .call(d3.axisLeft(y));
+
+  // // What happens when the mouse move -> show the annotations at the right positions.
+  // const mouseover = () => {
+  //   focus.style("opacity", 1)
+  //   focusText.style("opacity",1)
+  // }
+  //
+  // const mousemove = () => {
+  //   // recover coordinate we need
+  //   var x0 = x.invert(d3.pointer(this)[0]);
+  //   var i = bisect(data, x0, 1);
+  //   selectedData = data[i]
+  //   focus
+  //     .attr("cx", x(selectedData.x))
+  //     .attr("cy", y(selectedData.y))
+  //   focusText
+  //     .html("x:" + selectedData.x + "  -  " + "y:" + selectedData.y)
+  //     .attr("x", x(selectedData.x)+15)
+  //     .attr("y", y(selectedData.y))
+  // }
+  //
+  // const mouseout = () => {
+  //   focus.style("opacity", 0)
+  //   focusText.style("opacity", 0)
+  // }
+  //
+  // svg.on('mouseover', mouseover)
+  //   .on('mousemove', mousemove)
+  //   .on('mouseout', mouseout);
+
+}
+
+</script>

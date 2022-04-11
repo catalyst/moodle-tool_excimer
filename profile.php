@@ -137,5 +137,7 @@ $tabs = new tabs($url);
 $data['tabs'] = $tabs->export_for_template($output)['tabs'];
 
 echo $output->header();
+echo $output->render_from_template('tool_excimer/profile', $data);
 echo $output->render_from_template('tool_excimer/flamegraph', $data);
+echo $output->render_from_template('tool_excimer/memoryusagegraph', $data);
 echo $output->footer();

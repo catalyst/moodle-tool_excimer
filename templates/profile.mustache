@@ -1,0 +1,164 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_excimer/profile_page
+
+    Markup for displaying a flame graph.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * id - The id of the profile
+    * request - The request url (with pathinfo and parameters)
+    * sessionid - The session ID
+    * userid - ID of the user who loaded the page
+    * scripttype - The script type
+    * created - Unix timestamp of profile creation
+    * duration - Profile duration in seconds.
+    * resposnecode - HTTP response code
+    * cookies - Is cookies enabled?
+    * buffering - Is buffering enabled?
+    * fullname - Full nane of user represented by userid.
+    * userlink - Link to user's profile page, or null if no user.
+    * tabs - Tabs markup.
+
+    Example context (json):
+    {
+        "id" : 3,
+        "request" : "/my/index.php/another/deeper/path?time=day&duration=week",
+        "sessionid" : "9842abcdef",
+        "scripttype" : 2,
+        "created" : 1638244603,
+        "duration" : 0.153,
+        "resposnecode" : 200,
+        "cookies" : 1,
+        "buffering" : 1,
+        "fullname" : "Admin User",
+        "userlink" : "https://some.domain://user/profile?id=1',
+        "tabs" : "<ul></ul>"
+    }
+}}
+
+{{> core/tabtree}}
+<h3>{{{responsecode}}} {{method}} {{{request}}}</h3>
+<p>{{{delete_button}}} {{{delete_all_button}}}</p>
+
+<div id="profile-stats" class="container">
+    <div class="row">
+        <div class="">
+            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+                <tr>
+                    <th>{{#str}} field_contenttype, tool_excimer {{/str}}</th>
+                        <td>
+                        <span title="{{#str}} field_contenttypecategory, tool_excimer {{/str}}">{{contenttypecategory}}</span>
+                        -
+                        <span title="{{#str}} field_contenttypekey, tool_excimer {{/str}}">.{{contenttypekey}}</span>
+                        -
+                        <span title="{{#str}} field_contenttypevalue, tool_excimer {{/str}}">{{contenttypevalue}}</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
+                    <td>{{sessionid}}...</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_reason, tool_excimer {{/str}}</th>
+                    <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_scripttype, tool_excimer {{/str}}</th>
+                    <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_created, tool_excimer {{/str}}</th>
+                    <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_finished, tool_excimer {{/str}}</th>
+                    <td>
+                        {{#finished}}
+                            {{#userdate}} {{finished}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}
+                        {{/finished}}
+                        {{^finished}}
+                            {{#str}} didnotfinish, tool_excimer {{/str}}
+                        {{/finished}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
+                    <td>{{{duration}}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_numsamples, tool_excimer {{/str}}</th>
+                    <td>{{numsamples}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_dbreadwrites, tool_excimer {{/str}}</th>
+                    <td>{{dbreads}}/{{dbwrites}}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="">
+            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+                <tr>
+                    <th>{{#str}} field_datasize, tool_excimer {{/str}}</th>
+                    <td>{{datasize}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_cookies, tool_excimer {{/str}}</th>
+                    <td>{{#cookies}} {{#str}} yes, core_customfield {{/str}} {{/cookies}}{{^cookies}}{{#str}} no, core_customfield {{/str}}{{/cookies}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_buffering, tool_excimer {{/str}}</th>
+                    <td>{{#buffering}} {{#str}} yes, core_customfield {{/str}} {{/buffering}}{{^buffering}}{{#str}} no, core_customfield {{/str}}{{/buffering}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_userid, tool_excimer {{/str}}</th>
+                    <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
+                        {{^userlink}}{{fullname}}{{/userlink}}</td>
+                </tr>
+
+                <tr>
+                    <th>{{#str}} field_pid, tool_excimer {{/str}}</th>
+                    <td>{{pid}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_hostname, tool_excimer {{/str}}</th>
+                    <td>{{hostname}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_useragent, tool_excimer {{/str}}</th>
+                    <td><span title="{{useragent}}">{{#shortentext}} 20,{{useragent}} {{/shortentext}}</span></td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_versionhash, tool_excimer {{/str}}</th>
+                    <td><span title="{{versionhash}}">{{#shortentext}} 20,{{versionhash}} {{/shortentext}}</span></td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_dbreplicareads, tool_excimer {{/str}}</th>
+                    <td>{{dbreplicareads}}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+</div>
