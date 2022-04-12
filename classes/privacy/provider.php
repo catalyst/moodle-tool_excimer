@@ -48,7 +48,7 @@ class provider implements \core_privacy\local\metadata\provider,
                 'parameters' => 'field_parameters',
                 'referer' => 'field_referer',
             ],
-            'privacy:metadata:tool_excimer_profiles',
+            'privacy:metadata:tool_excimer_profiles'
         );
         return $collection;
     }
