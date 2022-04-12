@@ -324,5 +324,18 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         // Excimer savepoint reached.
         upgrade_plugin_savepoint(true, 2022041301, 'tool', 'excimer');
     }
+
+    if ($oldversion < 2022042000) {
+        // Add field maxstackdepth.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('maxstackdepth', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'userid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022042000, 'tool', 'excimer');
+    }
     return true;
 }

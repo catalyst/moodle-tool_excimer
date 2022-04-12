@@ -73,6 +73,8 @@ $string['samplelimit_desc'] = 'The maximum number of samples that will be record
     samples. Each time the limit is reached, the samples recorded so far are stripped of every second sample. Also, the filter rate
     doubles, so that only every Nth sample is recorded at filter rate N. This has the same effect as adjusting the sampling period
     so that the total number of samples never exceeds the limit.';
+$string['stacklimit'] = 'Stack limit';
+$string['stacklimit_desc'] = 'The maximum permitted recursion or stack depth before the task is flagged.';
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest scripts';
@@ -139,6 +141,7 @@ $string['reason_flameme'] = 'Flame Me';
 $string['reason_auto'] = 'Auto';
 $string['reason_slow'] = 'Slow';
 $string['reason_flameall'] = 'Flame All';
+$string['reason_stack'] = 'Recursion';
 
 // Time formats.
 $string['strftime_datetime'] = '%d %b %Y, %H:%M';
