@@ -1,5 +1,7 @@
 # moodle-tool_excimer
 
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-tool_excimer/ci/MOODLE_35_STABLE)
+
 * [What is this plugin?](#what-is-this-plugin)
 * [What this plugin is not](#what-this-plugin-is-not)
 * [Design principles](#design-principles)
@@ -89,10 +91,10 @@ what matters.
 
 ## Branches
 
-| Moodle version    | Branch       | PHP  | excimer    |
-| ----------------- | ------------ | ---- | ---------- |
-| Moodle ?+         | main         | ??   | ?    |
-| Totara 12+        | ???          | ??   | ?    |
+| Moodle version    | Branch           | PHP  | Excimer    |
+|-------------------|------------------|------|------------|
+| Moodle 3.5+       | MOODLE_35_STABLE | 7.2+ | 1.0.2+     |
+| Totara 10+        | MOODLE_35_STABLE | 7.2+ | 1.0.2+     |
 
 ## Installation
 
