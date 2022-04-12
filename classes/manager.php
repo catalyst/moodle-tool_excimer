@@ -176,6 +176,9 @@ class manager {
     public function get_reasons(profile $profile): int {
         global $SESSION;
         $reason = profile::REASON_NONE;
+        if ((int) $profile->get('maxstackdepth') > (int) script_metadata::get_stack_limit()) {
+            $reason |= profile::REASON_STACK;
+        }
         if (self::is_flag_set(self::FLAME_ME_PARAM_NAME)) {
             $reason |= profile::REASON_FLAMEME;
         }

@@ -33,6 +33,7 @@ class sample_set {
 
     /** @var ?int $samplelimit */
     public $samplelimit;
+    public $maxstackdepth = 0;
 
     /** @var int If $filterrate is R, then only each Rth sample is recorded. */
     private $filterrate = 1;
@@ -57,11 +58,21 @@ class sample_set {
     }
 
     /**
+     * Return the stack depth for this set.
+     *
+     * @return int
+     */
+    public function get_stack_depth() : int {
+        return (int) $this->maxstackdepth;
+    }
+
+    /**
      * Add a sample to the sample store, applying any filters.
      *
      * @param array|\ExcimerLogEntry $sample
      */
     public function add_sample($sample) {
+        $trace = false;
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
@@ -72,8 +83,13 @@ class sample_set {
         }
         // If this is a log entry, it will count the number of total events
         // processed instead.
+        // Each time a sample is added, recalculate the maxstackdepth for this set.
         if ($sample instanceof \ExcimerLogEntry) {
             $this->totaladded += $sample->getEventCount();
+            $trace = $sample->getTrace();
+            if ($trace) {
+                $this->maxstackdepth = max($this->maxstackdepth, count($trace));
+            }
             return;
         }
         $this->totaladded++;

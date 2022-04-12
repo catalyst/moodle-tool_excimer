@@ -16,6 +16,8 @@
 
 namespace tool_excimer;
 
+use tool_excimer\script_metadata;
+
 /**
  * Class for processing cron and adhoc tasks.
  *
@@ -162,6 +164,7 @@ class cron_processor implements processor {
         $profile->add_env($this->tasksampleset->name);
         $profile->set('created', (int) $this->tasksampleset->starttime);
         $profile->set('duration', $duration);
+        $profile->set('maxstackdepth', $this->tasksampleset->get_stack_depth());
         $reasons = $manager->get_reasons($profile);
         if ($reasons !== profile::REASON_NONE) {
             $profile->set('reason', $reasons);

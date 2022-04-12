@@ -102,6 +102,17 @@ if ($hassiteconfig) {
         );
 
         $settings->add(
+            new admin_setting_configtext(
+                'tool_excimer/stacklimit',
+                get_string('stacklimit', 'tool_excimer'),
+                get_string('stacklimit_desc', 'tool_excimer'),
+                '1000',
+                PARAM_INT
+            )
+        );
+
+
+        $settings->add(
             new admin_setting_configduration(
                 'tool_excimer/expiry_s',
                 get_string('expiry_s', 'tool_excimer'),

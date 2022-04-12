@@ -95,6 +95,7 @@ class web_processor implements processor {
         ]);
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());
+        $this->profile->set('maxstackdepth', $this->sampleset->get_stack_depth());
         $reason = $manager->get_reasons($this->profile);
         if ($reason !== profile::REASON_NONE) {
             $this->profile->set('reason', $reason);
