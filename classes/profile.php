@@ -221,6 +221,7 @@ class profile extends persistent {
             'parameters' => ['type' => PARAM_TEXT, 'default' => ''],
             'sessionid' => ['type' => PARAM_ALPHANUM, 'default' => ''],
             'userid' => ['type' => PARAM_INT, 'default' => 0],
+            'maxstackdepth' => ['type' => PARAM_INT, 'default' => 0],
             'cookies' => ['type' => PARAM_BOOL],
             'buffering' => ['type' => PARAM_BOOL],
             'responsecode' => ['type' => PARAM_INT, 'default' => 0],

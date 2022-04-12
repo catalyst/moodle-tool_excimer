@@ -286,5 +286,17 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022040802, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2022041200) {
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('maxstackdepth', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'userid');
+
+        if ($dbman->table_exists($table) && $dbman->field_exists($table, $field)) {
+            $dbman->change_field_type($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022041200, 'tool', 'excimer');
+    }
+
     return true;
 }
