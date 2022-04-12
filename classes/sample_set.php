@@ -68,14 +68,12 @@ class sample_set {
             $this->counter = 0;
         }
         // Each time a sample is added, recalculate the maxstackdepth for this set.
-        if ($this->samples) {
-            foreach ($this->samples as $sample) {
-                $trace = $sample->getTrace();
-                if ($trace) {
-                    $stackdepth = count($trace);
-                    if ($stackdepth > $this->maxstackdepth) {
-                        $this->maxstackdepth = $stackdepth;
-                    }
+        foreach ($this->samples as $sample) {
+            $trace = $sample->getTrace();
+            if ($trace) {
+                $stackdepth = count($trace);
+                if ($stackdepth > $this->maxstackdepth) {
+                    $this->maxstackdepth = $stackdepth;
                 }
             }
         }
