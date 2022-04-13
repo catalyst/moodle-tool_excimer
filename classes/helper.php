@@ -157,7 +157,7 @@ class helper {
     }
 
 
-    public static function full_request(object $profile): string {
+    public static function full_request(\stdClass $profile): string {
         $displayedrequest = $profile->request . $profile->pathinfo;
         if (!empty($profile->parameters)) {
             if ($profile->scripttype == profile::SCRIPTTYPE_CLI) {
