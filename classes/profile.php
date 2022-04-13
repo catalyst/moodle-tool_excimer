@@ -72,7 +72,6 @@ class profile extends persistent {
     protected function set_flamedatad3(flamed3_node $node): void {
         $flamedata = gzcompress(json_encode($node));
         $this->raw_set('flamedatad3', $flamedata);
-        $this->raw_set('numsamples',  $node->value);
         $this->raw_set('datasize', strlen($flamedata));
     }
 
@@ -129,6 +128,9 @@ class profile extends persistent {
         $this->raw_set('pid', getmypid());
         $this->raw_set('hostname', gethostname());
         $this->raw_set('versionhash', $CFG->allversionshash);
+
+        // Store the sample rate at the time this profile is created.
+        $this->raw_set('samplerate', get_config('tool_excimer', 'sample_ms'));
 
         $this->raw_set('method', $_SERVER['REQUEST_METHOD'] ?? '');
         $this->raw_set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
@@ -266,6 +268,7 @@ class profile extends persistent {
             'versionhash' => ['type' => PARAM_TEXT, 'default' => ''],
             'datasize' => ['type' => PARAM_INT, 'default' => 0],
             'numsamples' => ['type' => PARAM_INT, 'default' => 0],
+            'samplerate' => ['type' => PARAM_INT, 'default' => 0],
             'memoryusagedatad3' => ['type' => PARAM_RAW],
             'memoryusagemax' => ['type' => PARAM_INT],
             'flamedatad3' => ['type' => PARAM_RAW],

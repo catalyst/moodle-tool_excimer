@@ -168,6 +168,8 @@ class cron_processor implements processor {
             $profile->set('finished', (int) $finishtime);
             $profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
+            $profile->set('numsamples', $this->tasksampleset->total_added());
+            $profile->set('samplerate', $this->tasksampleset->filter_rate() * get_config('tool_excimer', 'sample_ms'));
             $profile->save_record();
         }
     }

@@ -106,6 +106,7 @@ $string['field_referer'] = 'Referer';
 $string['field_cookies'] = 'Cookies enabled';
 $string['field_buffering'] = 'Buffering enabled';
 $string['field_numsamples'] = 'Number of samples';
+$string['field_numsamples_value'] = '{$a->samples} samples @ ~{$a->samplerate}ms';
 $string['field_dbreadwrites'] = 'DB reads/writes';
 $string['field_dbreplicareads'] = 'DB reads from replica';
 $string['field_datasize'] = 'Size of profile data';
