@@ -94,7 +94,7 @@ $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
 $data = (array) $profile->to_record();
-$data['duration'] = format_time($data['duration']);
+$data['duration'] = format_time(round($data['duration'], 3));
 
 $data['request'] = helper::full_request($profile->to_record());
 
