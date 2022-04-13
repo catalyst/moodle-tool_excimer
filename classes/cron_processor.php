@@ -147,7 +147,8 @@ class cron_processor implements processor {
         $reasonstack = 0;
         $duration = $finishtime - $this->currenttask->starttime;
 
-        if ($this->currentstack && $this->currenttask->get_stack_depth() > script_metadata::get_stack_limit()) {
+        if (property_exists($this, 'currentstack') && $this->currentstack
+                && $this->currenttask->get_stack_depth() > script_metadata::get_stack_limit()) {
             $reasonstack = profile::REASON_STACK;
         }
         $profile = new profile();
