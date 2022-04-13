@@ -93,8 +93,8 @@ what matters.
 
 | Moodle version    | Branch           | PHP  | Excimer    |
 |-------------------|------------------|------|------------|
-| Moodle 3.5+       | MOODLE_35_STABLE | 7.2+ | 1.0.2+     |
-| Totara 10+        | MOODLE_35_STABLE | 7.2+ | 1.0.2+     |
+| Moodle 3.5+       | MOODLE_35_STABLE | 7.1+ | 1.0.2+     |
+| Totara 10+        | MOODLE_35_STABLE | 7.1+ | 1.0.2+     |
 
 ## Installation
 
