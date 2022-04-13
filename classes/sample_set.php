@@ -32,6 +32,7 @@ class sample_set {
     public $samples = [];
 
     public $samplelimit;
+    public $maxstackdepth = 0;
 
     /** @var int If $filterrate is R, then only each Rth sample is recorded. */
     private $filterrate = 1;
@@ -53,6 +54,17 @@ class sample_set {
     }
 
     /**
+     * Return the stack depth for this set.
+     *
+     * @param \ExcimerLogEntry $sample
+     * @return void
+     */
+
+    public function get_stack_depth() : int {
+        return $this->maxstackdepth;
+    }
+
+    /**
      * Add a sample to the sample store, applying any filters.
      *
      * @param array $sample
@@ -65,6 +77,16 @@ class sample_set {
         if ($this->counter === $this->filterrate) {
             $this->samples[] = $sample;
             $this->counter = 0;
+        }
+        // Each time a sample is added, recalculate the maxstackdepth for this set.
+        foreach ($this->samples as $sample) {
+            $trace = $sample->getTrace();
+            if ($trace) {
+                $stackdepth = count($trace);
+                if ($stackdepth > $this->maxstackdepth) {
+                    $this->maxstackdepth = $stackdepth;
+                }
+            }
         }
     }
 
