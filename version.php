@@ -26,9 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2022040802;
 $plugin->release = 2022040802;
 
-$plugin->requires = 2019052006;    // Our lowest supported Moodle (3.7.6).
+$plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
 
-// TODO $plugin->supported = ;     // Available as of Moodle 3.9.0 or later.
+$plugin->supported = [35, 41];     // Supports Moodle 3.5 or later.
 // TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
 
 $plugin->component = 'tool_excimer';
