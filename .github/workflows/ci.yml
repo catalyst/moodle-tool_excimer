@@ -9,4 +9,5 @@ jobs:
     # uses: catalyst/catalyst-moodle-workflows/.github/workflows/group-35-plus-ci.yml@main
     with:
       disable_behat: true
+      disable_grunt: true
       extra_php_extensions: excimer
