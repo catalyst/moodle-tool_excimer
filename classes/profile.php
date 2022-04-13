@@ -164,7 +164,10 @@ class profile extends persistent {
         // Get DB ops (reads/writes).
         $this->raw_set('dbreads', $DB->perf_get_reads());
         $this->raw_set('dbwrites', $DB->perf_get_writes());
-        $this->raw_set('dbreplicareads', (method_exists($DB, 'want_read_slave') && $DB->want_read_slave()) ? $DB->perf_get_reads_slave() : 0);
+        $this->raw_set(
+            'dbreplicareads',
+            (method_exists($DB, 'want_read_slave') && $DB->want_read_slave()) ? $DB->perf_get_reads_slave() : 0
+        );
 
         $this->raw_set('responsecode', http_response_code());
 

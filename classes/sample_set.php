@@ -41,7 +41,7 @@ class sample_set {
     private $counter = 0;
 
     /** @var int Internal counter of how many samples were added (regardless of how many are currently held). */
-    private $total_added = 0;
+    private $totaladded = 0;
 
     /**
      * Constructs the sample set.
@@ -70,7 +70,7 @@ class sample_set {
             $this->samples[] = $sample;
             $this->counter = 0;
         }
-        $this->total_added++;
+        $this->totaladded++;
     }
 
     /**
@@ -105,10 +105,20 @@ class sample_set {
         );
     }
 
+    /**
+     * Number of samples that have gone through the add_sample method
+     *
+     * @return    int number of samples added
+     */
     public function total_added() {
-        return $this->total_added;
+        return $this->totaladded;
     }
 
+    /**
+     * Number of samples currently in possession
+     *
+     * @return    int count of $this->samples
+     */
     public function count() {
         return count($this->samples);
     }
