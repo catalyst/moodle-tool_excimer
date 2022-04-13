@@ -5,8 +5,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    uses: catalyst/catalyst-moodle-workflows/.github/workflows/test.yml@20-configurable-php-extensions
-    # uses: catalyst/catalyst-moodle-workflows/.github/workflows/group-35-plus-ci.yml@main
+    uses: catalyst/catalyst-moodle-workflows/.github/workflows/group-35-plus-ci.yml@main
     with:
       disable_behat: true
       disable_grunt: true
