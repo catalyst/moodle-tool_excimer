@@ -32,7 +32,7 @@ class web_processor implements processor {
     protected $profile;
 
     /** @var sample_set */
-    protected $sampleset;
+    public $sampleset;
 
     /**
      * Initialises the processor
@@ -80,12 +80,16 @@ class web_processor implements processor {
      * @throws \dml_exception
      */
     public function process(manager $manager, bool $isfinal) {
+        $reasonstack = 0;
         $log = $manager->get_profiler()->flush();
         $this->sampleset->add_many_samples($log);
 
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());
-        $reason = $manager->get_reasons($this->profile);
+        if ($this->sampleset->get_stack_depth() > script_metadata::get_stack_limit()) {
+            $reasonstack = profile::REASON_STACK;
+        }
+        $reason = $manager->get_reasons($this->profile) + $reasonstack;
         if ($reason !== profile::REASON_NONE) {
             $this->profile->set('reason', $reason);
             $this->profile->set('finished', $isfinal ? (int) $current : 0);

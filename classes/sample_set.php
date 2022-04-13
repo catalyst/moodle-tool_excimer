@@ -54,6 +54,17 @@ class sample_set {
     }
 
     /**
+     * Return the stack depth for this set.
+     *
+     * @param \ExcimerLogEntry $sample
+     * @return void
+     */
+
+    public function get_stack_depth() : int {
+        return $this->maxstackdepth;
+    }
+
+    /**
      * Add a sample to the sample store, applying any filters.
      *
      * @param array $sample

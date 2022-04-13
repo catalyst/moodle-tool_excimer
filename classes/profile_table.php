@@ -146,6 +146,7 @@ class profile_table extends \table_sql {
             'responsecode',
             'referer',
             'userid',
+            'maxstackdepth',
             'lang',
             'firstname',
             'lastname',

@@ -43,18 +43,23 @@ class profile extends persistent {
     /** Reason - FLAMEALL - Toggles profiling for all subsequent pages, until FLAMEALLSTOP param is passed as a page param. */
     const REASON_FLAMEALL = 0b0100;
 
+    /** Reason - STACK - Set when maxstackdepth exceeds a predefined limit. */
+    const REASON_STACK = 0b1000;
+
 
     /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
     const REASONS = [
         self::REASON_FLAMEME,
         self::REASON_SLOW,
         self::REASON_FLAMEALL,
+        self::REASON_STACK,
     ];
 
     const REASON_STR_MAP = [
         self::REASON_FLAMEME => 'manual',
         self::REASON_SLOW => 'slowest',
         self::REASON_FLAMEALL => 'flameall',
+        self::REASON_STACK => 'stackdepth',
     ];
 
     const SCRIPTTYPE_AJAX = 0;

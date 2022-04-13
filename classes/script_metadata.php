@@ -68,6 +68,8 @@ class script_metadata {
     const TIMER_INTERVAL_MIN = 1;
     const TIMER_INTERVAL_DEFAULT = 10;
 
+    const STACK_DEPTH_LIMIT = 1000;
+
     const SAMPLE_LIMIT_DEFAULT = 1024;
 
     /**
@@ -344,5 +346,18 @@ class script_metadata {
             return self::SAMPLE_LIMIT_DEFAULT;
         }
         return $limit;
+    }
+
+    /**
+     * Returns the pre-configured stack (recursion) limit.
+     *
+     * @return integer
+     */
+    public static function get_stack_limit(): int {
+        $depth = (int) get_config('tool_excimer', 'stacklimit');
+        if ($depth <= 0) {
+            return self::STACK_DEPTH_LIMIT;
+        }
+        return $depth;
     }
 }
