@@ -36,7 +36,7 @@ if ($hassiteconfig) {
         'tool_excimer',
         get_string('pluginname', 'tool_excimer')
     );
-    $ADMIN->add('tool_excimer_settings', $settings);
+    $ADMIN->add('tools', $settings);
 
     $reports = new admin_settingpage(
         'tool_excimer_reports',
@@ -113,7 +113,7 @@ if ($hassiteconfig) {
         $settings->add(new admin_setting_heading(
             'tool_excimer/auto',
             get_string('auto_settings', 'tool_excimer'),
-            get_string('auto_settings_desc', 'tool_excimer'),
+            get_string('auto_settings_desc', 'tool_excimer')
         ));
 
         $settings->add(
@@ -121,7 +121,7 @@ if ($hassiteconfig) {
                 'tool_excimer/enable_auto',
                 get_string('enable_auto', 'tool_excimer'),
                 get_string('enable_auto_desc', 'tool_excimer'),
-                0,
+                0
             )
         );
 

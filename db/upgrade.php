@@ -286,7 +286,31 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022040802, 'tool', 'excimer');
     }
 
-    if ($oldversion < 2022041200) {
+    if ($oldversion < 2022041300) {
+
+        // Define field memoryusagedatad3 to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('memoryusagedatad3', XMLDB_TYPE_BINARY, null, null, null, null, null, 'flamedatad3');
+
+        // Conditionally launch add field memoryusagedatad3.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field memoryusagemax to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('memoryusagemax', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'timemodified');
+
+        // Conditionally launch add field memoryusagemax.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022041300, 'tool', 'excimer');
+    }
+
+    if ($oldversion < 2022041400) {
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('maxstackdepth', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'userid');
 
@@ -295,7 +319,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         }
 
         // Excimer savepoint reached.
-        upgrade_plugin_savepoint(true, 2022041200, 'tool', 'excimer');
+        upgrade_plugin_savepoint(true, 2022041400, 'tool', 'excimer');
     }
 
     return true;

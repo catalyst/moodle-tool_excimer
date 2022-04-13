@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20220412" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20220414" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -31,6 +32,7 @@
         <FIELD NAME="datasize" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Size of the profile data (in bytes)"/>
         <FIELD NAME="numsamples" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Number of samples taken"/>
         <FIELD NAME="flamedatad3" TYPE="binary" NOTNULL="false" SEQUENCE="false" COMMENT="Compressed JSON structure compatible with d3-flame-graph."/>
+        <FIELD NAME="memoryusagedatad3" TYPE="binary" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="contenttypecategory" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="core_filetypes' resolved string value"/>
         <FIELD NAME="contenttypekey" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="core_filetypes's key from the types available."/>
         <FIELD NAME="contenttypevalue" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="Raw content type as returned from the content-type response header, if available"/>
@@ -40,6 +42,7 @@
         <FIELD NAME="usermodified" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The user who created/modified the object"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The timestamp at which the record was created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The timestamp at which the record was modified"/>
+        <FIELD NAME="memoryusagemax" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum memory usage recorded for this given run. Note that CLI profiles might store the max for previous connected runs within the same process."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

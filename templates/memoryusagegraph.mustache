@@ -1,0 +1,226 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_excimer/memoryusagegraph
+
+    Markup for displaying a line graph.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * id - The id of the profile
+
+    Example context (json):
+    {
+        "id" : 3,
+    }
+}}
+
+<h4>Memory Usage</h4>
+
+<div id="loadingmemoryusagegraph">
+    Loading...
+</div>
+
+<div id="memoryusagegraph" style="margin-top: 1rem;"></div>
+<div id="memoryusagedetails" style="min-height: 1.5rem; clear: both;"></div>
+
+
+<style>
+.memory-usage-line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 150px;
+    height: 40px;
+    padding: 5px 10px;
+    font: 12px sans-serif;
+    background: black;
+    color: white;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+</style>
+
+<script type="text/javascript">
+
+/**
+ * Generate the display for file size
+ * @param int size The size to convert to human readable form
+ * @return string
+ */
+const display_size = function(size) {
+    // This is snippet of code (with some changes) is from the display_size function in moodlelib.
+    var gb = "{{#str}} sizegb, moodle {{/str}}",
+        mb = "{{#str}} sizemb, moodle {{/str}}",
+        kb = "{{#str}} sizekb, moodle {{/str}}",
+        b  = "{{#str}} sizeb, moodle {{/str}}"
+
+    if (size >= 1073741824) {
+        size = Math.round(size / 1073741824 * 10) / 10 + gb;
+    } else if (size >= 1048576) {
+        size = Math.round(size / 1048576 * 10) / 10 + mb;
+    } else if (size >= 1024) {
+        size = Math.round(size / 1024 * 10) / 10 + kb;
+    } else {
+        size = parseInt(size, 10) + ' ' + b;
+    }
+
+    return size;
+}
+
+let excimerData;
+let memoryusagedetails = document.getElementById("memoryusagedetails");
+
+const memUsageInit = async () => {
+
+    const setLoading = (yn) => {
+        document.getElementById('loadingmemoryusagegraph').style.display = yn ? 'block' : 'none';
+    }
+
+    let graph = document.getElementById('memoryusagegraph');
+    let details = document.getElementById('memoryusagedetails');
+    if (excimerData === undefined) {
+        setLoading(true);
+        try {
+            const data = await d3.json('/admin/tool/excimer/memoryusagegraph.json.php?profileid={{id}}')
+            setLoading(false);
+            excimerData = data;
+            processGraph('memoryusagegraph', excimerData);
+        } catch (error) {
+            console.warn(error);
+        }
+    } else {
+        processGraph('memoryusagegraph', excimerData);
+    }
+}
+
+// Main execution.
+memUsageInit();
+window.addEventListener('resize', memUsageInit);
+
+// Get the data
+function processGraph(id, data) {
+    let existingSvg = document.querySelector(`#${id} svg`);
+    if (existingSvg !== null) {
+        existingSvg.remove();
+    }
+
+    // Prep
+    let graph = document.getElementById(id);
+    const chartWidth = Math.max(graph.offsetWidth - 15, 500);
+    // NOTE: left=70 is used to display the numerical range, but it will not line up with the flame chart samples so is removed
+    var margin = {top: 10, right: 5, bottom: 30, left: 5},
+        width = chartWidth,
+        height = 200;
+
+    // set the ranges
+    // var x = d3.scaleTime().range([0, width]); // if dates
+    var x = d3.scaleLinear().range([0, width]); // if ordinal scale (such as samples vs mem-usage)
+    var y = d3.scaleLinear().range([height, 0]);
+
+    // define the line
+    var valueline = d3.line()
+        .x(function(d) { return x(d.sampleindex); })
+        .y(function(d) { return y(d.value); });
+
+    // append the svg obgect to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3
+      .select(`#${id}`)
+      .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform',
+              'translate(' + margin.left + ',' + margin.top + ')');
+
+
+  // format the data
+  data.forEach(function(d) {
+      d.sampleindex;
+      d.value = +d.value;
+  });
+
+  // Tooltip DOM element
+  var div = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+  // Scale the range of the data
+  x.domain([0, d3.max(data, function(d) { return d.sampleindex; })]);
+  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+  // Add the valueline path.
+  svg.append('path')
+      .data([data])
+      .datum(data)
+      .attr('class', 'memory-usage-line')
+      .attr('d', valueline);
+
+  // Add the x Axis
+  svg.append('g')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(d3.axisBottom(x));
+
+  // Add the y Axis
+  svg.append('g')
+      .call(d3.axisLeft(y));
+
+  // add the dots with tooltips
+  svg.selectAll("dot")
+      .data(data)
+  .enter().append("circle")
+      .attr("r", 5)
+      .attr("cx", function(d) { return x(d.sampleindex); })
+      .attr("cy", function(d) { return y(d.value); })
+      .on("mouseover", function(event, d) {
+          div.transition()
+              .duration(200)
+              .style("opacity", .9);
+
+          div.html(`
+              Sample #${d.sampleindex} <br/>
+              Memory: ${display_size(d.value)}
+          `)
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+
+          memoryusagedetails.innerHTML = `
+              Sample #${d.sampleindex}, Memory Usage: ${display_size(d.value)}
+          `
+       })
+     .on("mouseout", function(d) {
+       div.transition()
+         .duration(100)
+         .style("opacity", 0);
+         memoryusagedetails.innerHTML = null
+       });
+
+}
+
+</script>

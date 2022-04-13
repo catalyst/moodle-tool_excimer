@@ -94,7 +94,7 @@ $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
 $data = (array) $profile->to_record();
-$data['duration'] = format_time($data['duration']);
+$data['duration'] = format_time(round($data['duration'], 3));
 
 $data['request'] = helper::full_request($profile->to_record());
 
@@ -120,6 +120,7 @@ $data['reason_display'] = function($text, $render) {
 };
 
 $data['datasize'] = display_size($profile->get('datasize'));
+$data['memoryusagemax'] = display_size($profile->get('memoryusagemax'));
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 
@@ -137,5 +138,7 @@ $tabs = new tabs($url);
 $data['tabs'] = $tabs->export_for_template($output)['tabs'];
 
 echo $output->header();
+echo $output->render_from_template('tool_excimer/profile', $data);
 echo $output->render_from_template('tool_excimer/flamegraph', $data);
+echo $output->render_from_template('tool_excimer/memoryusagegraph', $data);
 echo $output->footer();

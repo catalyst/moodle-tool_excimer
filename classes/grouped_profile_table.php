@@ -55,7 +55,7 @@ class grouped_profile_table extends profile_table {
         return $columns;
     }
 
-    public function col_group(object $record): string {
+    public function col_group(\stdClass $record): string {
         $displayedvalue = $record->groupby;
 
         if ($this->is_downloading()) {
@@ -68,20 +68,20 @@ class grouped_profile_table extends profile_table {
         }
     }
 
-    public function col_maxcreated(object $record): string {
+    public function col_maxcreated(\stdClass $record): string {
         return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
     }
-    public function col_mincreated(object $record): string {
+    public function col_mincreated(\stdClass $record): string {
         return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
     }
-    public function col_maxduration(object $record): string {
+    public function col_maxduration(\stdClass $record): string {
         return helper::duration_display($record->maxduration, !$this->is_downloading());
     }
-    public function col_minduration(object $record): string {
+    public function col_minduration(\stdClass $record): string {
         return helper::duration_display($record->minduration, !$this->is_downloading());
     }
 
-    public function col_actions(object $record) {
+    public function col_actions(\stdClass $record) {
         if ($this->is_downloading()) {
             return '';
         }

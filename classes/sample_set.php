@@ -28,9 +28,10 @@ class sample_set {
     public $name;
     public $starttime;
 
-    /** array An array of \ExcimerLogEntry objects. */
+    /** @var array $samples An array of \ExcimerLogEntry objects. */
     public $samples = [];
 
+    /** @var ?int $samplelimit */
     public $samplelimit;
     public $maxstackdepth = 0;
 
@@ -40,17 +41,20 @@ class sample_set {
     /** @var int Internal counter to help with filtering. */
     private $counter = 0;
 
+    /** @var int Internal counter of how many samples were added (regardless of how many are currently held). */
+    private $totaladded = 0;
+
     /**
      * Constructs the sample set.
      *
      * @param string $name
      * @param float $starttime
-     * @param int $samplelimit
+     * @param ?int $samplelimit
      */
-    public function __construct(string $name, float $starttime, int $samplelimit) {
+    public function __construct(string $name, float $starttime, ?int $samplelimit = null) {
         $this->name = $name;
         $this->starttime = $starttime;
-        $this->samplelimit = $samplelimit;
+        $this->samplelimit = is_null($samplelimit) ? script_metadata::get_sample_limit() : $samplelimit;
     }
 
     /**
@@ -67,9 +71,9 @@ class sample_set {
     /**
      * Add a sample to the sample store, applying any filters.
      *
-     * @param array $sample
+     * @param array|\ExcimerLogEntry $sample
      */
-    public function add_sample(\ExcimerLogEntry $sample) {
+    public function add_sample($sample) {
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
@@ -78,6 +82,7 @@ class sample_set {
             $this->samples[] = $sample;
             $this->counter = 0;
         }
+
         // Each time a sample is added, recalculate the maxstackdepth for this set.
         foreach ($this->samples as $sample) {
             $trace = $sample->getTrace();
@@ -88,6 +93,9 @@ class sample_set {
                 }
             }
         }
+
+        $this->totaladded++;
+
     }
 
     /**
@@ -120,5 +128,23 @@ class sample_set {
                 ARRAY_FILTER_USE_KEY
             )
         );
+    }
+
+    /**
+     * Number of samples that have gone through the add_sample method
+     *
+     * @return    int number of samples added
+     */
+    public function total_added() {
+        return $this->totaladded;
+    }
+
+    /**
+     * Number of samples currently in possession
+     *
+     * @return    int count of $this->samples
+     */
+    public function count() {
+        return count($this->samples);
     }
 }

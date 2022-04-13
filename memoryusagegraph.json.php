@@ -15,23 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * D3.js flamegraph data in JSON format.
+ *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Kevin Pham <kevinpham@catalyst-au.net>
+ * @copyright Catalyst IT, 2022
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+use tool_excimer\profile;
 
-$plugin->version = 2022041300;
-$plugin->release = 2022041300;
+require_once(__DIR__ . '/../../../config.php');
 
-$plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
+require_once($CFG->libdir.'/adminlib.php');
+require_admin();
 
-$plugin->supported = [35, 41];     // Supports Moodle 3.5 or later.
-// TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
+$profileid = required_param('profileid', PARAM_INT);
 
-$plugin->component = 'tool_excimer';
-$plugin->maturity = MATURITY_ALPHA;
+$profile = new profile($profileid);
 
-$plugin->dependencies = [];
+header('Content-Type: application/json; charset: utf-8');
+
+$jsondata = $profile->get_uncompressed_json('memoryusagedatad3');
+if (!empty($jsondata)) {
+    echo $jsondata;
+}

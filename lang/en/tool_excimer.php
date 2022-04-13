@@ -24,7 +24,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Profiler settings';
+$string['pluginname'] = 'Excimer profiler';
 $string['reportname'] = 'Profiler reports';
 $string['adminname'] = 'Excimer profiler';
 
@@ -111,6 +111,7 @@ $string['field_numsamples'] = 'Number of samples';
 $string['field_dbreadwrites'] = 'DB reads/writes';
 $string['field_dbreplicareads'] = 'DB reads from replica';
 $string['field_datasize'] = 'Size of profile data';
+$string['field_memoryusagemax'] = 'Max Memory Used';
 $string['field_maxcreated'] = 'Latest';
 $string['field_mincreated'] = 'Earliest';
 $string['field_maxduration'] = 'Slowest';

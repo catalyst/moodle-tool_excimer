@@ -180,22 +180,22 @@ class profile_table extends \table_sql {
     /**
      * Display values for 'reason' column entries.
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      * @throws \coding_exception
      */
-    public function col_reason(object $record): string {
+    public function col_reason(\stdClass $record): string {
         return helper::reason_display($record->reason);
     }
 
     /**
      * Display value for 'type' column entries.
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      * @throws \coding_exception
      */
-    public function col_type(object $record): string {
+    public function col_type(\stdClass $record): string {
         $scripttype = helper::script_type_display($record->scripttype);
         $contenttype = $record->contenttypecategory;
 
@@ -224,10 +224,10 @@ class profile_table extends \table_sql {
     /**
      * Display value for 'request' column entries.
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      */
-    public function col_request(object $record): string {
+    public function col_request(\stdClass $record): string {
         $displayedrequest = helper::full_request($record);
 
         // Return plaintext for download table response format.
@@ -245,31 +245,31 @@ class profile_table extends \table_sql {
     /**
      * Display value for 'duration' column entries.
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      */
-    public function col_duration(object $record): string {
+    public function col_duration(\stdClass $record): string {
         return helper::duration_display($record->duration, !$this->is_downloading());
     }
 
     /**
      * Display value for 'created' column entries.
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      * @throws \coding_exception
      */
-    public function col_created(object $record): string {
+    public function col_created(\stdClass $record): string {
         return userdate($record->created, get_string('strftime_datetime', 'tool_excimer'));
     }
 
     /**
      * Displays the full name of the user.
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      */
-    public function col_userid(object $record): string {
+    public function col_userid(\stdClass $record): string {
         if ($record->userid == 0) {
             return '-';
         } else {
@@ -285,10 +285,10 @@ class profile_table extends \table_sql {
     /**
      * Displays the 'responsecode' column entries
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return string
      */
-    public function col_responsecode(object $record): string {
+    public function col_responsecode(\stdClass $record): string {
         if ($this->is_downloading()) {
             return $record->responsecode;
         } else {
@@ -299,12 +299,12 @@ class profile_table extends \table_sql {
     /**
      * Display for the action icons
      *
-     * @param object $record
+     * @param \stdClass $record
      * @return mixed
      * @throws \coding_exception
      * @throws \moodle_exception
      */
-    public function col_actions(object $record) {
+    public function col_actions(\stdClass $record) {
         if ($this->is_downloading()) {
             return '';
         }

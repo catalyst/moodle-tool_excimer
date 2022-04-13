@@ -95,6 +95,35 @@ class profile extends persistent {
         return gzuncompress($this->raw_get('flamedatad3'));
     }
 
+    /**
+     * Custom setter to set the memory usage d3 data.
+     *
+     * @param array $node
+     * @throws \coding_exception
+     */
+    protected function set_memoryusagedatad3(array $node): void {
+        $memoryusagejson = json_encode($node);
+        $this->raw_set('memoryusagedatad3', gzcompress($memoryusagejson));
+    }
+
+    protected function get_memoryusagedatad3(): string {
+        return json_decode($this->get_uncompressed_json('memoryusagedatad3'));
+    }
+
+    /**
+     * Special getter to obtain the uncompressed stored JSON.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_uncompressed_json($fieldname): string {
+        $rawdata = $this->raw_get($fieldname);
+        if (isset($rawdata)) {
+            return gzuncompress($rawdata);
+        }
+        return json_encode(null);
+    }
+
     public function add_env(string $request): void {
         global $USER, $CFG;
 
@@ -134,10 +163,16 @@ class profile extends persistent {
     public function save_record(): int {
         global $DB, $USER;
 
+        // Get max memory usage.
+        $this->raw_set('memoryusagemax', memory_get_peak_usage());
+
         // Get DB ops (reads/writes).
         $this->raw_set('dbreads', $DB->perf_get_reads());
         $this->raw_set('dbwrites', $DB->perf_get_writes());
-        $this->raw_set('dbreplicareads', $DB->want_read_slave() ? $DB->perf_get_reads_slave() : 0);
+        $this->raw_set(
+            'dbreplicareads',
+            (method_exists($DB, 'want_read_slave') && $DB->want_read_slave()) ? $DB->perf_get_reads_slave() : 0
+        );
 
         $this->raw_set('responsecode', http_response_code());
 
@@ -237,6 +272,8 @@ class profile extends persistent {
             'versionhash' => ['type' => PARAM_TEXT, 'default' => ''],
             'datasize' => ['type' => PARAM_INT, 'default' => 0],
             'numsamples' => ['type' => PARAM_INT, 'default' => 0],
+            'memoryusagedatad3' => ['type' => PARAM_RAW],
+            'memoryusagemax' => ['type' => PARAM_INT],
             'flamedatad3' => ['type' => PARAM_RAW],
             'contenttypecategory' => ['type' => PARAM_TEXT, 'default' => ''],
             'contenttypekey' => ['type' => PARAM_TEXT],
