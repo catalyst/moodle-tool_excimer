@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template tool_excimer/profile_page
+    @template tool_excimer/flamegraph
 
     Markup for displaying a flame graph.
 
@@ -27,33 +27,10 @@
 
     Context variables required for this template:
     * id - The id of the profile
-    * request - The request url (with pathinfo and parameters)
-    * sessionid - The session ID
-    * userid - ID of the user who loaded the page
-    * scripttype - The script type
-    * created - Unix timestamp of profile creation
-    * duration - Profile duration in seconds.
-    * resposnecode - HTTP response code
-    * cookies - Is cookies enabled?
-    * buffering - Is buffering enabled?
-    * fullname - Full nane of user represented by userid.
-    * userlink - Link to user's profile page, or null if no user.
-    * tabs - Tabs markup.
 
     Example context (json):
     {
         "id" : 3,
-        "request" : "/my/index.php/another/deeper/path?time=day&duration=week",
-        "sessionid" : "9842abcdef",
-        "scripttype" : 2,
-        "created" : 1638244603,
-        "duration" : 0.153,
-        "resposnecode" : 200,
-        "cookies" : 1,
-        "buffering" : 1,
-        "fullname" : "Admin User",
-        "userlink" : "https://some.domain://user/profile?id=1',
-        "tabs" : "<ul></ul>"
     }
 }}
 
