@@ -36,7 +36,7 @@ if ($hassiteconfig) {
         'tool_excimer',
         get_string('pluginname', 'tool_excimer')
     );
-    $ADMIN->add('tool_excimer_settings', $settings);
+    $ADMIN->add('tools', $settings);
 
     $reports = new admin_settingpage(
         'tool_excimer_reports',
