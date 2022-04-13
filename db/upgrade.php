@@ -309,5 +309,20 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         // Excimer savepoint reached.
         upgrade_plugin_savepoint(true, 2022041300, 'tool', 'excimer');
     }
+
+    if ($oldversion < 2022041301) {
+
+        // Define field samplerate to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('samplerate', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'memoryusagemax');
+
+        // Conditionally launch add field samplerate.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022041301, 'tool', 'excimer');
+    }
     return true;
 }

@@ -23,8 +23,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2022041300;
-$plugin->release = 2022041300;
+$plugin->version = 2022041301;
+$plugin->release = 2022041301;
 
 $plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
 

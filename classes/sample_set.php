@@ -122,4 +122,13 @@ class sample_set {
     public function count() {
         return count($this->samples);
     }
+
+    /**
+     * Returns the filter rate to calculate the real sampling rate
+     *
+     * @return int
+     */
+    public function filter_rate() {
+        return $this->filterrate;
+    }
 }
