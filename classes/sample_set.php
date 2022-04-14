@@ -83,11 +83,13 @@ class sample_set {
         }
 
         // Each time a sample is added, recalculate the maxstackdepth for this set.
-        $trace = $sample->getTrace();
-        if ($trace) {
-            $this->maxstackdepth = max($this->maxstackdepth, count($trace));
+        // Only do this if we were passed an \ExcimerLogEntry instance.
+        if ($trace instanceof \ExcimerLogEntry) {
+            $trace = $sample->getTrace();
+            if ($trace) {
+                $this->maxstackdepth = max($this->maxstackdepth, count($trace));
+            }
         }
-
         $this->totaladded++;
 
     }
