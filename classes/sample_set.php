@@ -73,6 +73,7 @@ class sample_set {
      * @param array|\ExcimerLogEntry $sample
      */
     public function add_sample($sample) {
+        $trace = false;
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
