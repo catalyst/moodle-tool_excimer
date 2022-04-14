@@ -193,6 +193,12 @@ class profile extends persistent {
         $this->raw_set('timemodified', $now);
         $this->raw_set('usermodified', $USER->id);
 
+        // We may not have obtained a valid userid when the profile record was created.
+        // If the current profile userid is 0, but there's a valid $USER->id, update it.
+        if ($USER->id && ! $this->raw_get('userid')) {
+            $this->raw_set('userid', $USER->id);
+        }
+
         if ($this->raw_get('id') <= 0) {
             $this->raw_set('timecreated', $now);
             $id = $db2->insert_record(self::TABLE, $this->to_record());
