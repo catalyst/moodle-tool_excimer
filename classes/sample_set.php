@@ -70,6 +70,12 @@ class sample_set {
             $this->samples[] = $sample;
             $this->counter = 0;
         }
+        // If this is a log entry, it will count the number of total events
+        // processed instead.
+        if ($sample instanceof \ExcimerLogEntry) {
+            $this->totaladded += $sample->getEventCount();
+            return;
+        }
         $this->totaladded++;
     }
 
@@ -108,18 +114,29 @@ class sample_set {
     /**
      * Number of samples that have gone through the add_sample method
      *
-     * @return    int number of samples added
+     * @return int number of samples added
      */
     public function total_added() {
         return $this->totaladded;
     }
 
     /**
-     * Number of samples currently in possession
+     * Number of real samples, that is currently in possession.
      *
-     * @return    int count of $this->samples
+     * This is the total sum of events. Noting that the filtering, if required,
+     * will have a reduced amount when compared to the totaladded count.
+     *
+     * @return int count of $this->samples
      */
     public function count() {
+        if (isset($this->samples[0]) instanceof \ExcimerLogEntry) {
+            $count = array_reduce($this->samples, function($acc, $sample) {
+                $acc += $sample->getEventCount();
+                return $acc;
+            }, 0);
+            return $count;
+        }
+
         return count($this->samples);
     }
 
