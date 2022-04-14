@@ -101,7 +101,7 @@ class web_processor implements processor {
             $this->profile->set('finished', $isfinal ? (int) $current : 0);
             $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
-            $this->profile->set('numsamples', $this->sampleset->total_added());
+            $this->profile->set('numsamples', $this->sampleset->count());
             $this->profile->set('samplerate', $this->sampleset->filter_rate() * get_config('tool_excimer', 'sample_ms'));
             $this->profile->save_record();
         }
