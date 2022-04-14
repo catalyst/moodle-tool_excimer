@@ -62,9 +62,8 @@ class sample_set {
      *
      * @return int
      */
-
     public function get_stack_depth() : int {
-        return $this->maxstackdepth;
+        return (int) $this->maxstackdepth;
     }
 
     /**

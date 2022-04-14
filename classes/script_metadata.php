@@ -356,6 +356,7 @@ class script_metadata {
     public static function get_stack_limit(): int {
         $depth = (int) get_config('tool_excimer', 'stacklimit');
         if ($depth <= 0) {
+            set_config('stacklimit', self::STACK_DEPTH_LIMIT, 'tool_excimer');
             return self::STACK_DEPTH_LIMIT;
         }
         return $depth;
