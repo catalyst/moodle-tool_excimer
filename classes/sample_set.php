@@ -60,8 +60,7 @@ class sample_set {
     /**
      * Return the stack depth for this set.
      *
-     * @param \ExcimerLogEntry $sample
-     * @return void
+     * @return int
      */
 
     public function get_stack_depth() : int {
@@ -84,14 +83,9 @@ class sample_set {
         }
 
         // Each time a sample is added, recalculate the maxstackdepth for this set.
-        foreach ($this->samples as $sample) {
-            $trace = $sample->getTrace();
-            if ($trace) {
-                $stackdepth = count($trace);
-                if ($stackdepth > $this->maxstackdepth) {
-                    $this->maxstackdepth = $stackdepth;
-                }
-            }
+        $trace = $sample->getTrace();
+        if ($trace) {
+            $this->maxstackdepth = max($this->maxstackdepth, count($trace));
         }
 
         $this->totaladded++;

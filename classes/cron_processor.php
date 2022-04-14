@@ -159,22 +159,13 @@ class cron_processor implements processor {
      * @throws \dml_exception
      */
     public function process(manager $manager, float $finishtime): void {
-
-        $reasonstack = 0;
-        $duration = $finishtime - $this->currenttask->starttime;
-
-        if (property_exists($this, 'currenttask') && $this->currenttask
-                && $this->currenttask->get_stack_depth() > script_metadata::get_stack_limit()) {
-            $reasonstack = profile::REASON_STACK;
-        }
-
         $duration = $finishtime - $this->tasksampleset->starttime;
-
         $profile = new profile();
         $profile->add_env($this->tasksampleset->name);
         $profile->set('created', (int) $this->tasksampleset->starttime);
         $profile->set('duration', $duration);
-        $reasons = $manager->get_reasons($profile) + $reasonstack;
+        $profile->set('maxstackdepth', $this->tasksampleset->get_stack_depth());
+        $reasons = $manager->get_reasons($profile);
         if ($reasons !== profile::REASON_NONE) {
             $profile->set('reason', $reasons);
             $profile->set('finished', (int) $finishtime);
