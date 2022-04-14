@@ -30,7 +30,7 @@ class flamed3_node {
     public $value;
     public $children = [];
 
-    public function __construct(string $name, $value, array $children = []) {
+    public function __construct(string $name, int $value = 0, array $children = []) {
         $this->name = $name;
         $this->value = $value;
         $this->children = $children;
@@ -41,17 +41,19 @@ class flamed3_node {
      *
      * @param array $tail
      */
-    public function add_excimer_trace_tail(array $tail): void {
-        ++$this->value;
+    public function add_excimer_trace_tail(array $tail, int $eventcount = 1): void {
+        // Increases the base event size by the sum of its events.
+        $this->value += $eventcount;
+
         if (count($tail)) {
             $child = end($this->children);
             $fname = self::extract_name_from_trace($tail[0]);
             if ($child === false || $child->name != $fname) {
-                $child = new flamed3_node($fname, 0);
+                $child = new flamed3_node($fname);
                 $this->children[] = $child;
             }
 
-            $child->add_excimer_trace_tail(array_slice($tail, 1));
+            $child->add_excimer_trace_tail(array_slice($tail, 1), $eventcount);
         }
     }
 
@@ -63,10 +65,11 @@ class flamed3_node {
      * @return flamed3_node
      */
     public static function from_excimer_log_entries(iterable $entries): flamed3_node {
-        $root = new flamed3_node('root', 0);
+        $root = new flamed3_node('root');
         foreach ($entries as $entry) {
+            $eventcount = $entry->getEventCount();
             $trace = array_reverse($entry->getTrace());
-            $root->add_excimer_trace_tail($trace);
+            $root->add_excimer_trace_tail($trace, $eventcount);
         }
         return $root;
     }
