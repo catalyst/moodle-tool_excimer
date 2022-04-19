@@ -58,8 +58,6 @@ class tool_excimer_profile_test extends \advanced_testcase {
     protected function quick_log(int $iterations): \ExcimerLog {
         $prof = new \ExcimerProfiler();
         $prof->setPeriod(1);
-
-        $x = 0;
         $prof->start();
         for ($i = 0; $i < $iterations; ++$i) {
             // Do some busy work.
@@ -84,12 +82,16 @@ class tool_excimer_profile_test extends \advanced_testcase {
     public function test_set_flamedata(): void {
         $profile = new profile();
         $log = $this->quick_log(10);
-        $node = flamed3_node::from_excimer_log_entries($log);
+        $sampleset = new sample_set('name', 0);
+        $sampleset->add_many_samples($log);
+        $node = flamed3_node::from_excimer_log_entries($sampleset->samples);
         $nodejson = json_encode($node);
         $compressed = gzcompress($nodejson);
         $size = strlen($compressed);
 
         $profile->set('flamedatad3', $node);
+        $profile->set('numsamples', $sampleset->count());
+
         $this->assertEquals($nodejson, $profile->get_flamedatad3json());
         $this->assertEquals($size, $profile->get('datasize'));
         $this->assertEquals($node->value, $profile->get('numsamples'));
@@ -100,7 +102,11 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(150); // TODO change to use stubs.
-        $node = flamed3_node::from_excimer_log_entries($log);
+
+        $sampleset = new sample_set('name', 0);
+        $sampleset->add_many_samples($log);
+
+        $node = flamed3_node::from_excimer_log_entries($sampleset->samples);
         $flamedatad3json = json_encode($node);
         $numsamples = $node->value;
         $datasize = strlen(gzcompress($flamedatad3json));
@@ -117,6 +123,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $profile->set('duration', $duration);
         $profile->set('finished', $finished);
         $profile->set('flamedatad3', $node);
+        $profile->set('numsamples', $sampleset->count());
 
         $id = $profile->save_record();
         $record = $DB->get_record(profile::TABLE, [ 'id' => $id ]);
