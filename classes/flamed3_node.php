@@ -40,8 +40,10 @@ class flamed3_node {
      * Converts a trace tail to flamed3_nodes.
      *
      * @param array $tail
+     * @param int $eventcount the count of events
      */
-    public function add_excimer_trace_tail(array $tail, int $eventcount = 1): void {
+    public function add_excimer_trace_tail(array $tail, int $eventcount): void {
+
         // Increases the base event size by the sum of its events.
         $this->value += $eventcount;
 
