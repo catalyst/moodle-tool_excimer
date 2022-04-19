@@ -193,9 +193,7 @@ class profile extends persistent {
         $this->raw_set('timemodified', $now);
         $this->raw_set('usermodified', $USER->id);
 
-        // We may not have obtained a valid userid when the profile record was created.
-        // If the current profile userid is 0, but there's a valid $USER->id, update it.
-        if ($USER->id && ! $this->raw_get('userid')) {
+        if ($this->check_update_userid($USER->id)) {
             $this->raw_set('userid', $USER->id);
         }
 
@@ -227,6 +225,37 @@ class profile extends persistent {
         }
 
         return (int) $this->raw_get('id');
+    }
+
+    /**
+     * Decide if the user id stored with this profile should be updated with the current $USER->id.
+     *
+     * @param int $currentid
+     * @return bool
+     */
+    protected function check_update_userid(int $currentid) : bool {
+        global $CFG;
+
+        $stored = (int) $this->raw_get('userid');
+
+        // We may not have obtained a valid userid when the profile record was created.
+        // If the stored userid is 0, and there's now a valid $USER->id, update the stored userid.
+        if ($currentid && !$stored) {
+            return true;
+        }
+
+        // If current userid isn't guest, but stored user is guest, update it.
+        $guestid = (int) $CFG->siteguest;
+        if ($guestid && $currentid !== $guestid && $stored === $guestid) {
+            return true;
+        }
+
+        // If current user isn't cli admin, but stored user is cli admin, update it.
+        $adminid = get_admin()->id;
+        if ($adminid && $currentid !== $adminid && $stored === $adminid) {
+            return true;
+        }
+        return false;
     }
 
     /**
