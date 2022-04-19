@@ -69,6 +69,9 @@ class excimer_testcase extends \advanced_testcase {
         $stub->method('getTrace')
             ->willReturn($newtrace);
 
+        $stub->method('getEventCount')
+            ->willReturn(1);
+
         $stub->method('getTimestamp')
             ->willReturn($timestamp);
 

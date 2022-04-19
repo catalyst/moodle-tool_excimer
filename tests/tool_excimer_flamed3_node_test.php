@@ -43,12 +43,12 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
     public function test_add_excimer_trace_tail(): void {
         $trace = [];
         $node = new flamed3_node('root', 0);
-        $node->add_excimer_trace_tail($trace);
+        $node->add_excimer_trace_tail($trace, 1);
         $this->assertEquals(1, $node->value);
         $this->assertEquals(0, count($node->children));
 
         $trace = [['function' => 'a'], ['function' => 'b'], ['function' => 'c']];
-        $node->add_excimer_trace_tail($trace);
+        $node->add_excimer_trace_tail($trace, 1);
         $this->assertEquals(2, $node->value);
         $this->assertEquals(1, count($node->children));
         $this->assertEquals('a', $node->children[0]->name);
@@ -57,7 +57,7 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
         $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
 
         $trace = [['function' => 'a'], ['function' => 'd'], ['function' => 'e']];
-        $node->add_excimer_trace_tail($trace);
+        $node->add_excimer_trace_tail($trace, 1);
         $this->assertEquals(3, $node->value);
         $this->assertEquals(1, count($node->children));
         $this->assertEquals('a', $node->children[0]->name);
@@ -69,7 +69,7 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
         $this->assertEquals('e', $node->children[0]->children[1]->children[0]->name);
 
         $trace = [['function' => 'm'], ['function' => 'n'], ['function' => 'e']];
-        $node->add_excimer_trace_tail($trace);
+        $node->add_excimer_trace_tail($trace, 1);
         $this->assertEquals(4, $node->value);
         $this->assertEquals(2, count($node->children));
         $this->assertEquals('a', $node->children[0]->name);
