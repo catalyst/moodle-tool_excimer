@@ -96,13 +96,20 @@ class script_metadata {
      *               For cli requests, the arguments are returned in a space sseparated list.
      */
     public static function get_parameters(int $type): string {
+        global $ME;
+
         if ($type == profile::SCRIPTTYPE_CLI) {
             return implode(' ', array_slice($_SERVER['argv'], 1));
-        } else {
-            $parameters = [];
-            parse_str($_SERVER['QUERY_STRING'], $parameters);
-            return http_build_query(self::stripparameters($parameters), '', '&');
         }
+
+        if (isset($ME)) {
+            $parameters = (new \moodle_url($ME))->get_query_string();
+            return $parameters;
+        }
+
+        $parameters = [];
+        parse_str($_SERVER['QUERY_STRING'], $parameters);
+        return http_build_query(self::stripparameters($parameters), '', '&');
     }
 
     /**
@@ -136,9 +143,19 @@ class script_metadata {
      * @return string the request path for this profile.
      */
     public static function get_request(): string {
-        global $SCRIPT;
-        // If set, it will trim off the leading '/' to normalise web & cli requests.
-        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+        global $SCRIPT, $ME, $CFG;
+
+        if (!isset($ME)) {
+            // If set, it will trim off the leading '/' to normalise web & cli requests.
+            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
+            return $request;
+        }
+
+        $request = (new \moodle_url($ME))->out_omit_querystring();
+        $request = str_replace($CFG->wwwroot, '', $request);
+        $request = ltrim($request, '/');
+        return $request;
+
         return $request;
     }
 
