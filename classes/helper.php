@@ -169,11 +169,12 @@ class helper {
                 $profile->parameters = escapeshellcmd($profile->parameters);
             } else {
                 // For GET requests, request should look like `myrequest.php?myparam=1` as an example.
-                $separator = '?';
+                $separator = strpos($profile->parameters, ' (') === 0 ? '' : '?';
                 $profile->parameters = urldecode($profile->parameters);
             }
             $displayedrequest .= $separator . $profile->parameters;
         }
+
         return $displayedrequest;
     }
 }

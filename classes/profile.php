@@ -126,6 +126,19 @@ class profile extends persistent {
     public function add_env(string $request): void {
         global $USER, $CFG;
 
+        // This is horrible.
+        // Determine if this is a redirected web request by examining the $_SERVER environment and
+        // seeing if the current $request is contained therein. If not, append the redirect information
+        // to the parameters so it will show up in reports. This does not change any other report information.
+
+        $redirect = '';
+        if (!empty($_SERVER['REQUEST_URI'])) {
+            if (! strpos($_SERVER['REQUEST_URI'], $request)) {
+                $redirect = ' (' . $_SERVER['REQUEST_URI'] . ')';
+            }
+
+        }
+
         $this->raw_set('request', $request);
         $this->raw_set('sessionid', substr(session_id(), 0, 10));
         $this->raw_set('scripttype', script_metadata::get_script_type());
@@ -138,12 +151,12 @@ class profile extends persistent {
         $this->raw_set('samplerate', get_config('tool_excimer', 'sample_ms'));
 
         $this->raw_set('method', $_SERVER['REQUEST_METHOD'] ?? '');
-        $this->raw_set('pathinfo', $_SERVER['REQUEST_URI'] ?? '');
+        $this->raw_set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
         $this->raw_set('useragent', $_SERVER['HTTP_USER_AGENT'] ?? '');
         $this->raw_set('referer', $_SERVER['HTTP_REFERER'] ?? '');
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
         $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
-        $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
+        $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')) . $redirect);
         $this->raw_set('groupby', script_metadata::get_groupby_value($this));
 
         list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
