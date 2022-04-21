@@ -138,7 +138,7 @@ class profile extends persistent {
         $this->raw_set('samplerate', get_config('tool_excimer', 'sample_ms'));
 
         $this->raw_set('method', $_SERVER['REQUEST_METHOD'] ?? '');
-        $this->raw_set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
+        $this->raw_set('pathinfo', $_SERVER['REQUEST_URI'] ?? '');
         $this->raw_set('useragent', $_SERVER['HTTP_USER_AGENT'] ?? '');
         $this->raw_set('referer', $_SERVER['HTTP_REFERER'] ?? '');
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
