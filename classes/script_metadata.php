@@ -107,9 +107,12 @@ class script_metadata {
             return $parameters;
         }
 
-        $parameters = [];
-        parse_str($_SERVER['QUERY_STRING'], $parameters);
-        return http_build_query(self::stripparameters($parameters), '', '&');
+        if (isset($_SERVER['QUERY_STRING'])) {
+            $parameters = [];
+            parse_str($_SERVER['QUERY_STRING'], $parameters);
+            return http_build_query(self::stripparameters($parameters), '', '&');
+        }
+        return '';
     }
 
     /**
