@@ -28,7 +28,7 @@ $plugin->release = 2022042000;
 
 $plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
 
-$plugin->supported = [35, 41];     // Supports Moodle 3.5 or later.
+$plugin->supported = [35, 401];     // Supports Moodle 3.5 or later.
 // TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
 
 $plugin->component = 'tool_excimer';
