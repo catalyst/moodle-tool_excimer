@@ -144,16 +144,15 @@ class sample_set {
      *
      * @return int count of $this->samples
      */
-    public function count() {
-        if (isset($this->samples[0]) instanceof \ExcimerLogEntry) {
+    public function count(): int {
+        $count = count($this->samples);
+        if ($count > 0 && $this->samples[0] instanceof \ExcimerLogEntry) {
             $count = array_reduce($this->samples, function($acc, $sample) {
                 $acc += $sample->getEventCount();
                 return $acc;
             }, 0);
-            return $count;
         }
-
-        return count($this->samples);
+        return $count;
     }
 
     /**

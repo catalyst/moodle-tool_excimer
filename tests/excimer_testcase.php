@@ -40,7 +40,7 @@ class excimer_testcase extends \advanced_testcase {
      * @param float|int $timestamp A timestamp to be returned by getTimestamp().
      * @return \ExcimerLogEntry|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_log_entry_stub(array $stacktrace, float $timestamp = 0) {
+    protected function get_log_entry_stub(array $stacktrace, float $timestamp = 0, int $eventcount = 1) {
         $newtrace = [];
         // ExcimerLogEntry stores the trace from most local to topmost.
         foreach (array_reverse($stacktrace) as $fn) {
@@ -70,7 +70,7 @@ class excimer_testcase extends \advanced_testcase {
             ->willReturn($newtrace);
 
         $stub->method('getEventCount')
-            ->willReturn(1);
+            ->willReturn($eventcount);
 
         $stub->method('getTimestamp')
             ->willReturn($timestamp);
