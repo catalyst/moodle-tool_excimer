@@ -34,7 +34,16 @@ class renderer extends \plugin_renderer_base {
      * @throws \moodle_exception
      */
     public function render_tabs(tabs $tabs): string {
+        $selected = '';
         $data = $tabs->export_for_template($this);
-        return $this->render_from_template('core/tabtree', $data);
+        $tabobjects = [];
+        foreach ($data['tabs'] as $tab) {
+            $tmp = new \tabobject($tab['id'], $tab['link'][0]['link'], $tab['text']);
+            if (!empty($tab['active'])) {
+                $selected = $tab['id'];
+            }
+            $tabobjects[] = $tmp;
+        }
+        return $this->output->tabtree($tabobjects, $selected);
     }
 }
