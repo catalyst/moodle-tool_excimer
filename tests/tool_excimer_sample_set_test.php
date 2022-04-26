@@ -164,4 +164,20 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         // By this point apply_doubling should have been invoked a second time.
         $this->assertEquals($expected2, $set->samples);
     }
+
+    public function test_event_count() {
+        $eventcounts = [1, 1, 4, 1, 2, 1];
+        $samples1 = [
+            $this->get_log_entry_stub(['a'], 0, $eventcounts[0]),
+            $this->get_log_entry_stub(['b'], 1, $eventcounts[1]),
+            $this->get_log_entry_stub(['c'], 2, $eventcounts[2]),
+            $this->get_log_entry_stub(['d'], 3, $eventcounts[3]),
+            $this->get_log_entry_stub(['e'], 4, $eventcounts[4]),
+            $this->get_log_entry_stub(['f'], 5, $eventcounts[5]),
+        ];
+
+        $set = new sample_set('a', 0);
+        $set->add_many_samples($samples1);
+        $this->assertEquals(array_sum($eventcounts), $set->count());
+    }
 }
