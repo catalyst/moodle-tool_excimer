@@ -28,7 +28,8 @@ use tool_excimer\profile_helper;
 
 require_once(__DIR__ . '/../../../config.php');
 
-require_admin();
+require_login(null, false);
+require_capability('moodle/site:config', context_system::instance());
 
 $returnurl = optional_param('returnurl', get_local_referer(false), PARAM_LOCALURL);
 $deleteall = optional_param('deleteall', 0, PARAM_BOOL);
