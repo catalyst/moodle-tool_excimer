@@ -90,13 +90,13 @@
                 </tr>
                 <tr>
                     <th>{{#str}} field_created, tool_excimer {{/str}}</th>
-                    <td>{{#userdate}} {{created}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}</td>
+                    <td>{{created}}</td>
                 </tr>
                 <tr>
                     <th>{{#str}} field_finished, tool_excimer {{/str}}</th>
                     <td>
                         {{#finished}}
-                            {{#userdate}} {{finished}}, {{#str}} strftimedaydatetime, langconfig {{/str}} {{/userdate}}
+                            {{finished}}
                         {{/finished}}
                         {{^finished}}
                             {{#str}} didnotfinish, tool_excimer {{/str}}
@@ -109,7 +109,7 @@
                 </tr>
                 <tr>
                     <th>{{#str}} field_numsamples, tool_excimer {{/str}}</th>
-                    <td>{{#str}} field_numsamples_value, tool_excimer, { "samples": {{numsamples}}, "samplerate": {{samplerate}} } {{/str}}</td>
+                    <td>{{numsamples_str}}</td>
                 </tr>
                 <tr>
                     <th>{{#str}} field_dbreadwrites, tool_excimer {{/str}}</th>
