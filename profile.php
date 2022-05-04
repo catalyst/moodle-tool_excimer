@@ -94,6 +94,11 @@ $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
 $data = (array) $profile->to_record();
+
+// Totara doesn't like userdate being called within mustache.
+$data['created'] = userdate($data['created']);
+$data['finished'] = userdate($data['finished']);
+
 $data['duration'] = format_time(round($data['duration'], 3));
 
 $data['request'] = helper::full_request($profile->to_record());
@@ -125,6 +130,9 @@ $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 
 $data['responsecode'] = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
+// Totara doesn't like the mustache string helper being called with varaibles.
+$data['numsamples_str'] = get_string('field_numsamples_value', 'tool_excimer', ['samples' => $data['numsamples'], 'samplerate' => $data['samplerate']]);
+
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
