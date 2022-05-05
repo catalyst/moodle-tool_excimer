@@ -4,7 +4,7 @@ name: ci
 on: [push, pull_request]
 
 jobs:
-  test:
+  ci:
     uses: catalyst/catalyst-moodle-workflows/.github/workflows/ci.yml@main
     # secrets:
       # Required if you plan to publish (uncomment the below)
@@ -12,4 +12,4 @@ jobs:
     with:
       disable_behat: true
       disable_grunt: true
-      extra_php_extensions: excimer
+      extra_php_extensions: excimer-1.0.2
