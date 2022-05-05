@@ -28,7 +28,8 @@ use tool_excimer\profile;
 require_once(__DIR__ . '/../../../config.php');
 
 require_once($CFG->libdir.'/adminlib.php');
-require_admin();
+require_login(null, false);
+require_capability('moodle/site:config', context_system::instance());
 
 $profileid = required_param('profileid', PARAM_INT);
 
