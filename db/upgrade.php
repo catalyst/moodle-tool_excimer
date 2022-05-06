@@ -352,5 +352,29 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         // Excimer savepoint reached.
         upgrade_plugin_savepoint(true, 2022042700, 'tool', 'excimer');
     }
+
+    if ($oldversion < 2022050600) {
+        // Modify field maxstackdepth.
+        $table = new xmldb_table('tool_excimer_profiles');
+
+        $field = new xmldb_field('memoryusagedatad3', XMLDB_TYPE_BINARY, 'medium', null, null, null, null, 'flamedatad3');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        } else {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('flamedatad3', XMLDB_TYPE_BINARY, 'medium', null, null, null, null, 'numsamples');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        } else {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022050600, 'tool', 'excimer');
+    }
+
+    // 2022050600
     return true;
 }
