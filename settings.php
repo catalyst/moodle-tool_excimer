@@ -76,7 +76,7 @@ if ($hassiteconfig) {
                 get_string('period_ms', 'tool_excimer'),
                 get_string('period_ms_desc', 'tool_excimer',
                     [ 'min' => script_metadata::SAMPLING_PERIOD_MIN * 1000, 'max' => script_metadata::SAMPLING_PERIOD_MAX * 1000]),
-                '100',
+                '10',
                 PARAM_INT
             )
         );
@@ -132,7 +132,7 @@ if ($hassiteconfig) {
                 'tool_excimer/enable_auto',
                 get_string('enable_auto', 'tool_excimer'),
                 get_string('enable_auto_desc', 'tool_excimer'),
-                0
+                1
             )
         );
 
