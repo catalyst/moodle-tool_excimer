@@ -40,6 +40,12 @@ class tool_excimer_manager_test extends \advanced_testcase {
      * @throws \dml_exception
      */
     public function test_is_profiling(): void {
+        // Do not assume any config is set or unset.
+        set_config('enable_auto', 0, 'tool_excimer');
+        unset($_REQUEST[manager::FLAME_ME_PARAM_NAME]);
+        unset($_REQUEST[manager::FLAME_ON_PARAM_NAME]);
+        unset($_REQUEST[manager::FLAME_OFF_PARAM_NAME]);
+
         $this->assertFalse(manager::is_profiling());
 
         $_REQUEST[manager::FLAME_ME_PARAM_NAME] = 1;

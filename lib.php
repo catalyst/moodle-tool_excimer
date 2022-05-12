@@ -37,7 +37,8 @@ use tool_excimer\check\slowest;
  * See also https://docs.moodle.org/dev/Login_callbacks#after_config.
  */
 function tool_excimer_after_config(): void {
-    if (manager::is_profiling()) {
+    // Skip setup if unit testing, but do the test here to avoid complicating manager::is_profiling().
+    if (!PHPUNIT_TEST && manager::is_profiling()) {
         $manager = manager::create();
         $manager->init();
     }
