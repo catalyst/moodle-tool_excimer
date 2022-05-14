@@ -11,8 +11,6 @@
 * [Support](#support)
 * [Credits](#credits)
 
-NOTE: This plugin currently in early stage development and is NOT production ready yet, stay tuned!
-
 ## What is this plugin?
 
 This is a Moodle admin plugin that provides developers with insights into not
@@ -39,7 +37,7 @@ Because Tideways instruments every single call, it can be used for a variety of
 things that Excimer cannot, such as determining in production if a particular code
 path was executed or not.
 
-This plugin does also not aim to be a full Application performance management(APM)
+This plugin does also not aim to be a full Application performance management (APM)
 solution such as New Relic. But if you don't have or cannot afford an APM this
 plugin should be another great tool to have in your tool box.
 
@@ -57,7 +55,7 @@ to zero. Even when it is storing and processing profiles, keep the impact as low
 possible and defer things until needed if possible or worse case to a cron task.
 
 An extension of this is 'don't escalate', meaning if something fundamentally goes wrong
-at a low level inf level, then attempt to mitigate
+at a low level inf level, then avoid making things worse. 
 
 ### 2) Don't make me think
 
@@ -131,7 +129,7 @@ If you use containers, and install the package via apt/PECL, you may see this er
 
 ## Support
 
-If you have issues please log them in GitHub here
+If you find code issues please log them in GitHub here
 
 https://github.com/catalyst/moodle-tool_excimer/issues
 
