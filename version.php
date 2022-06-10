@@ -32,6 +32,6 @@ $plugin->supported = [35, 401];     // Supports Moodle 3.5 or later.
 // TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
 
 $plugin->component = 'tool_excimer';
-$plugin->maturity = MATURITY_ALPHA;
+$plugin->maturity  = MATURITY_STABLE;
 
 $plugin->dependencies = [];
