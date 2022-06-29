@@ -98,6 +98,10 @@ what matters.
 
 ### PHP Extension
 
+Details on the php extension are here:
+
+https://www.mediawiki.org/wiki/Excimer
+
 #### Using apt
 
 ```sh
