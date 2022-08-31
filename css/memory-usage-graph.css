@@ -1,0 +1,19 @@
+/* TODO: Try to replace as much of this as possible with standard CSS. */
+.memory-usage-line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+}
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 150px;
+    height: 40px;
+    padding: 5px 10px;
+    font: 12px sans-serif;
+    background: black;
+    color: white;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
