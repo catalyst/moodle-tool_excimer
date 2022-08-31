@@ -29,6 +29,8 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
     /**
      * Tests adding samples to the object.
+     *
+     * @covers \tool_excimer\sample_set::add_many_samples
      */
     public function test_add_sample() {
         $samples = [
@@ -46,6 +48,9 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
     /**
      * Tests the effect of filtering while adding samples.
+     *
+     * @covers \tool_excimer\sample_set::add_many_samples
+     * @covers \tool_excimer\sample_set::apply_doubling
      */
     public function test_filtering() {
         $samples = [
@@ -87,6 +92,9 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
     /**
      * Tests stripping existing samples when calling apply_doubling.
+     *
+     * @covers \tool_excimer\sample_set::add_many_samples
+     * @covers \tool_excimer\sample_set::apply_doubling
      */
     public function test_stripping() {
         $samples = [
@@ -120,6 +128,8 @@ class tool_excimer_sample_set_test extends excimer_testcase {
 
     /**
      * Tests the invoking of apply_doubling from within add_sample.
+     *
+     * @covers \tool_excimer\sample_set::add_many_samples
      */
     public function test_automatic_doubling_when_adding_samples() {
         $samples1 = [
@@ -165,6 +175,11 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $this->assertEquals($expected2, $set->samples);
     }
 
+    /**
+     * Tests event count
+     *
+     * @covers \tool_excimer\sample_set::add_many_samples
+     */
     public function test_event_count() {
         $eventcounts = [1, 1, 4, 1, 2, 1];
         $samples1 = [

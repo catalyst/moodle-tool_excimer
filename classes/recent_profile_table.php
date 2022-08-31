@@ -26,6 +26,7 @@ namespace tool_excimer;
  */
 class recent_profile_table extends profile_table {
 
+    /** Columns to be displayed */
     const COLUMNS = [
         'created',
         'responsecode',
@@ -48,7 +49,4 @@ class recent_profile_table extends profile_table {
         }
         return $columns;
     }
-
-
-
 }

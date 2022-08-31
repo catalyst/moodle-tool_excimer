@@ -46,7 +46,7 @@ class script_metadata {
     ];
 
     /**
-     * List of script names that requires more infor for grouping.
+     * List of script names that requires more info for grouping.
      * TODO: This list is incomplete.
      */
     const SCRIPT_NAMES_FOR_GROUP_REFINING = [
@@ -61,15 +61,22 @@ class script_metadata {
         'tokenpluginfile.php',
     ];
 
+    /** Minimum sampling period. */
     const SAMPLING_PERIOD_MIN = 0.01;
+    /** Maximum sampling period. */
     const SAMPLING_PERIOD_MAX = 100.0;
+    /** Default sampling period. */
     const SAMPLING_PERIOD_DEFAULT = 0.1;
 
+    /** Minimum timer interval */
     const TIMER_INTERVAL_MIN = 1;
+    /** Default timer interval */
     const TIMER_INTERVAL_DEFAULT = 10;
 
+    /** Maximium stack depth. */
     const STACK_DEPTH_LIMIT = 1000;
 
+    /** Default sample limit. */
     const SAMPLE_LIMIT_DEFAULT = 1024;
 
     /**
@@ -239,6 +246,7 @@ class script_metadata {
         return [$contenttypevalue, $contenttypekey, $contenttypecategory];
     }
 
+    /** Script names for pluginfile. */
     const PLUGINFILE_SCRIPTS = [
         'pluginfile.php',
         'webservice/pluginfile.php',
@@ -246,9 +254,10 @@ class script_metadata {
     ];
 
     /**
+     * Determine the group for the profile.
+     *
      * @param profile $profile
      * @return string
-     * @throws \coding_exception
      */
     public static function get_groupby_value(profile $profile): string {
         $request = $profile->get('request');

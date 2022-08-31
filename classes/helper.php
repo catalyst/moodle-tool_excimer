@@ -89,6 +89,7 @@ class helper {
 
     /**
      * Returns a formatted time duration in m:s.ms format.
+     *
      * @param float $duration
      * @param bool $markup If true, then use markup on the result.
      * @return string
@@ -141,7 +142,8 @@ class helper {
     /**
      * Returns status as a badge.
      *
-     * @param int $status
+     * @param string $scripttype
+     * @param int $responsecode
      * @return string
      */
     public static function status_display(string $scripttype, int $responsecode): string {
@@ -159,7 +161,12 @@ class helper {
         }
     }
 
-
+    /**
+     * Get the full request of thh profile.
+     *
+     * @param \stdClass $profile
+     * @return string URL
+     */
     public static function full_request(\stdClass $profile): string {
         $displayedrequest = $profile->request . $profile->pathinfo;
         if (!empty($profile->parameters)) {

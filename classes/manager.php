@@ -26,14 +26,22 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class manager {
+    /** Collect profile for the current script. */
     const FLAME_ME_PARAM_NAME = 'FLAMEME';
+    /** Collect profiles for all scripts. */
     const FLAME_ON_PARAM_NAME = 'FLAMEALL';
+    /** Stop collecting profiles for all scripts. */
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
+    /** Don't collect profile for current scripts. */
     const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
 
+    /** @var processor */
     private $processor;
+    /** @var \ExcimerProfiler */
     private $profiler;
+    /** @var \ExcimerTimer */
     private $timer;
+    /** @var float */
     private $starttime;
 
     /**
@@ -192,7 +200,6 @@ class manager {
         return $reason;
     }
 
-
     /**
      * Returns whether or not the profile should be stored based on the duration provided.
      *
@@ -204,7 +211,7 @@ class manager {
      * it should be harder to reach the minimums required for a new profile to
      * be stored once quotas are maxed.
      *
-     * @param float duration of the current profile
+     * @param profile $profile
      * @return bool whether or not the profile should stored with the REASON_SLOW reason.
      */
     public function is_considered_slow(profile $profile): bool {

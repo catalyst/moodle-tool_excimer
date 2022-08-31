@@ -46,11 +46,10 @@ class profile_helper {
      *
      * @author Kevin Pham <kevinpham@catalyst-au.net>
      *
-     * @param  string $request holds the request url
-     * @param  int $reason the profile type or REASON_*
-     * @param  bool $usecache whether or not to even bother with caching. This allows for a forceful cache update.
-     *
-     * @return float duration (as seconds) of the fastest profile for a given reason and request/page.
+     * @param string $group
+     * @param int $reason
+     * @param bool $usecache
+     * @return float
      */
     public static function get_min_duration_for_group_and_reason(string $group, int $reason, bool $usecache = true): float {
         global $DB;

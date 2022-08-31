@@ -21,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Intermediary class to provide stubs for Excimer classes.
  *
- * @package    tool_eximer
+ * @package    tool_excimer
  * @author     Jason den Dulk <jasondendulk@catalyst-au.net>
  * @copyright  2022, Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -37,7 +37,8 @@ class excimer_testcase extends \advanced_testcase {
      * - n    - defines a function
      *
      * @param array $stacktrace A stack trace, ordered topmost to local.
-     * @param float|int $timestamp A timestamp to be returned by getTimestamp().
+     * @param float $timestamp A timestamp to be returned by getTimestamp().
+     * @param int $eventcount To be returned by getEventCount().
      * @return \ExcimerLogEntry|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
     protected function get_log_entry_stub(array $stacktrace, float $timestamp = 0, int $eventcount = 1) {
@@ -82,7 +83,7 @@ class excimer_testcase extends \advanced_testcase {
      * Creates a stub for the ExcimerLog class for testing purposes.
      *
      * @param array $stacktraces A set of stack traces, representing samples.
-     * @param float|int $period A time interval used to create timestamps.
+     * @param float $period A time interval used to create timestamps.
      * @param float $starttime Starting time for timestamps.
      * @return \ExcimerLog|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
@@ -127,7 +128,7 @@ class excimer_testcase extends \advanced_testcase {
      * Creates a stub for the ExcimerProfiler class for testing purposes.
      *
      * @param array $stacktraces A set of stack traces, representing samples.
-     * @param float|int $period A time interval used to create timestamps.
+     * @param float $period A time interval used to create timestamps.
      * @param float $starttime
      * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
      */

@@ -68,6 +68,16 @@ class tool_excimer_profile_test extends \advanced_testcase {
         return $prof->flush();
     }
 
+    /**
+     * A convenience function to save a profile.
+     *
+     * @param string $request
+     * @param flamed3_node $node
+     * @param int $reason
+     * @param float $duration
+     * @param int $created
+     * @return int The ID of the record.
+     */
     public function quick_save(string $request, flamed3_node $node, int $reason, float $duration, int $created = 12345): int {
         $profile = new profile();
         $profile->add_env($request);
@@ -79,6 +89,13 @@ class tool_excimer_profile_test extends \advanced_testcase {
         return $profile->save_record();
     }
 
+    /**
+     * Tests flamedata
+     *
+     * @covers \tool_excimer\flamed3_node::from_excimer_log_entries
+     * @covers \tool_excimer\profile::get_flamedatad3json
+     * @throws \coding_exception
+     */
     public function test_set_flamedata(): void {
         $profile = new profile();
         $log = $this->quick_log(10);
@@ -97,6 +114,12 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals($node->value, $profile->get('numsamples'));
     }
 
+    /**
+     * Tests saving profiles.
+     *
+     * @covers \tool_excimer\sample_set
+     * @covers \tool_excimer\profile::save_record
+     */
     public function test_save(): void {
         global $DB;
         $this->preventResetByRollback();
@@ -139,6 +162,11 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(getmypid(), $record->pid);
     }
 
+    /**
+     * Tests the partial saving of a profile.
+     *
+     * @covers \tool_excimer\profile::save_record
+     */
     public function test_partial_save() {
         $this->preventResetByRollback();
 
@@ -193,6 +221,11 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(getmypid(), $record->get('pid'));
     }
 
+    /**
+     * Tests profiling reasons.
+     *
+     * @covers \tool_excimer\profile::save_record
+     */
     public function test_reasons_are_being_stored(): void {
         global $DB;
         $this->preventResetByRollback();

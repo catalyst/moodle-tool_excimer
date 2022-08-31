@@ -26,10 +26,20 @@ namespace tool_excimer;
  */
 class flamed3_node {
 
+    /** @var string Node name */
     public $name;
+    /** @var int Node value */
     public $value;
+    /** @var array Node's children */
     public $children = [];
 
+    /**
+     * Create the node.
+     *
+     * @param string $name
+     * @param int $value
+     * @param array $children
+     */
     public function __construct(string $name, int $value = 0, array $children = []) {
         $this->name = $name;
         $this->value = $value;

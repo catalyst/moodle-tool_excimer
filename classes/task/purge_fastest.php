@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_excimer\task;
+
+use tool_excimer\profile_helper;
+
 /**
  * Delete excess logs to keep only the slowest.
  *
@@ -22,17 +26,20 @@
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace tool_excimer\task;
-
-use tool_excimer\profile_helper;
-
 class purge_fastest  extends \core\task\scheduled_task {
 
+    /**
+     * Get a descriptive name for this task (shown to admins).
+     *
+     * @return string
+     */
     public function get_name() {
         return get_string('task_purge_fastest', 'tool_excimer');
     }
 
+    /**
+     * Do the job.
+     */
     public function execute() {
         profile_helper::purge_fastest_by_group((int) get_config('tool_excimer', 'num_slowest_by_page'));
         profile_helper::purge_fastest((int) get_config('tool_excimer', 'num_slowest'));

@@ -26,6 +26,7 @@ namespace tool_excimer;
  */
 class grouped_profile_table extends profile_table {
 
+    /** Columns to be displayed. */
     const COLUMNS = [
         'maxduration',
         'group',
@@ -35,6 +36,9 @@ class grouped_profile_table extends profile_table {
         'minduration',
     ];
 
+    /**
+     * Sets the SQL.
+     */
     protected function put_sql(): void {
         global $DB;
 
@@ -47,6 +51,11 @@ class grouped_profile_table extends profile_table {
         $this->set_count_sql("SELECT count(distinct request) FROM {tool_excimer_profiles}");
     }
 
+    /**
+     * Get the columns to be displayed.
+     *
+     * @return string[]
+     */
     protected function get_columns(): array {
         $columns = self::COLUMNS;
         if (!$this->is_downloading()) {
@@ -55,6 +64,12 @@ class grouped_profile_table extends profile_table {
         return $columns;
     }
 
+    /**
+     * Profile group column.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
     public function col_group(\stdClass $record): string {
         $displayedvalue = $record->groupby;
 
@@ -68,19 +83,52 @@ class grouped_profile_table extends profile_table {
         }
     }
 
+    /**
+     * Max created column.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
     public function col_maxcreated(\stdClass $record): string {
-        return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
+        return userdate($record->maxcreated, get_string('strftime_datetime', 'tool_excimer'));
     }
+
+    /**
+     * Min created column.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
     public function col_mincreated(\stdClass $record): string {
         return userdate($record->mincreated, get_string('strftime_datetime', 'tool_excimer'));
     }
+
+    /**
+     * Max duration column.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
     public function col_maxduration(\stdClass $record): string {
         return helper::duration_display($record->maxduration, !$this->is_downloading());
     }
+
+    /**
+     * Min duration column.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
     public function col_minduration(\stdClass $record): string {
         return helper::duration_display($record->minduration, !$this->is_downloading());
     }
 
+    /**
+     * Actions column.
+     *
+     * @param \stdClass $record
+     * @return bool|mixed|string
+     */
     public function col_actions(\stdClass $record) {
         if ($this->is_downloading()) {
             return '';
@@ -93,5 +141,4 @@ class grouped_profile_table extends profile_table {
         $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);
         return $OUTPUT->render($link);
     }
-
 }
