@@ -40,6 +40,11 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
         $this->resetAfterTest();
     }
 
+    /**
+     * Test \tool_excimer\flamed3_node::add_excimer_trace_tail()
+     *
+     * @covers \tool_excimer\flamed3_node::add_excimer_trace_tail
+     */
     public function test_add_excimer_trace_tail(): void {
         $trace = [];
         $node = new flamed3_node('root', 0);
@@ -84,6 +89,11 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
         $this->assertEquals('e', $node->children[1]->children[0]->children[0]->name);
     }
 
+    /**
+     * Tests flamed3_node::from_excimer_log_entries
+     *
+     * @covers \tool_excimer\flamed3_node::from_excimer_log_entries
+     */
     public function test_from_excimer_log_entries(): void {
         $entries = [
             $this->get_log_entry_stub(['c::a', 'b', 'c']),
@@ -113,6 +123,11 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
         $this->assertEquals('{closure:l(12)}', $node->children[2]->children[1]->name);
     }
 
+    /**
+     * Test from log entries counts.
+     *
+     * @covers \tool_excimer\flamed3_node::from_excimer_log_entries
+     */
     public function test_from_excimer_log_entries_counts(): void {
         $entries = [
             $this->get_log_entry_stub(['c::a', 'b']),

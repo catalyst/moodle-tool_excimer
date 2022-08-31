@@ -25,14 +25,17 @@ namespace tool_excimer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class sample_set {
+    /** @var string name of the sample set. */
     public $name;
+    /** @var float Starting time of the sample set. */
     public $starttime;
 
     /** @var array $samples An array of \ExcimerLogEntry objects. */
     public $samples = [];
 
-    /** @var ?int $samplelimit */
+    /** @var int Sample limit. */
     public $samplelimit;
+    /** @var int The maximum stack depth. */
     public $maxstackdepth = 0;
 
     /** @var int If $filterrate is R, then only each Rth sample is recorded. */
@@ -49,7 +52,7 @@ class sample_set {
      *
      * @param string $name
      * @param float $starttime
-     * @param ?int $samplelimit
+     * @param int|null $samplelimit
      */
     public function __construct(string $name, float $starttime, ?int $samplelimit = null) {
         $this->name = $name;

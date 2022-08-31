@@ -26,6 +26,7 @@ namespace tool_excimer;
  */
 class profile_table extends \table_sql {
 
+    /** Columns to be displayed. */
     const COLUMNS = [
         'duration',
         'responsecode',
@@ -36,13 +37,16 @@ class profile_table extends \table_sql {
         'userid',
     ];
 
+    /** Columns to be displayed, but not sorted. */
     const NOSORT_COLUMNS = [
         'actions',
     ];
 
-    protected $filters = []; // Where clause filters.
+    /** @var array Where clause filters. */
+    protected $filters = [];
 
-    protected $scripttypes = []; // Filter by specific and/or multiple scripttypes.
+    /** @var array Filter by specific and/or multiple script types. */
+    protected $scripttypes = [];
 
     /**
      * Add a filter to limit the profiles being listed.
@@ -182,7 +186,6 @@ class profile_table extends \table_sql {
      *
      * @param \stdClass $record
      * @return string
-     * @throws \coding_exception
      */
     public function col_reason(\stdClass $record): string {
         return helper::reason_display($record->reason);

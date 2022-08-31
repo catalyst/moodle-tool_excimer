@@ -28,8 +28,9 @@ use core\persistent;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile extends persistent {
-    const TABLE = 'tool_excimer_profiles';
 
+    /** Table name. */
+    const TABLE = 'tool_excimer_profiles';
 
     /** Reason - NONE - Default fallback reason value, this will not be stored. */
     const REASON_NONE = 0b0000;
@@ -55,6 +56,7 @@ class profile extends persistent {
         self::REASON_STACK,
     ];
 
+    /** String map for profiling reasons.  */
     const REASON_STR_MAP = [
         self::REASON_FLAMEME => 'manual',
         self::REASON_SLOW => 'slowest',
@@ -62,17 +64,21 @@ class profile extends persistent {
         self::REASON_STACK => 'stackdepth',
     ];
 
+    /** Ajax scripts */
     const SCRIPTTYPE_AJAX = 0;
+    /** CLI scripts */
     const SCRIPTTYPE_CLI = 1;
+    /** Web page scripts */
     const SCRIPTTYPE_WEB = 2;
+    /** Web service scripts */
     const SCRIPTTYPE_WS = 3;
+    /** Cron tasks */
     const SCRIPTTYPE_TASK = 4;
 
     /**
      * Custom setter to set the flame data.
      *
      * @param flamed3_node $node
-     * @throws \coding_exception
      */
     protected function set_flamedatad3(flamed3_node $node): void {
         $flamedata = gzcompress(json_encode($node));
@@ -80,6 +86,11 @@ class profile extends persistent {
         $this->raw_set('datasize', strlen($flamedata));
     }
 
+    /**
+     * Custom getter for flame data.
+     *
+     * @return string
+     */
     protected function get_flamedatad3(): string {
         return json_decode($this->get_flamedatad3json());
     }
@@ -88,7 +99,6 @@ class profile extends persistent {
      * Special getter to obtain the flame data JSON.
      *
      * @return string
-     * @throws \coding_exception
      */
     public function get_flamedatad3json(): string {
         return gzuncompress($this->raw_get('flamedatad3'));
@@ -98,13 +108,17 @@ class profile extends persistent {
      * Custom setter to set the memory usage d3 data.
      *
      * @param array $node
-     * @throws \coding_exception
      */
     protected function set_memoryusagedatad3(array $node): void {
         $memoryusagejson = json_encode($node);
         $this->raw_set('memoryusagedatad3', gzcompress($memoryusagejson));
     }
 
+    /**
+     * Custom getter for memory usage data.
+     *
+     * @return string
+     */
     protected function get_memoryusagedatad3(): string {
         return json_decode($this->get_uncompressed_json('memoryusagedatad3'));
     }
@@ -112,10 +126,10 @@ class profile extends persistent {
     /**
      * Special getter to obtain the uncompressed stored JSON.
      *
+     * @param string $fieldname
      * @return string
-     * @throws \coding_exception
      */
-    public function get_uncompressed_json($fieldname): string {
+    public function get_uncompressed_json(string $fieldname): string {
         $rawdata = $this->raw_get($fieldname);
         if (isset($rawdata)) {
             return gzuncompress($rawdata);
@@ -123,6 +137,11 @@ class profile extends persistent {
         return json_encode(null);
     }
 
+    /**
+     * Convenience method to add environment data to the profile.
+     *
+     * @param string $request The name/URL of the script.
+     */
     public function add_env(string $request): void {
         global $USER, $CFG;
 

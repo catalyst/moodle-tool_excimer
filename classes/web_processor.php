@@ -31,8 +31,9 @@ class web_processor implements processor {
     /** @var profile $profile The profile object for the run. */
     protected $profile;
 
-    /** @var sample_set */
+    /** @var sample_set $sampleset */
     protected $sampleset;
+    /** @var sample_set $memoryusagesampleset */
     protected $memoryusagesampleset;
 
     /**
@@ -108,4 +109,3 @@ class web_processor implements processor {
         }
     }
 }
-

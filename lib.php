@@ -44,6 +44,11 @@ function tool_excimer_after_config(): void {
     }
 }
 
+/**
+ * Hook to obtain a list of perfomence checks supplied by the plugin.
+ *
+ * @return \core\check\check[]
+ */
 function tool_excimer_performance_checks(): array {
     return [new slowest()];
 }

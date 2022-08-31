@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Interface for classes that define processors for the samples.
+ *
+ * @package   tool_excimer
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2022, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_excimer;
 
 /**
@@ -23,11 +32,9 @@ namespace tool_excimer;
  * creates the profile(s) to be saved to disk.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright 2022, Catalyst IT
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface processor {
+
     /**
      * Initialises the processor
      *

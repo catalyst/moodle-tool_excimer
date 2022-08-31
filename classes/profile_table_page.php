@@ -18,6 +18,14 @@ namespace tool_excimer;
 
 use tool_excimer\output\tabs;
 
+/**
+ * Boilerplate for displaying a profile table.
+ *
+ * @package tool_excimer
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2021, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class profile_table_page {
 
     /**

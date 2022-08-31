@@ -39,7 +39,9 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
     }
 
     /**
-     * Tests cron_manager::findtaskname().
+     * Tests cron_processor::findtaskname().
+     *
+     * @covers \tool_excimer\cron_processor::findtaskname
      */
     public function test_findtaskname() {
         $processor = new cron_processor();
@@ -57,7 +59,9 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
     }
 
     /**
-     * Tests cron_manager::on_interval().
+     * Tests cron_processor::on_interval().
+     *
+     * @covers \tool_excimer\cron_processor::on_interval
      */
     public function test_on_interval() {
         global $DB;

@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Version.
+ *
  * @package   tool_excimer
  * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
  * @copyright 2021, Catalyst IT

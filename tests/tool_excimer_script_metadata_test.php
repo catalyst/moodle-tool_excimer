@@ -34,6 +34,11 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $this->resetAfterTest();
     }
 
+    /**
+     * Tests strip_parameters
+     *
+     * @covers \tool_excimer\script_metadata::stripparameters
+     */
     public function test_strip_parameters() {
         $param = ['a' => '1', 'b' => 2, 'c' => 3];
         $paramexpect = $param;
@@ -52,7 +57,11 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * Test script_metadata::get_groupby_value().
      *
      * @dataProvider group_by_value_provider
-     * @throws \coding_exception
+     * @covers \tool_excimer\script_metadata::get_groupby_value
+     * @param string $request
+     * @param string $pathinfo
+     * @param string $parameters
+     * @param string $expected
      */
     public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected) {
         $profile = new profile();
@@ -82,9 +91,9 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * Tests script_metadata::get_samplelimit().
      *
      * @dataProvider sampling_limit_provider
+     * @covers \tool_excimer\script_metadata::get_sample_limit
      * @param int $limit
      * @param int $expected
-     * @throws \dml_exception
      */
     public function test_get_sample_limit(int $limit, int $expected) {
         $this->preventResetByRollback();

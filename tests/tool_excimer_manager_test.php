@@ -37,7 +37,7 @@ class tool_excimer_manager_test extends \advanced_testcase {
     /**
      * Test is_profiling().
      *
-     * @throws \dml_exception
+     * @covers \tool_excimer\manager::is_profiling
      */
     public function test_is_profiling(): void {
         // Do not assume any config is set or unset.

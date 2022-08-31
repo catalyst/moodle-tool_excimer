@@ -70,6 +70,16 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         return $prof->flush();
     }
 
+    /**
+     * A convenience function to save a profile.
+     *
+     * @param string $request
+     * @param flamed3_node $node
+     * @param int $reason
+     * @param float $duration
+     * @param int $created
+     * @return int The ID of the record.
+     */
     public function quick_save(string $request, flamed3_node $node, int $reason, float $duration, int $created = 12345): int {
         $profile = new profile();
         $profile->add_env($request);
@@ -84,7 +94,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
     /**
      * Tests the functionality to keep only the N slowest profiles.
      *
-     * @throws \dml_exception
+     * @covers \tool_excimer\profile_helper::purge_fastest
      */
     public function test_n_slowest_kept(): void {
         global $DB;
@@ -137,6 +147,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
     /**
      * Tests the functionality to keep only the N slowest profiles for each group.
      *
+     * @covers \tool_excimer\profile_helper::purge_fastest_by_group
      * @throws \dml_exception
      */
     public function test_n_slowest_kept_per_group(): void {
@@ -187,6 +198,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
     /**
      * Tests the expiry of profiles.
      *
+     * @covers \tool_excimer\profile_helper::purge_profiles_before_epoch_time
      * @throws \dml_exception
      */
     public function test_purge_old_profiles(): void {
@@ -218,6 +230,12 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->assertEquals($times[3], $record->created);
     }
 
+    /**
+     * Tests removal reasons
+     *
+     * @covers \tool_excimer\profile_helper::remove_reason
+     * @throws \dml_exception
+     */
     public function test_reasons_being_removed(): void {
         global $DB;
         $this->preventResetByRollback();
@@ -249,9 +267,9 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
     }
 
     /**
+     * Insert a mock profile with a duration.
+     *
      * @param float $duration time in seconds.
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     private function mock_profile_insertion_with_duration(float $duration) {
         $manager = new manager(new web_processor());
@@ -275,6 +293,11 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         }
     }
 
+    /**
+     * Tests cache
+     *
+     * @covers \tool_excimer\profile
+     */
     public function test_minimal_db_reads_writes_for_warm_cache() {
         global $DB;
         $this->preventResetByRollback();

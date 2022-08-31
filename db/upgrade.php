@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for availability conditions options.
+ * Upgrade script for databases.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -23,6 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Function to upgrade tool_excimer database
+ *
+ * @param int $oldversion the version we are upgrading from
+ * @return bool result
+ */
 function xmldb_tool_excimer_upgrade($oldversion) {
     global $DB;
 
