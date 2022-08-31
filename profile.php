@@ -78,6 +78,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
 
 $PAGE->requires->css('/admin/tool/excimer/css/d3-flamegraph.css');
+$PAGE->requires->css('/admin/tool/excimer/css/memory-usage-graph.css');
 
 $PAGE->requires->js('/admin/tool/excimer/lib/d3/dist/d3.min.js', true);
 $PAGE->requires->js('/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph.min.js', true);
