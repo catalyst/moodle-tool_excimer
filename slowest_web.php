@@ -24,16 +24,40 @@
  */
 
 use tool_excimer\grouped_profile_table;
+use tool_excimer\profile;
+use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-admin_externalpage_setup('tool_excimer_report_slowest_grouped');
+// The script can either be a URL, or a task name, or whatever may be used
+// for a request name. So we need to accept TEXT input.
+$script = optional_param('script', '', PARAM_TEXT);
+$group = optional_param('group', '', PARAM_TEXT);
 
-$url = new moodle_url("/admin/tool/excimer/slowest_grouped.php");
+admin_externalpage_setup('tool_excimer_report_slowest_web');
 
-$table = new grouped_profile_table('profile_table_slowest_grouped');
-$table->sortable(true, 'maxduration', SORT_DESC);
+$url = new moodle_url('/admin/tool/excimer/slowest_web.php');
+
+if ($script || $group) {
+    $table = new profile_table('profile_table_slowest_web');
+    $table->sortable(true, 'duration', SORT_DESC);
+    if ($script) {
+        $table->add_filter('request', $script);
+        $url->params(['script' => $script]);
+    }
+    if ($group) {
+        $table->add_filter('groupby', $group);
+        $url->params(['group' => $group]);
+        $PAGE->navbar->add($group);
+    }
+} else {
+    $table = new grouped_profile_table('profile_table_slowest_web');
+    $table->set_url_path($url);
+    $table->sortable(true, 'maxduration', SORT_DESC);
+}
+
+$table->set_scripttypes([profile::SCRIPTTYPE_WEB]);
 
 profile_table_page::display($table, $url);

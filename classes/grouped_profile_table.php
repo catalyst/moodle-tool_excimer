@@ -36,19 +36,40 @@ class grouped_profile_table extends profile_table {
         'minduration',
     ];
 
+    /** @var \moodle_url $urlpath URL path to use for linking to profile groups. */
+    protected $urlpath;
+
     /**
-     * Sets the SQL.
+     * Set the URL path to use for linking to profile groups.
+     *
+     * @param \moodle_url $url
+     */
+    public function set_url_path(\moodle_url $url) {
+        $this->urlpath = $url;
+    }
+
+    /**
+     * Sets the SQL for the table.
      */
     protected function put_sql(): void {
-        global $DB;
 
+        list($filterstring, $filterparams) = $this->get_filter_for_sql();
+
+        $this->set_count_sql(
+            "SELECT count(distinct request)
+            FROM {tool_excimer_profiles}
+            WHERE $filterstring",
+            $filterparams
+        );
+
+        $filterstring .= " GROUP BY groupby, scripttype";
         $this->set_sql(
             'groupby, count(request) as requestcount, scripttype, max(created) as maxcreated, min(created) as mincreated,
              max(duration) as maxduration, min(duration) as minduration',
             '{tool_excimer_profiles}',
-            '1=1 GROUP BY groupby, scripttype'
+            $filterstring,
+            $filterparams
         );
-        $this->set_count_sql("SELECT count(distinct request) FROM {tool_excimer_profiles}");
     }
 
     /**
@@ -76,10 +97,13 @@ class grouped_profile_table extends profile_table {
         if ($this->is_downloading()) {
             return $displayedvalue;
         } else {
+            $url = clone $this->urlpath;
+            $url->param('group', $record->groupby);
             return \html_writer::link(
-                    new \moodle_url('/admin/tool/excimer/slowest.php', ['group' => $record->groupby]),
-                    shorten_text($displayedvalue, 100, true, '…'),
-                    ['title' => $displayedvalue, 'style' => 'word-break: break-all']);
+                $url,
+                shorten_text($displayedvalue, 100, true, '…'),
+                ['title' => $displayedvalue, 'style' => 'word-break: break-all']
+            );
         }
     }
 

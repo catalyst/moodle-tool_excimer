@@ -23,6 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_excimer\grouped_profile_table;
 use tool_excimer\profile;
 use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
@@ -39,16 +40,24 @@ admin_externalpage_setup('tool_excimer_report_slowest_other');
 
 $url = new moodle_url("/admin/tool/excimer/slowest_other.php");
 
-$table = new profile_table('profile_table_slowest_other');
+if ($script || $group) {
+    $table = new profile_table('profile_table_slowest_other');
+    $table->sortable(true, 'duration', SORT_DESC);
+    if ($script) {
+        $table->add_filter('request', $script);
+        $url->params(['script' => $script]);
+    }
+    if ($group) {
+        $table->add_filter('groupby', $group);
+        $url->params(['group' => $group]);
+        $PAGE->navbar->add($group);
+    }
+} else {
+    $table = new grouped_profile_table('profile_table_slowest_other');
+    $table->set_url_path($url);
+    $table->sortable(true, 'maxduration', SORT_DESC);
+}
+
 $table->set_scripttypes([profile::SCRIPTTYPE_CLI, profile::SCRIPTTYPE_TASK, profile::SCRIPTTYPE_WS]);
-$table->sortable(true, 'duration', SORT_DESC);
-if ($script) {
-    $table->add_filter('request', $script);
-    $url->params(['script' => $script]);
-}
-if ($group) {
-    $table->add_filter('groupby', $group);
-    $url->params(['group' => $group]);
-}
 
 profile_table_page::display($table, $url);
