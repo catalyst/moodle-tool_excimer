@@ -33,8 +33,11 @@ require_once($CFG->libdir.'/adminlib.php');
 /** Report section - recent - lists the most recent profiles first */
 const REPORT_SECTION_RECENT = 'recent';
 
-/** Report section - slowest - lists the slowest profiles first */
-const REPORT_SECTION_SLOWEST = 'slowest';
+/** Report section - slowest web - lists profile groups for web pages. */
+const REPORT_SECTION_SLOWEST_WEB = 'slowest_web';
+
+/** Report section - slowest other - lists profile groups for tasks, CLI and WS scripts. */
+const REPORT_SECTION_SLOWEST_OTHER = 'slowest_other';
 
 /** Report section - unfinished - lists profiles of scripts that did not finish */
 const REPORT_SECTION_UNFINISHED = 'unfinished';
@@ -42,7 +45,8 @@ const REPORT_SECTION_UNFINISHED = 'unfinished';
 /** Report sections */
 const REPORT_SECTIONS = [
     REPORT_SECTION_RECENT,
-    REPORT_SECTION_SLOWEST,
+    REPORT_SECTION_SLOWEST_WEB,
+    REPORT_SECTION_SLOWEST_OTHER,
     REPORT_SECTION_UNFINISHED,
 ];
 
@@ -57,11 +61,11 @@ $PAGE->set_url($url);
 
 $returnurl = get_local_referer(false);
 
-// The page's breadcrumb will include a link to the reports for recent or slowest (default).
+// The page's breadcrumb will include a link to the top level report pages that are defined by the tabs.
 // Handling here prevents things links from other pages and paginated listings
 // from breaking the output of this page.
 $report = explode('.php', basename($returnurl, '.php'))[0] ?? null;
-$report = in_array($report, REPORT_SECTIONS) ? $report : REPORT_SECTION_SLOWEST;
+$report = in_array($report, REPORT_SECTIONS) ? $report : REPORT_SECTION_SLOWEST_WEB;
 admin_externalpage_setup('tool_excimer_report_' . $report);
 
 $output = $PAGE->get_renderer('tool_excimer');
@@ -71,6 +75,9 @@ $pluginname = get_string('pluginname', 'tool_excimer');
 $url = new moodle_url("/admin/tool/excimer/index.php");
 
 $profile = new profile($profileid);
+
+$prevurl = new moodle_url('/admin/tool/excimer/' . $report. '.php', ['group' => $profile->get('groupby')]);
+$PAGE->navbar->add($profile->get('groupby'), $prevurl);
 
 $PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'));
 $PAGE->set_title($pluginname);

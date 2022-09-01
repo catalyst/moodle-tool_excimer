@@ -112,12 +112,13 @@ class profile_table extends \table_sql {
     }
 
     /**
-     * Sets the SQL for the table.
+     * Constructs a where clause for the filters.
+     *
+     * @return array - The filter string and parameters as a list.
      */
-    protected function put_sql(): void {
+    protected function get_filter_for_sql(): array {
         global $DB;
 
-        $filterstring = '';
         $filter = [];
         $filterparams = [];
         if (count($this->filters)) {
@@ -135,6 +136,15 @@ class profile_table extends \table_sql {
             $filterstring .= " and scripttype $query";
             $filterparams = array_merge($filterparams, $params);
         }
+        return [$filterstring, $filterparams];
+    }
+
+    /**
+     * Sets the SQL for the table.
+     */
+    protected function put_sql(): void {
+
+        list($filterstring, $filterparams) = $this->get_filter_for_sql();
 
         $fields = [
             '{tool_excimer_profiles}.id as id',

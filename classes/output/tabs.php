@@ -51,21 +51,15 @@ class tabs implements \templatable {
 
                 [
                     'id' => 'slowest_web',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest.php') ]],
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_web.php') ]],
                     'title' => get_string('report_slowest_web', 'tool_excimer'),
-                    'text' => get_string('slowest_web', 'tool_excimer'),
-                ],
-                [
-                    'id' => 'slowest_grouped',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_grouped.php') ]],
-                    'title' => get_string('report_slowest_grouped', 'tool_excimer'),
-                    'text' => get_string('slowest_grouped', 'tool_excimer'),
+                    'text' => get_string('tab_slowest_web', 'tool_excimer'),
                 ],
                 [
                     'id' => 'slowest_other',
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_other.php') ]],
                     'title' => get_string('report_slowest_other', 'tool_excimer'),
-                    'text' => get_string('slowest_other', 'tool_excimer'),
+                    'text' => get_string('tab_slowest_other', 'tool_excimer'),
                 ],
                 [
                     'id' => 'recent',
@@ -83,7 +77,7 @@ class tabs implements \templatable {
         ];
 
         foreach ($tabs['tabs'] as &$tab) {
-            if ($tab['link'][0]['link'] == $this->activeurl) {
+            if ($tab['link'][0]['link']->get_path(false) == $this->activeurl->get_path(false)) {
                 $tab['active'] = true;
             }
         }

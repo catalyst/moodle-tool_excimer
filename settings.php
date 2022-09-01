@@ -111,7 +111,6 @@ if ($hassiteconfig) {
             )
         );
 
-
         $settings->add(
             new admin_setting_configduration(
                 'tool_excimer/expiry_s',
@@ -156,7 +155,6 @@ if ($hassiteconfig) {
         $item->set_updatedcallback($clearprofiletimingscachecallback);
         $settings->add($item);
 
-
         $item = new admin_setting_configtext(
             'tool_excimer/num_slowest',
             get_string('num_slowest', 'tool_excimer'),
@@ -179,23 +177,12 @@ if ($hassiteconfig) {
 
     }
 
-
     $ADMIN->add(
         'tool_excimer_reports',
         new admin_externalpage(
-            'tool_excimer_report_slowest',
+            'tool_excimer_report_slowest_web',
             get_string('report_slowest_web', 'tool_excimer'),
-            new moodle_url('/admin/tool/excimer/slowest.php'),
-            'moodle/site:config'
-        )
-    );
-
-    $ADMIN->add(
-        'tool_excimer_reports',
-        new admin_externalpage(
-            'tool_excimer_report_slowest_grouped',
-            get_string('report_slowest_grouped', 'tool_excimer'),
-            new moodle_url('/admin/tool/excimer/slowest_grouped.php'),
+            new moodle_url('/admin/tool/excimer/slowest_web.php'),
             'moodle/site:config'
         )
     );
