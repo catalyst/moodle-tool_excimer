@@ -168,6 +168,7 @@ class profile_table extends \table_sql {
             'lastnamephonetic',
             'middlename',
             'alternatename',
+            'lockreason',
         ];
         $fieldsstr = implode(',', $fields);
 
@@ -322,10 +323,14 @@ class profile_table extends \table_sql {
             return '';
         }
         global $OUTPUT;
+        $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $record->id]);
+        $lockprofileicon = new \pix_icon($record->lockreason != '' ? 'i/unlock' : 'i/lock', get_string('lock_profile', 'tool_excimer'));
+        $lockprofilelink = new \action_link($lockprofileurl, '', null, null,  $lockprofileicon);
+
         $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $record->id, 'sesskey' => sesskey()]);
         $confirmaction = new \confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
         $deleteicon = new \pix_icon('t/delete', get_string('deleteprofile', 'tool_excimer'));
         $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);
-        return $OUTPUT->render($link);
+        return $OUTPUT->render($lockprofilelink) . $OUTPUT->render($link);
     }
 }

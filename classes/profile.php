@@ -338,6 +338,7 @@ class profile extends persistent {
             'dbreads' => ['type' => PARAM_INT, 'default' => 0],
             'dbwrites' => ['type' => PARAM_INT, 'default' => 0],
             'dbreplicareads' => ['type' => PARAM_INT, 'default' => 0],
+            'lockreason' => ['type' => PARAM_TEXT, 'default' => ''],
         ];
     }
 }

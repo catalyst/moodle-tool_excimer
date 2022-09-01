@@ -43,7 +43,7 @@
         <FIELD NAME="timemodified" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="The timestamp at which the record was modified"/>
         <FIELD NAME="memoryusagemax" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum memory usage recorded for this given run. Note that CLI profiles might store the max for previous connected runs within the same process."/>
         <FIELD NAME="samplerate" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Base sample rate at the time the profile was recorded"/>
-      </FIELDS>
+        <FIELD NAME="lockreason" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Holds reasons for keeping this profile. Any non-empty value will prevent purging."/>      </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>

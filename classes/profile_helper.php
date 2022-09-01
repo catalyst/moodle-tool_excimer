@@ -208,10 +208,10 @@ class profile_helper {
         }
 
         // Purge the profiles older than this time as they are no longer
-        // relevant.
+        // relevant, but keep any locked profiles.
         $DB->delete_records_select(
             profile::TABLE,
-            'created < :cutoff',
+            "created < :cutoff and lockreason = ''",
             ['cutoff' => $cutoff]
         );
 
@@ -231,6 +231,10 @@ class profile_helper {
         $idstodelete = [];
         $updateordelete = false;
         foreach ($profiles as $profile) {
+            // Do not change any profile that has been locked.
+            if ($profile->lockreason != '') {
+                continue;
+            }
             // Ensuring we only remove a reason that exists on the profile provided.
             if ($profile->reason & $reason) {
                 $profile->reason ^= $reason; // Remove the reason.
@@ -275,7 +279,7 @@ class profile_helper {
 
         $purgablereasons = $DB->sql_bitand('reason', profile::REASON_SLOW);
         $records = $DB->get_records_sql(
-            "SELECT id, groupby, reason
+            "SELECT id, groupby, reason, lockreason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
            ORDER BY duration ASC
@@ -329,7 +333,7 @@ class profile_helper {
         // from the records after $numtokeep.
         $purgablereasons = $DB->sql_bitand('reason', profile::REASON_SLOW);
         $records = $DB->get_records_sql(
-            "SELECT id, reason
+            "SELECT id, reason, lockreason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
            ORDER BY duration DESC", [profile::REASON_NONE], $numtokeep);

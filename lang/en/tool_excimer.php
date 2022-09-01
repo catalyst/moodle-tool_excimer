@@ -143,6 +143,14 @@ $string['reason_slow'] = 'Slow';
 $string['reason_flameall'] = 'Flame All';
 $string['reason_stack'] = 'Recursion';
 
+// Lock reason form.
+$string['lock_profile'] = 'Lock Profile';
+$string['lockreason'] = 'Lock Profile Reason';
+$string['lockreason_help'] = 'Submitting text will prevent this profile from being purged during cleanup tasks.
+Typically you would provide a reason why you want to keep this profile. Clearing this box will allow the profile to be purged.
+You can always delete this profile manually.';
+$string['profile_updated'] = 'Profile updated';
+
 // Time formats.
 $string['strftime_datetime'] = '%d %b %Y, %H:%M';
 
