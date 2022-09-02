@@ -72,6 +72,18 @@ function init() {
     } else {
         draw();
     }
+
+    window.excimerChart.label(function(d) {
+        return d.data.name + ' (' + ((d.x1 - d.x0) * 100).toFixed(3)
+                + '%, ' + d.value + ' samples, duration ~' +  d.value * {{samplerate}} + ' ms)'
+    });
+
+    var tip = flamegraph.tooltip.defaultFlamegraphTooltip().text(function(d) {
+        return d.data.name + ' (' + ((d.x1 - d.x0) * 100).toFixed(3)
+        + '%, ' + d.value + ' samples, duration ~' +  d.value * {{samplerate}} + ' ms)'
+    });
+
+    window.excimerChart.tooltip(tip);
 }
 
 function draw() {

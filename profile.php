@@ -89,6 +89,7 @@ $PAGE->requires->css('/admin/tool/excimer/css/memory-usage-graph.css');
 
 $PAGE->requires->js('/admin/tool/excimer/lib/d3/dist/d3.min.js', true);
 $PAGE->requires->js('/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph.min.js', true);
+$PAGE->requires->js('/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph-tooltip.min.js', true);
 
 $user = $DB->get_record('user', ['id' => $profile->get('userid')]);
 
