@@ -38,7 +38,7 @@ class renderer extends \plugin_renderer_base {
         $data = $tabs->export_for_template($this);
         $tabobjects = [];
         foreach ($data['tabs'] as $tab) {
-            $tmp = new \tabobject($tab['id'], $tab['link'][0]['link'], $tab['text']);
+            $tmp = new \tabobject($tab['id'], $tab['link'][0]['link'], $tab['text'], '', true);
             if (!empty($tab['active'])) {
                 $selected = $tab['id'];
             }
