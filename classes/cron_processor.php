@@ -96,7 +96,10 @@ class cron_processor implements processor {
 
             // If there is a task and the current task name is different from the previous, then store the profile.
             if ($this->tasksampleset && ($this->tasksampleset->name != $taskname)) {
-                $this->process($manager, $this->sampletime);
+                $profile = $this->process($manager, $this->sampletime);
+
+                // Keep an approximate count of each profile.
+                page_group::record_fuzzy_counts($profile);
                 $this->tasksampleset = null;
             }
 
@@ -158,7 +161,7 @@ class cron_processor implements processor {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public function process(manager $manager, float $finishtime): void {
+    public function process(manager $manager, float $finishtime): profile {
         $duration = $finishtime - $this->tasksampleset->starttime;
         $profile = new profile();
         $profile->add_env($this->tasksampleset->name);
@@ -175,5 +178,6 @@ class cron_processor implements processor {
             $profile->set('samplerate', $this->tasksampleset->filter_rate() * get_config('tool_excimer', 'sample_ms'));
             $profile->save_record();
         }
+        return $profile;
     }
 }

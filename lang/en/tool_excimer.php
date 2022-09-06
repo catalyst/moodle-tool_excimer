@@ -35,6 +35,7 @@ $string['report_slowest_web'] = 'Slow web pages';
 $string['report_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['report_recent'] = 'Recently profiled';
 $string['report_unfinished'] = 'Currently profiling';
+$string['report_page_groups'] = 'Page Group Metadata';
 
 // Check API.
 $string['checkslowest'] = 'Excimer profiles';
@@ -55,8 +56,6 @@ $string['expiry_s'] = 'Log expiry (days)';
 $string['expiry_s_desc'] = 'Remove profiles after this long.';
 $string['num_slowest'] = 'Max to save';
 $string['num_slowest_desc'] = 'Only the N slowest profiles will be kept.';
-$string['task_expire_logs'] = 'Expire excimer logs';
-$string['task_purge_fastest'] = 'Purge fastest excimer profiles';
 $string['period_ms'] = 'Sampling period (milliseconds)';
 $string['period_ms_desc'] = 'Frequency of sampling. Minimum is {$a->min}, maximum is {$a->max}.';
 $string['request_ms'] = 'Minimum request duration (milliseconds)';
@@ -75,6 +74,14 @@ $string['samplelimit_desc'] = 'The maximum number of samples that will be record
     so that the total number of samples never exceeds the limit.';
 $string['stacklimit'] = 'Stack limit';
 $string['stacklimit_desc'] = 'The maximum permitted recursion or stack depth before the task is flagged.';
+$string['expiry_fuzzy_counts'] = 'Months to keep aproximate count data.';
+$string['expiry_fuzzy_counts_desc'] = 'The number of full months worth of data to keep. Leave blank to keep indefinitely.';
+
+// Tasks.
+$string['task_expire_logs'] = 'Expire excimer logs';
+$string['task_purge_fastest'] = 'Purge fastest excimer profiles';
+$string['task_purge_page_groups'] = 'Purge page group approximate count data';
+
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest scripts';
@@ -83,6 +90,7 @@ $string['slowest'] = 'Slowest';
 $string['tab_slowest_web'] = 'Slow web pages';
 $string['tab_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['unfinished'] = 'Unfinished';
+$string['tab_page_groups'] = 'Page Groups';
 
 // Profile table.
 $string['field_id'] = 'ID';
@@ -122,6 +130,11 @@ $string['field_pid'] = 'Process ID';
 $string['field_hostname'] = 'Host name';
 $string['field_useragent'] = 'User agent';
 $string['field_versionhash'] = 'Version Hash';
+$string['field_name'] = 'Name';
+$string['field_month'] = 'Month';
+$string['field_fuzzycount'] = 'Approx. count';
+$string['field_fuzzydurationcounts'] = 'Approx. duration counts';
+$string['field_fuzzydurationsum'] = 'Approx. total duration (s)';
 
 // Note: This is needed as the headers for the profile table are added in a loop.
 $string['field_actions'] = 'Actions';
@@ -172,3 +185,4 @@ $string['didnotfinish'] = 'Did not finish';
 $string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles that match this filter. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofiles_filter'] = 'Delete all profiles for this filter';
 $string['edit_lock'] = 'Edit lock';
+$string['fuzzydurationcount_lines'] = '{$a->low}-{$a->high}s: {$a->value}';

@@ -34,6 +34,8 @@ class manager {
     const FLAME_OFF_PARAM_NAME = 'FLAMEALLSTOP';
     /** Don't collect profile for current scripts. */
     const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
+    /** The size of a PHP integer in bits (64 on Linux x86_64, 32 on Windows). */
+    const PHP_INT_SIZE_BITS = 8 * PHP_INT_SIZE;
 
     /** @var processor */
     private $processor;
@@ -242,5 +244,30 @@ class manager {
         // By this stage, the duration provided should have exceeded the min
         // requirements for all the different timing types (if they exist).
         return true;
+    }
+
+    /**
+     * Increments a counter using the approximate counting algorithm.
+     * Can handle up to PHP_INT_SIZE_BITS counts (2^PHP_INT_SIZE_BITS events).
+     *
+     * See https://en.wikipedia.org/wiki/Approximate_counting_algorithm
+     *
+     * @param int $current The current count.
+     * @return int The new count.
+     */
+    public static function approximate_increment(int $current): int {
+        // If the number of events is ever expected to be more than 2 billion, a refactor may be needed.
+
+        $bits = random_int(PHP_INT_MIN, PHP_INT_MAX);
+
+        // This gives us a number of bits equal to the current count. The rest are all zeroed.
+        $bits = $bits << (self::PHP_INT_SIZE_BITS - $current);
+
+        // If the bits are all zero (equiv to all coin tosses = tails), then we increment the counter.
+        if ($bits == 0) {
+            return $current + 1;
+        }
+
+        return $current;
     }
 }

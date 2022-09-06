@@ -1,0 +1,67 @@
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Display a table of page group metadata.
+ *
+ * @package   tool_excimer
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2022, Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+use tool_excimer\page_group_table;
+use tool_excimer\page_group;
+use tool_excimer\helper;
+use tool_excimer\output\tabs;
+
+require_once('../../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
+
+$download = optional_param('download', '', PARAM_ALPHA);
+
+$url = new \moodle_url('/admin/tool/excimer/profile-groups.php');
+$context = context_system::instance();
+
+$PAGE->set_context($context);
+$PAGE->set_url($url);
+
+admin_externalpage_setup('tool_excimer_report_page_groups');
+
+$output = $PAGE->get_renderer('tool_excimer');
+
+$pluginname = get_string('pluginname', 'tool_excimer');
+
+$table = new page_group_table('page_group_table');
+$table->is_downloading($download, 'page_groups', 'group');
+$table->define_baseurl($url);
+$table->make_columns();
+
+if (!$table->is_downloading()) {
+    $PAGE->set_title($pluginname);
+    $PAGE->set_pagelayout('admin');
+    $PAGE->set_heading($pluginname);
+    echo $output->header();
+
+    $tabs = new tabs($url);
+    echo $output->render_tabs($tabs);
+}
+
+$table->out(40, true); // TODO replace with a value from settings.
+
+if (!$table->is_downloading()) {
+    echo $output->footer();
+}

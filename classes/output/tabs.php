@@ -48,7 +48,6 @@ class tabs implements \templatable {
     public function export_for_template(\renderer_base $output): array {
         $tabs = [
             'tabs' => [
-
                 [
                     'id' => 'slowest_web',
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_web.php') ]],
@@ -72,6 +71,12 @@ class tabs implements \templatable {
                     'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/unfinished.php') ]],
                     'title' => get_string('report_unfinished', 'tool_excimer'),
                     'text' => get_string('unfinished', 'tool_excimer'),
+                ],
+                [
+                    'id' => 'page_groups',
+                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/page_groups.php') ]],
+                    'title' => get_string('report_page_groups', 'tool_excimer'),
+                    'text' => get_string('tab_page_groups', 'tool_excimer'),
                 ],
             ],
         ];
