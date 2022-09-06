@@ -47,6 +47,8 @@ class manager {
     private $timer;
     /** @var float */
     private $starttime;
+    /** @var manager */
+    private static $instance;
 
     /**
      * Generates the samples for the script.
@@ -76,6 +78,19 @@ class manager {
     }
 
     /**
+     * Get manager instance.
+     *
+     * @return manager
+     * @throws \dml_exception
+     */
+    public static function get_instance(): manager {
+        if (!self::$instance) {
+            self::create();
+        }
+        return self::$instance;
+    }
+
+    /**
      * Constructs the manager.
      *
      * @param processor $processor The object that processes the samples generated.
@@ -90,35 +105,54 @@ class manager {
      * @throws \dml_exception
      */
     public function init() {
-        $sampleperiod = script_metadata::get_sampling_period();
-        $timerinterval = script_metadata::get_timer_interval();
+        if (!self::is_testing()) {
+            $sampleperiod = script_metadata::get_sampling_period();
+            $timerinterval = script_metadata::get_timer_interval();
 
-        $this->profiler = new \ExcimerProfiler();
-        $this->profiler->setPeriod($sampleperiod);
+            $this->profiler = new \ExcimerProfiler();
+            $this->profiler->setPeriod($sampleperiod);
 
-        $this->timer = new \ExcimerTimer();
-        $this->timer->setPeriod($timerinterval);
+            $this->timer = new \ExcimerTimer();
+            $this->timer->setPeriod($timerinterval);
 
-        $this->starttime = microtime(true);
+            $this->starttime = microtime(true);
 
-        $this->processor->init($this);
+            $this->profiler->start();
+            $this->timer->start();
+        }
+    }
 
-        $this->profiler->start();
-        $this->timer->start();
+    /**
+     * Starts processor if not unit testing.
+     *
+     */
+    public function start_processor() {
+        if (!self::is_testing()) {
+            $this->processor->init($this);
+        }
     }
 
     /**
      * Creates the manager object using the appropriate processor.
      *
-     * @return manager
-     * @throws \coding_exception
      */
-    public static function create(): manager {
+    public static function create() {
         if (self::is_cron()) {
-            return new manager(new cron_processor());
+            self::$instance = new manager(new cron_processor());
         } else {
-            return new manager(new web_processor());
+            self::$instance = new manager(new web_processor());
         }
+    }
+
+    /**
+     * Is this a unit test.
+     * @throws \dml_exception
+     */
+    public static function is_testing(): bool {
+        if (!PHPUNIT_TEST && self::is_profiling()) {
+            return false;
+        }
+        return true;
     }
 
     /**
