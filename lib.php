@@ -27,6 +27,15 @@ use tool_excimer\manager;
 use tool_excimer\check\slowest;
 
 /**
+ * Hook to run plugin before session start.
+ */
+function tool_excimer_before_session_start() {
+    // Start plugin.
+    $manager = manager::get_instance();
+    $manager->init();
+}
+
+/**
  * Hook to be run after initial site config.
  *
  * This allows the plugin to selectively activate the ExcimerProfiler while
@@ -37,11 +46,9 @@ use tool_excimer\check\slowest;
  * See also https://docs.moodle.org/dev/Login_callbacks#after_config.
  */
 function tool_excimer_after_config(): void {
-    // Skip setup if unit testing, but do the test here to avoid complicating manager::is_profiling().
-    if (!PHPUNIT_TEST && manager::is_profiling()) {
-        $manager = manager::create();
-        $manager->init();
-    }
+    // Start processor.
+    $manager = manager::get_instance();
+    $manager->start_processor();
 }
 
 /**
