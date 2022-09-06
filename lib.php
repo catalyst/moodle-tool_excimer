@@ -52,3 +52,10 @@ function tool_excimer_after_config(): void {
 function tool_excimer_performance_checks(): array {
     return [new slowest()];
 }
+
+/**
+ * Hook to run plugin before session start.
+ */
+function tool_excimer_before_session_start() {
+    // Start plugin
+}
