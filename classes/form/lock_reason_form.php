@@ -26,6 +26,9 @@ namespace tool_excimer\form;
  */
 class lock_reason_form extends \moodleform {
 
+    /**
+     * Form definition
+     */
     public function definition() {
         $mform = $this->_form;
 
