@@ -381,6 +381,20 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022050600, 'tool', 'excimer');
     }
 
-    // 2022050600
+    if ($oldversion < 2022090100) {
+
+        // Define field lockreason to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('lockreason', XMLDB_TYPE_TEXT, null, null, null, null, null, 'samplerate');
+
+        // Conditionally launch add field lockreason.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022090100, 'tool', 'excimer');
+    }
+
     return true;
 }

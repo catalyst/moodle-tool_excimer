@@ -70,6 +70,13 @@ admin_externalpage_setup('tool_excimer_report_' . $report);
 
 $output = $PAGE->get_renderer('tool_excimer');
 
+$lockform = new \tool_excimer\form\lock_reason_form($url);
+if ($lockdata = $lockform->get_data()) {
+    $DB->update_record('tool_excimer_profiles', ['id' => $profileid, 'lockreason' => $lockdata->lockreason]);
+} else {
+    $lockform->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);
+}
+
 $pluginname = get_string('pluginname', 'tool_excimer');
 
 $url = new moodle_url("/admin/tool/excimer/index.php");
@@ -101,6 +108,10 @@ $deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php',
         ['script' => $profile->get('request'), 'returnurl' => $returnurl]);
 $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_script', 'tool_excimer'));
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
+
+$lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $profileid]);
+
+$lockprofilebutton = new \single_button($lockprofileurl, 'Lock/Unlock', 'GET');
 
 $data = (array) $profile->to_record();
 
@@ -137,11 +148,12 @@ $data['datasize'] = display_size($profile->get('datasize'));
 $data['memoryusagemax'] = display_size($profile->get('memoryusagemax'));
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
+$data['profile_lock_button'] = $output->render($lockprofilebutton);
 
 $data['responsecode'] = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
 // Totara doesn't like the mustache string helper being called with varaibles.
-$data['numsamples_str'] = get_string('field_numsamples_value', 'tool_excimer', ['samples' => $data['numsamples'], 'samplerate' => $data['samplerate']]);
-
+$data['numsamples_str'] = get_string('field_numsamples_value', 'tool_excimer',
+    ['samples' => $data['numsamples'], 'samplerate' => $data['samplerate']]);
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
@@ -150,6 +162,7 @@ if ($user) {
     $data['userlink'] = null;
     $data['fullname'] = '-';
 }
+$data['lockreason'] = format_text($data['lockreason']);
 $tabs = new tabs($url);
 
 $data['tabs'] = $tabs->export_for_template($output)['tabs'];

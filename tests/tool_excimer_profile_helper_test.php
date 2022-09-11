@@ -78,9 +78,11 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
      * @param int $reason
      * @param float $duration
      * @param int $created
+     * @param string $lockreason
      * @return int The ID of the record.
      */
-    public function quick_save(string $request, flamed3_node $node, int $reason, float $duration, int $created = 12345): int {
+    public function quick_save(string $request, flamed3_node $node, int $reason,
+            float $duration, int $created = 12345, string $lockreason = ''): int {
         $profile = new profile();
         $profile->add_env($request);
         $profile->set('reason', $reason);
@@ -88,6 +90,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         $profile->set('created', $created);
         $profile->set('duration', $duration);
         $profile->set('finished', $created + 2);
+        $profile->set('lockreason', $lockreason);
         return $profile->save_record();
     }
 
@@ -142,6 +145,43 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
         $this->assertEquals($sortedtimes[0],
                 $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
+    }
+
+    /**
+     * Tests the functionality to keep only the N slowest profiles accounting for locks.
+     *
+     * @covers \tool_excimer\profile_helper::purge_fastest
+     */
+    public function test_n_slowest_kept_with_locks(): void {
+        global $DB;
+        $this->preventResetByRollback();
+
+        $log = $this->quick_log(10);
+
+        $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22 ];
+        $sortedtimes = $times;
+        sort($sortedtimes);
+        $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
+        $node = flamed3_node::from_excimer_log_entries($log);
+
+        foreach ($times as $time) {
+            $this->quick_save('mock', $node, profile::REASON_SLOW, $time, 0, 'X');
+        }
+
+        $this->assertEquals(count($times), $DB->count_records(profile::TABLE));
+
+        // No profiles should be removed becauase they are all locked.
+        $numtokeep = 6;
+        profile_helper::purge_fastest($numtokeep);
+        $this->assertEquals(count($times), $DB->count_records(profile::TABLE));
+
+        $numtokeep = 2;
+        profile_helper::purge_fastest($numtokeep);
+        $this->assertEquals(count($times), $DB->count_records(profile::TABLE));
+
+        $numtokeepnew = 11;
+        profile_helper::purge_fastest($numtokeepnew);
+        $this->assertEquals(count($times), $DB->count_records(profile::TABLE));
     }
 
     /**
@@ -231,6 +271,36 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
     }
 
     /**
+     * Tests the retainment of locked profiles when purging.
+     *
+     * @covers \tool_excimer\profile_helper::purge_profiles_before_epoch_time
+     */
+    public function test_purge_old_profiles_with_lock(): void {
+        global $DB;
+        $this->preventResetByRollback();
+
+        $log = $this->quick_log(10);
+        $times = [ 12345, 23456, 34567, 45678 ];
+        $cutoff1 = 30000;
+        $cutoff2 = 20000;
+        $cutoff3 = 40000;
+
+        $expectedcount = count($times);
+        foreach ($times as $time) {
+            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_FLAMEME, 0.2, $time, 'X');
+        }
+
+        profile_helper::purge_profiles_before_epoch_time($cutoff1);
+        $this->assertEquals($expectedcount, profile_helper::get_num_profiles());
+        profile_helper::purge_profiles_before_epoch_time($cutoff2);
+        $this->assertEquals($expectedcount, profile_helper::get_num_profiles());
+        profile_helper::purge_profiles_before_epoch_time($cutoff3);
+        $this->assertEquals($expectedcount, profile_helper::get_num_profiles());
+        profile_helper::purge_profiles_before_epoch_time($cutoff1);
+        $this->assertEquals($expectedcount, profile_helper::get_num_profiles());
+    }
+
+    /**
      * Tests removal reasons
      *
      * @covers \tool_excimer\profile_helper::remove_reason
@@ -264,6 +334,37 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
 
         // The profile should no longer exist once the reasons are all removed.
         $this->assertFalse($profile);
+    }
+
+    /**
+     * Tests removal reasons with locks
+     *
+     * @covers \tool_excimer\profile_helper::remove_reason
+     * @throws \dml_exception
+     */
+    public function test_reasons_being_removed_with_lock(): void {
+        global $DB;
+        $this->preventResetByRollback();
+
+        // Initialise the logs object.
+        $log = $this->quick_log(0);
+
+        // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
+        $allthereasons = 0;
+        foreach (profile::REASONS as $reason) {
+            $allthereasons |= $reason;
+        }
+        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 2.345, 0, 'X');
+        $profile = $DB->get_record(profile::TABLE, ['id' => $id]);
+
+        // Fetch profile from DB and confirm it matches for all the reasons, and
+        // that the reason no longer exists on the profile after the change.
+        foreach (profile::REASONS as $reason) {
+            profile_helper::remove_reason([$profile], $reason);
+            $profile = $DB->get_record(profile::TABLE, ['id' => $id]);
+            $this->assertNotFalse($profile);
+            $this->assertEquals($allthereasons, $profile->reason);
+        }
     }
 
     /**

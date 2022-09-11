@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,26 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_excimer\form;
+
 /**
- * Version.
+ * form for editing the lock reason on profiles.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class lock_reason_form extends \moodleform {
 
-defined('MOODLE_INTERNAL') || die();
+    /**
+     * Form definition
+     */
+    public function definition() {
+        $mform = $this->_form;
 
-$plugin->version = 2022090100;
-$plugin->release = 2022090100;
+        $mform->addElement('textarea', 'lockreason', get_string('lockreason', 'tool_excimer'),
+            ['rows' => '4', 'style' => 'width:100%']);
 
-$plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
+        $mform->addElement('static', 'lockreason_help', '', get_string('lockreason_help', 'tool_excimer'));
 
-$plugin->supported = [35, 401];     // Supports Moodle 3.5 or later.
-// TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
-
-$plugin->component = 'tool_excimer';
-$plugin->maturity  = MATURITY_STABLE;
-
-$plugin->dependencies = [];
+        $this->add_action_buttons(false);
+    }
+}
