@@ -146,7 +146,7 @@ class profile_table extends \table_sql {
      * @param object $row the data for this row.
      * @return string added to the class="" attribute of the tr.
      */
-    function get_row_class($row) {
+    public function get_row_class($row) {
         $class = '';
 
         if (!empty($row->lockreason)) {
