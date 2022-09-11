@@ -145,6 +145,7 @@ $string['reason_stack'] = 'Recursion';
 
 // Lock reason form.
 $string['lock_profile'] = 'Lock Profile';
+$string['locked'] = 'Profile is locked';
 $string['lockreason'] = 'Lock Profile Reason';
 $string['lockreason_help'] = 'Submitting text will prevent this profile from being purged during cleanup tasks.
 Typically you would provide a reason why you want to keep this profile. Clearing this box will allow the profile to be purged.

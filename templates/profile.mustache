@@ -61,6 +61,10 @@
 <h3>{{{responsecode}}} {{method}} {{{request}}}</h3>
 <p>{{{delete_button}}} {{{delete_all_button}}} {{{profile_lock_button}}}</p>
 
+<div class="alert alert-info alert-block">
+    <h4>{{#str}} locked, tool_excimer {{/str}}</h4>
+    {{{lockreason}}}
+</div>
 <div id="profile-stats" class="container">
     <div class="row">
         <div class="">
@@ -160,10 +164,6 @@
                 <tr>
                     <th>{{#str}} field_dbreplicareads, tool_excimer {{/str}}</th>
                     <td>{{dbreplicareads}}</td>
-                </tr>
-                <tr>
-                    <th>Lock reason</th>
-                    <td>{{lockreason}}</td>
                 </tr>
             </table>
         </div>

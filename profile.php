@@ -110,6 +110,7 @@ $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
 $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $profileid]);
+
 $lockprofilebutton = new \single_button($lockprofileurl, 'Lock/Unlock', 'GET');
 
 $data = (array) $profile->to_record();
@@ -160,6 +161,7 @@ if ($user) {
     $data['userlink'] = null;
     $data['fullname'] = '-';
 }
+$data['lockreason'] = format_text($data['lockreason']);
 $tabs = new tabs($url);
 
 $data['tabs'] = $tabs->export_for_template($output)['tabs'];
