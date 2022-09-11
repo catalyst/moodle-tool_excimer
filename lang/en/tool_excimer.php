@@ -32,7 +32,7 @@ $string['adminname'] = 'Excimer profiler';
 $string['report_slowest'] = 'Slowest profiles';
 $string['report_slowest_grouped'] = 'Slowest scripts';
 $string['report_slowest_web'] = 'Slow web pages';
-$string['report_slowest_other'] = 'Slow tasks/CLI/WS';
+$string['report_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['report_recent'] = 'Recently profiled';
 $string['report_unfinished'] = 'Currently profiling';
 
@@ -81,7 +81,7 @@ $string['slowest_grouped'] = 'Slowest scripts';
 $string['recent'] = 'Recent';
 $string['slowest'] = 'Slowest';
 $string['tab_slowest_web'] = 'Slow web pages';
-$string['tab_slowest_other'] = 'Slow tasks/CLI/WS';
+$string['tab_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['unfinished'] = 'Unfinished';
 
 // Profile table.
