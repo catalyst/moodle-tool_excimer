@@ -140,6 +140,21 @@ class profile_table extends \table_sql {
     }
 
     /**
+     * Get any extra classes names to add to this row in the HTML.
+     * @param $row array the data for this row.
+     * @return string added to the class="" attribute of the tr.
+     */
+    function get_row_class($row) {
+        $class = '';
+
+        if (!empty($row->lockreason)) {
+            $class .= ' table-info';
+        }
+
+        return $class;
+    }
+
+    /**
      * Sets the SQL for the table.
      */
     protected function put_sql(): void {
@@ -250,10 +265,19 @@ class profile_table extends \table_sql {
         }
 
         // Return the web format.
-        return $record->method . ' ' . \html_writer::link(
+        $html = $record->method . ' ' . \html_writer::link(
                 new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
                 shorten_text($displayedrequest, 100, true, '…'),
                 ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
+
+        if (!empty($record->lockreason)) {
+            $html .= ' ' . \html_writer::tag('span', get_string('locked', 'tool_excimer'), [
+                'class' => 'badge badge-info',
+                'title' => s($record->lockreason),
+            ]);
+        }
+
+        return $html;
     }
 
     /**
