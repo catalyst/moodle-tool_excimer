@@ -324,7 +324,8 @@ class profile_table extends \table_sql {
         }
         global $OUTPUT;
         $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $record->id]);
-        $lockprofileicon = new \pix_icon($record->lockreason != '' ? 'i/unlock' : 'i/lock', get_string('lock_profile', 'tool_excimer'));
+        $lockprofileicon = new \pix_icon($record->lockreason != '' ? 'i/unlock' : 'i/lock',
+            get_string('lock_profile', 'tool_excimer'));
         $lockprofilelink = new \action_link($lockprofileurl, '', null, null,  $lockprofileicon);
 
         $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $record->id, 'sesskey' => sesskey()]);

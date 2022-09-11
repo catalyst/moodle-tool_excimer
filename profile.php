@@ -152,7 +152,8 @@ $data['profile_lock_button'] = $output->render($lockprofilebutton);
 
 $data['responsecode'] = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
 // Totara doesn't like the mustache string helper being called with varaibles.
-$data['numsamples_str'] = get_string('field_numsamples_value', 'tool_excimer', ['samples' => $data['numsamples'], 'samplerate' => $data['samplerate']]);
+$data['numsamples_str'] = get_string('field_numsamples_value', 'tool_excimer',
+    ['samples' => $data['numsamples'], 'samplerate' => $data['samplerate']]);
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
