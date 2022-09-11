@@ -142,7 +142,8 @@ class profile_table extends \table_sql {
 
     /**
      * Get any extra classes names to add to this row in the HTML.
-     * @param $row array the data for this row.
+     *
+     * @param object $row the data for this row.
      * @return string added to the class="" attribute of the tr.
      */
     function get_row_class($row) {
