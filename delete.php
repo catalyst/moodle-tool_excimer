@@ -54,14 +54,17 @@ if ($deleteall) {
     profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
 
     // Delete all profile records.
-    $DB->delete_records(profile::TABLE);
+    $DB->delete_records(profile::TABLE, ['lockreason' => '']);
     redirect($returnurl, get_string('allprofilesdeleted', 'tool_excimer'));
 }
 
 // Delete profile specified by an ID.
 if ($deleteid) {
     // Clears the profile metadata cache affected by this record deletion.
-    $conditions = ['id' => $deleteid];
+    $conditions = [
+        'id' => $deleteid,
+        'lockreason' => '',
+    ];
     $profile = $DB->get_record(profile::TABLE, $conditions, 'request, reason');
     $cache->delete($profile->request);
     profile_helper::clear_min_duration_cache_for_reason($profile->reason);
@@ -75,6 +78,7 @@ if ($filter) {
     $filtervalue = json_decode($filter, true);
     if (!is_null($filtervalue)) {
         // Clears the profile metadata caches affected by this filter.
+        $filtervalue['lockreason'] = '';
         $requests = $DB->get_records(profile::TABLE, $filtervalue, '', 'DISTINCT request');
         $reasons = $DB->get_records(profile::TABLE, $filtervalue, '', 'DISTINCT reason');
 
