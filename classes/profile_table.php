@@ -40,6 +40,7 @@ class profile_table extends \table_sql {
     /** Columns to be displayed, but not sorted. */
     const NOSORT_COLUMNS = [
         'actions',
+        'type',
     ];
 
     /** @var array Where clause filters. */
