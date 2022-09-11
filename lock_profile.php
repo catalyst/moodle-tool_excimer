@@ -52,6 +52,7 @@ $form = new \tool_excimer\form\lock_reason_form($url);
 
 if ($data = $form->get_data()) {
     $DB->update_record('tool_excimer_profiles', (object)['id' => $profileid, 'lockreason' => trim($data->lockreason)]);
+    redirect(new moodle_url('/admin/tool/excimer/profile.php', ['id' => $profileid]));
 } else {
     $form->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);
 }
@@ -79,10 +80,6 @@ $responsecode = helper::status_display($profile->get('scripttype'), $profile->ge
 $method = $profile->get('method');
 $request = $profile->get('request');
 echo html_writer::tag('h3', "$responsecode $method $request");
-
-if ($data) {
-    echo $output->notification(get_string('profile_updated', 'tool_excimer'), 'success');
-}
 
 $form->display();
 
