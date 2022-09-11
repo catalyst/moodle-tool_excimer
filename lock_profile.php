@@ -52,7 +52,7 @@ $form = new \tool_excimer\form\lock_reason_form($url);
 
 if ($data = $form->get_data()) {
     $DB->update_record('tool_excimer_profiles', (object)['id' => $profileid, 'lockreason' => trim($data->lockreason)]);
-    redirect(new moodle_url('/admin/tool/excimer/profile.php', ['id' => $profileid]));
+    redirect($data->returnurl);
 } else {
     $form->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);
 }

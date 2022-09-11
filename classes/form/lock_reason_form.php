@@ -32,6 +32,11 @@ class lock_reason_form extends \moodleform {
     public function definition() {
         $mform = $this->_form;
 
+        // Get returnurl if not coming from the lock page.
+        $mform->addElement('hidden', 'returnurl');
+        $mform->setType('returnurl', PARAM_LOCALURL);
+        $mform->setDefault('returnurl', get_local_referer(false));
+
         $mform->addElement('textarea', 'lockreason', get_string('lockreason', 'tool_excimer'),
             ['rows' => '4', 'style' => 'width:100%']);
 
