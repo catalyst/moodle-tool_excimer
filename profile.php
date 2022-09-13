@@ -103,6 +103,9 @@ $user = $DB->get_record('user', ['id' => $profile->get('userid')]);
 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $profileid, 'returnurl' => $returnurl]);
 $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool_excimer'));
 $deletebutton->add_confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
+if ($profile->get('lockreason') != '') {
+    $deletebutton->disabled = true;
+}
 
 $deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php',
         ['script' => $profile->get('request'), 'returnurl' => $returnurl]);
@@ -110,8 +113,7 @@ $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 
 $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $profileid]);
-
-$lockprofilebutton = new \single_button($lockprofileurl, 'Lock/Unlock', 'GET');
+$lockprofilebutton = new \single_button($lockprofileurl, get_string('edit_lock', 'tool_excimer'), 'GET');
 
 $data = (array) $profile->to_record();
 
