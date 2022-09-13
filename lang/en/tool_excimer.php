@@ -147,9 +147,9 @@ $string['reason_stack'] = 'Recursion';
 $string['lock_profile'] = 'Lock Profile';
 $string['locked'] = 'Profile is locked';
 $string['lockreason'] = 'Lock Profile Reason';
-$string['lockreason_help'] = 'Submitting text will prevent this profile from being purged during cleanup tasks.
-Typically you would provide a reason why you want to keep this profile. Clearing this box will allow the profile to be purged.
-You can always delete this profile manually.';
+$string['lockreason_help'] = 'Submitting text will prevent this profile from being deleted.
+    It will not be purged during cleanup tasks, nor can it be deleted manually (will also be excluded from group deletes).
+    Typically you would provide a reason why you want to keep this profile. Clearing this box will allow the profile to be deleted.';
 $string['profile_updated'] = 'Profile updated';
 
 // Time formats.
@@ -160,14 +160,15 @@ $string['privacy:metadata:tool_excimer_profiles'] = 'Excimer';
 
 // Miscellaneous.
 $string['cachedef_request_metadata'] = 'Excimer request metadata cache';
-$string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?';
+$string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofile'] = 'Delete profile';
 $string['deleteprofilewarning'] = 'This will remove the profile. Continue?';
 $string['allprofilesdeleted'] = 'All profiles have been deleted.';
 $string['profiledeleted'] = 'Profile has been deleted.';
-$string['deleteprofiles_script_warning'] = 'This will remove all stored profiles for the script. Continue?';
+$string['deleteprofiles_script_warning'] = 'This will remove all stored profiles for the script. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofiles_script'] = 'Delete all profiles for script';
 $string['profilesdeleted'] = 'Profiles have been deleted';
 $string['didnotfinish'] = 'Did not finish';
-$string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles that match this filter. Continue?';
+$string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles that match this filter. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofiles_filter'] = 'Delete all profiles for this filter';
+$string['edit_lock'] = 'Edit lock';

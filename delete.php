@@ -54,7 +54,8 @@ if ($deleteall) {
     profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
 
     // Delete all profile records.
-    $DB->delete_records_select(profile::TABLE, $DB->sql_equal('lockreason', '?'), ['']);
+    $isemptysql = $DB->sql_isempty(profile::TABLE, 'lockreason', true, true);
+    $DB->delete_records_select(profile::TABLE, $isemptysql);
     redirect($returnurl, get_string('allprofilesdeleted', 'tool_excimer'));
 }
 
@@ -97,8 +98,13 @@ if ($filter) {
             profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
         }
 
+        $select = [];
+        foreach ($filtervalue as $key => $value) {
+            $select[] = $DB->sql_equal($key, ":$key");
+        }
+        $select[] = $DB->sql_isempty(profile::TABLE, 'lockreason', true, true);
         // Deletes affected profile records.
-        $DB->delete_records(profile::TABLE, $filtervalue);
+        $DB->delete_records_select(profile::TABLE, implode(' AND ', $select), $filtervalue);
         redirect($returnurl, get_string('profilesdeleted', 'tool_excimer'));
     }
 }
