@@ -54,6 +54,48 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     }
 
     /**
+     * Tests get_parameters()
+     *
+     * @dataProvider get_parameters_provider
+     * @covers \tool_excimer\script_metadata::get_parameters
+     * @param string $querystring
+     * @param string $expected
+     */
+    public function test_get_parameters(string $querystring, string $expected) {
+        global $ME;
+
+        $globalme = $ME ?? null;
+        $ME = 'abc.php?' . $querystring;
+        $params = script_metadata::get_parameters(profile::SCRIPTTYPE_WEB);
+        $this->assertEquals($expected, $params);
+        $ME = $globalme;
+
+        $serverquerystring = $_SERVER['QUERY_STRING'] ?? null;
+        $_SERVER['QUERY_STRING'] = $querystring;
+        $params = script_metadata::get_parameters(profile::SCRIPTTYPE_WEB);
+        $this->assertEquals($expected, $params);
+        $_SERVER['QUERY_STRING'] = $serverquerystring;
+    }
+
+    /**
+     * Input values for test_get_parameters().
+     *
+     * @return \string[][]
+     */
+    public function get_parameters_provider(): array {
+        $args = [
+            ['a=1&b=2&c=3', 'a=1&b=2&c=3'],
+        ];
+        foreach (script_metadata::DENYLIST as $tobedenied) {
+            $args[] = ['a=1&b=2&' . $tobedenied . '=1', 'a=1&b=2'];
+        }
+        foreach (script_metadata::REDACTLIST as $toberedacted) {
+            $args[] = ['a=1&b=2&' . $toberedacted . '=1', 'a=1&b=2&' . $toberedacted . '='];
+        }
+        return $args;
+    }
+
+    /**
      * Test script_metadata::get_groupby_value().
      *
      * @dataProvider group_by_value_provider
