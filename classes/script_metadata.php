@@ -110,16 +110,15 @@ class script_metadata {
         }
 
         if (isset($ME)) {
-            $parameters = (new \moodle_url($ME))->get_query_string();
-            return $parameters;
+            $querystring = (new \moodle_url($ME))->get_query_string(false);
+        } else if (isset($_SERVER['QUERY_STRING'])) {
+            $querystring = $_SERVER['QUERY_STRING'];
+        } else {
+            return '';
         }
-
-        if (isset($_SERVER['QUERY_STRING'])) {
-            $parameters = [];
-            parse_str($_SERVER['QUERY_STRING'], $parameters);
-            return http_build_query(self::stripparameters($parameters), '', '&');
-        }
-        return '';
+        $parameters = [];
+        parse_str($querystring, $parameters);
+        return http_build_query(self::stripparameters($parameters), '', '&');
     }
 
     /**
