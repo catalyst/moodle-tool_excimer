@@ -124,7 +124,7 @@ class page_group_table extends \table_sql {
             $low = ($high == 1) ? 0 : pow(2, $k - 1);
             $lines[] = get_string('fuzzydurationcount_lines', 'tool_excimer', ['low' => $low, 'high' => $high, 'value' => $v]);
         }
-        return implode($lines, \html_writer::empty_tag('br'));
+        return implode(\html_writer::empty_tag('br'), $lines);
     }
 
     /**
