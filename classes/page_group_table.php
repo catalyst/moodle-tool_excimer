@@ -105,7 +105,7 @@ class page_group_table extends \table_sql {
      * @return string
      */
     public function col_fuzzycount(\stdClass $record): string {
-        return $record->fuzzycount;
+        return '~ ' . pow(2, $record->fuzzycount);
     }
 
     /**
