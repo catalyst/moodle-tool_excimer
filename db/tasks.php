@@ -26,23 +26,32 @@
 defined('MOODLE_INTERNAL') || die();
 
 // List of tasks.
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => 'tool_excimer\task\expire_logs',
         'blocking' => 0,
         'minute' => '0',
         'hour' => '*',
         'day' => '*',
         'month' => '*',
-        'dayofweek' => '*'
-    ),
-    array(
+        'dayofweek' => '*',
+    ],
+    [
         'classname' => 'tool_excimer\task\purge_fastest',
         'blocking' => 0,
         'minute' => '0',
         'hour' => '*',
         'day' => '*',
         'month' => '*',
-        'dayofweek' => '*'
-    )
-);
+        'dayofweek' => '*',
+    ],
+    [
+        'classname' => 'tool_excimer\task\purge_page_groups',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '0',
+        'day' => '1',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
+];

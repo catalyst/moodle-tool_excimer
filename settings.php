@@ -120,6 +120,16 @@ if ($hassiteconfig) {
             )
         );
 
+        $settings->add(
+            new admin_setting_configtext(
+                'tool_excimer/expiry_fuzzy_counts',
+                get_string('expiry_fuzzy_counts', 'tool_excimer'),
+                get_string('expiry_fuzzy_counts_desc', 'tool_excimer'),
+                12,
+                PARAM_INT
+            )
+        );
+
         $settings->add(new admin_setting_heading(
             'tool_excimer/auto',
             get_string('auto_settings', 'tool_excimer'),
@@ -213,6 +223,16 @@ if ($hassiteconfig) {
             'tool_excimer_report_unfinished',
             get_string('report_unfinished', 'tool_excimer'),
             new moodle_url('/admin/tool/excimer/unfinished.php'),
+            'moodle/site:config'
+        )
+    );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_report_page_groups',
+            get_string('report_page_groups', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/page_groups.php'),
             'moodle/site:config'
         )
     );

@@ -396,5 +396,30 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022090100, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2022091500) {
+
+        // Define table tool_excimer_profile_groups to be created.
+        $table = new xmldb_table('tool_excimer_page_groups');
+
+        // Adding fields to table tool_excimer_profile_groups.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '256', null, XMLDB_NOTNULL, null);
+        $table->add_field('month', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null);
+        $table->add_field('fuzzycount', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('fuzzydurationcounts', XMLDB_TYPE_TEXT);
+        $table->add_field('fuzzydurationsum', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0);
+
+        // Adding keys to table tool_excimer_profile_groups.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        // Conditionally launch create table for tool_excimer_profile_groups.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2022091500, 'tool', 'excimer');
+    }
+
     return true;
 }

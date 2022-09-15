@@ -19,7 +19,7 @@ namespace tool_excimer;
 /**
  * Processor for web script profiling.
  *
- * Makes one profile per run, with partial saving if the scripts runs long enough.
+ * Makes one profile per run, with partial saving if the script runs long enough.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
@@ -65,7 +65,10 @@ class web_processor implements processor {
             function () use ($manager) {
                 $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
+
+                // Keep an approximate count of each profile.
                 $this->process($manager, true);
+                page_group::record_fuzzy_counts($this->profile);
             }
         );
     }
