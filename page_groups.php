@@ -33,7 +33,7 @@ require_once($CFG->libdir.'/adminlib.php');
 
 $download = optional_param('download', '', PARAM_ALPHA);
 
-$url = new \moodle_url('/admin/tool/excimer/profile-groups.php');
+$url = new \moodle_url('/admin/tool/excimer/page_groups.php');
 $context = context_system::instance();
 
 $PAGE->set_context($context);
