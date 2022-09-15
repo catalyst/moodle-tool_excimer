@@ -396,7 +396,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022090100, 'tool', 'excimer');
     }
 
-    if ($oldversion < 2022090600) {
+    if ($oldversion < 2022091500) {
 
         // Define table tool_excimer_profile_groups to be created.
         $table = new xmldb_table('tool_excimer_page_groups');
@@ -418,7 +418,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         }
 
         // Excimer savepoint reached.
-        upgrade_plugin_savepoint(true, 2022090600, 'tool', 'excimer');
+        upgrade_plugin_savepoint(true, 2022091500, 'tool', 'excimer');
     }
 
     return true;
