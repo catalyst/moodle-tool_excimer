@@ -105,7 +105,7 @@ class page_group_table extends \table_sql {
      * @return string
      */
     public function col_fuzzycount(\stdClass $record): string {
-        return '~ ' . pow(2, $record->fuzzycount);
+        return pow(2, $record->fuzzycount - 1) . ' - ' . pow(2, $record->fuzzycount);
     }
 
     /**
@@ -122,7 +122,12 @@ class page_group_table extends \table_sql {
         foreach ($counts as $k => $v) {
             $high = pow(2, $k);
             $low = ($high == 1) ? 0 : pow(2, $k - 1);
-            $lines[] = get_string('fuzzydurationcount_lines', 'tool_excimer', ['low' => $low, 'high' => $high, 'value' => $v]);
+            $val = pow(2, $v - 1);
+            $lines[] = get_string('fuzzydurationcount_lines', 'tool_excimer', [
+                'low'   => $low,
+                'high'  => $high,
+                'value' => $val,
+            ]);
         }
         return implode(\html_writer::empty_tag('br'), $lines);
     }

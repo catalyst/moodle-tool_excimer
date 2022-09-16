@@ -133,7 +133,7 @@ $string['field_versionhash'] = 'Version Hash';
 $string['field_name'] = 'Name';
 $string['field_month'] = 'Month';
 $string['field_fuzzycount'] = 'Approx. count';
-$string['field_fuzzydurationcounts'] = 'Approx. duration counts';
+$string['field_fuzzydurationcounts'] = 'Histogram';
 $string['field_fuzzydurationsum'] = 'Approx. total duration (s)';
 
 // Note: This is needed as the headers for the profile table are added in a loop.
