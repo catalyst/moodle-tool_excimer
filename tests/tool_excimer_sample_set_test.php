@@ -62,12 +62,10 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         // This is every 2nd element of $samples.
         $expected1 = [
             $samples[1],
-            $samples[3]
+            $samples[3],
         ];
         // This is every 4th element of $samples.
-        $expected2 = [
-            $samples[3]
-        ];
+        $expected2 = [$samples[3]];
 
         $set = new sample_set('a', 0, 1024);
 
@@ -106,12 +104,10 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         // This is $samples ofter being stripped once.
         $expected1 = [
             $samples[1],
-            $samples[3]
+            $samples[3],
         ];
         // This is $samples ofter being stripped twice.
-        $expected2 = [
-            $samples[3]
-        ];
+        $expected2 = [$samples[3]];
 
         $set = new sample_set('a', 0, 1024);
 
@@ -144,7 +140,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $expected1 = [
             $samples1[1],
             $samples1[3],
-            $samples1[5]
+            $samples1[5],
         ];
 
         $samples2 = [
@@ -159,7 +155,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
         $expected2 = [
             $samples1[3],
             $samples2[1],
-            $samples2[5]
+            $samples2[5],
         ];
 
         $set = new sample_set('a', 0, 4);

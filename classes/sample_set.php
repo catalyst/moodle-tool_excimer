@@ -30,7 +30,7 @@ class sample_set {
     /** @var float Starting time of the sample set. */
     public $starttime;
 
-    /** @var array $samples An array of \ExcimerLogEntry objects. */
+    /** @var array An array of \ExcimerLogEntry objects. */
     public $samples = [];
 
     /** @var int Sample limit. */
@@ -38,7 +38,7 @@ class sample_set {
     /** @var int The maximum stack depth. */
     public $maxstackdepth = 0;
 
-    /** @var int If $filterrate is R, then only each Rth sample is recorded. */
+    /** @var int If is R, then only each Rth sample is recorded. */
     private $filterrate = 1;
 
     /** @var int Internal counter to help with filtering. */
@@ -65,7 +65,7 @@ class sample_set {
      *
      * @return int
      */
-    public function get_stack_depth() : int {
+    public function get_stack_depth(): int {
         return (int) $this->maxstackdepth;
     }
 
@@ -122,7 +122,7 @@ class sample_set {
         $this->samples = array_values(
             array_filter(
                 $this->samples,
-                function($key) {
+                function ($key) {
                     return ($key % 2);
                 },
                 ARRAY_FILTER_USE_KEY
@@ -150,7 +150,7 @@ class sample_set {
     public function count(): int {
         $count = count($this->samples);
         if ($count > 0 && $this->samples[0] instanceof \ExcimerLogEntry) {
-            $count = array_reduce($this->samples, function($acc, $sample) {
+            $count = array_reduce($this->samples, function ($acc, $sample) {
                 $acc += $sample->getEventCount();
                 return $acc;
             }, 0);

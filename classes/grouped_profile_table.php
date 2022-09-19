@@ -36,7 +36,7 @@ class grouped_profile_table extends profile_table {
         'minduration',
     ];
 
-    /** @var \moodle_url $urlpath URL path to use for linking to profile groups. */
+    /** @var \moodle_url URL path to use for linking to profile groups. */
     protected $urlpath;
 
     /**

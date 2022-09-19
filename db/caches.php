@@ -25,21 +25,21 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$definitions = array(
-    'request_metadata' => array(
+$definitions = [
+    'request_metadata' => [
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => false,
         'simpledata' => true,
         'staticacceleration' => true,
         'staticaccelerationsize' => 10,
-        'canuselocalstore' => false
-    ),
-    'page_group_metadata' => array(
+        'canuselocalstore' => false,
+    ],
+    'page_group_metadata' => [
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => false,
         'simpledata' => true,
         'staticacceleration' => true,
         'staticaccelerationsize' => 10,
-        'canuselocalstore' => false
-    ),
-);
+        'canuselocalstore' => false,
+    ],
+];

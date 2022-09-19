@@ -34,7 +34,7 @@ require_once($CFG->libdir.'/adminlib.php');
 $profileid = required_param('profileid', PARAM_INT);
 $pluginname = get_string('pluginname', 'tool_excimer');
 
-$params = [ 'profileid' => $profileid ];
+$params = ['profileid' => $profileid];
 $url = new \moodle_url('/admin/tool/excimer/lock_profile.php', $params);
 $context = context_system::instance();
 
@@ -51,7 +51,7 @@ admin_externalpage_setup('tool_excimer_report_' . $reporttype);
 $form = new \tool_excimer\form\lock_reason_form($url);
 
 if ($data = $form->get_data()) {
-    $DB->update_record('tool_excimer_profiles', (object)['id' => $profileid, 'lockreason' => trim($data->lockreason)]);
+    $DB->update_record('tool_excimer_profiles', (object) ['id' => $profileid, 'lockreason' => trim($data->lockreason)]);
     redirect($data->returnurl);
 } else {
     $form->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);

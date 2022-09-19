@@ -149,7 +149,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
         $profile->set('numsamples', $sampleset->count());
 
         $id = $profile->save_record();
-        $record = $DB->get_record(profile::TABLE, [ 'id' => $id ]);
+        $record = $DB->get_record(profile::TABLE, ['id' => $id]);
 
         $this->assertEquals($id, $record->id);
         $this->assertEquals($reason, $record->reason);

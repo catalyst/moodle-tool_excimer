@@ -28,12 +28,12 @@ namespace tool_excimer;
  */
 class web_processor implements processor {
 
-    /** @var profile $profile The profile object for the run. */
+    /** @var profile The profile object for the run. */
     protected $profile;
 
-    /** @var sample_set $sampleset */
+    /** @var sample_set */
     protected $sampleset;
-    /** @var sample_set $memoryusagesampleset */
+    /** @var sample_set */
     protected $memoryusagesampleset;
 
     /**
@@ -95,7 +95,7 @@ class web_processor implements processor {
 
         $this->memoryusagesampleset->add_sample([
             'sampleindex' => $this->sampleset->total_added() + $this->memoryusagesampleset->count() - 1,
-            'value' => memory_get_usage()
+            'value' => memory_get_usage(),
         ]);
         $current = microtime(true);
         $this->profile->set('duration', $current - $manager->get_starttime());

@@ -62,9 +62,7 @@ if ($deleteall) {
 // Delete profile specified by an ID.
 if ($deleteid) {
     // Clears the profile metadata cache affected by this record deletion.
-    $conditions = [
-        'id' => $deleteid,
-    ];
+    $conditions = ['id' => $deleteid];
     $profile = $DB->get_record(profile::TABLE, $conditions, 'request, reason, lockreason');
     if (empty($profile->lockreason)) {
         $cache->delete($profile->request);

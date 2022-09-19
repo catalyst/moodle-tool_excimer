@@ -30,10 +30,10 @@ use tool_excimer\script_metadata;
  */
 class cron_processor implements processor {
 
-    /** @var float $sampletime Timestamp updated after processing each sample */
+    /** @var float Timestamp updated after processing each sample */
     public $sampletime;
 
-    /** @var sample_set $tasksampleset A sample set recorded while processing a task */
+    /** @var sample_set A sample set recorded while processing a task */
     public $tasksampleset = null;
 
     /** @var sample_set A sample set for memory usage recorded while processing a task */
@@ -121,7 +121,7 @@ class cron_processor implements processor {
                 // Note that due to the looping this is probably inaccurate.
                 $this->memoryusagesampleset->add_sample([
                     'sampleindex' => $this->tasksampleset->total_added() + $this->memoryusagesampleset->count() - 1,
-                    'value' => memory_get_usage()
+                    'value' => memory_get_usage(),
                 ]);
             }
 

@@ -103,26 +103,25 @@ class excimer_testcase extends \advanced_testcase {
 
         // These methods proxy the function names to $iterator for stubbing.
         foreach (get_class_methods("\Iterator") as $methodname) {
-            $stub->method($methodname)->willReturnCallback(function() use($iterator, $methodname) {
+            $stub->method($methodname)->willReturnCallback(function () use ($iterator, $methodname) {
                 return $iterator->$methodname();
             });
         }
 
         $stub->method('count')
-            ->willReturnCallback(function() use($logentries) {
+            ->willReturnCallback(function () use ($logentries) {
                 return $logentries->count();
             });
 
         // Don't use reflection here because not all methods need to be overridden.
         foreach (['offsetExists', 'offsetGet'] as $methodname) {
-            $stub->method($methodname)->willReturnCallback(function($offset) use($logentries, $methodname) {
+            $stub->method($methodname)->willReturnCallback(function ($offset) use ($logentries, $methodname) {
                 return $logentries->$methodname($offset);
             });
         }
 
         return $stub;
     }
-
 
     /**
      * Creates a stub for the ExcimerProfiler class for testing purposes.

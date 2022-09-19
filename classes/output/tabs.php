@@ -50,31 +50,31 @@ class tabs implements \templatable {
             'tabs' => [
                 [
                     'id' => 'slowest_web',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_web.php') ]],
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/slowest_web.php')]],
                     'title' => get_string('report_slowest_web', 'tool_excimer'),
                     'text' => get_string('tab_slowest_web', 'tool_excimer'),
                 ],
                 [
                     'id' => 'slowest_other',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/slowest_other.php') ]],
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/slowest_other.php')]],
                     'title' => get_string('report_slowest_other', 'tool_excimer'),
                     'text' => get_string('tab_slowest_other', 'tool_excimer'),
                 ],
                 [
                     'id' => 'recent',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/recent.php') ]],
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/recent.php')]],
                     'title' => get_string('report_recent', 'tool_excimer'),
                     'text' => get_string('recent', 'tool_excimer'),
                 ],
                 [
                     'id' => 'unfinished',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/unfinished.php') ]],
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/unfinished.php')]],
                     'title' => get_string('report_unfinished', 'tool_excimer'),
                     'text' => get_string('unfinished', 'tool_excimer'),
                 ],
                 [
                     'id' => 'page_groups',
-                    'link' => [[ 'link' => new \moodle_url('/admin/tool/excimer/page_groups.php') ]],
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/page_groups.php')]],
                     'title' => get_string('report_page_groups', 'tool_excimer'),
                     'text' => get_string('tab_page_groups', 'tool_excimer'),
                 ],

@@ -41,7 +41,7 @@ class expire_logs extends \core\task\scheduled_task {
      * Do the job.
      */
     public function execute() {
-        $expiry = (int)get_config('tool_excimer', 'expiry_s');
+        $expiry = (int) get_config('tool_excimer', 'expiry_s');
         $cutoff = time() - $expiry;
         profile_helper::purge_profiles_before_epoch_time($cutoff);
     }
