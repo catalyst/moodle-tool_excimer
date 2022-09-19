@@ -268,17 +268,22 @@ class profile extends persistent {
             return true;
         }
 
-        // If current userid isn't guest, but stored user is guest, update it.
+        // If the would-be user matches the currently stored, do not update.
+        if ($currentid === $stored) {
+            return false;
+        }
+
+        // If stored user is guest, update it.
         $guestid = (int) $CFG->siteguest;
-        if ($guestid && $currentid !== $guestid && $stored === $guestid) {
+        if ($guestid && $stored === $guestid) {
             return true;
         }
 
-        // If current user isn't cli admin, but stored user is cli admin, update it.
-        $adminid = get_admin()->id;
-        if ($adminid && $currentid !== $adminid && $stored === $adminid) {
+        // If stored user is cli admin, update it.
+        if (!empty($CFG->siteadmins) && in_array($stored, explode(',', $CFG->siteadmins))) {
             return true;
         }
+
         return false;
     }
 
