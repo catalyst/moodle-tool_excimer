@@ -34,4 +34,12 @@ $definitions = array(
         'staticaccelerationsize' => 10,
         'canuselocalstore' => false
     ),
+    'page_group_metadata' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => false,
+        'simpledata' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 10,
+        'canuselocalstore' => false
+    ),
 );

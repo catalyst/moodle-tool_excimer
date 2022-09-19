@@ -31,6 +31,40 @@ class page_group extends persistent {
     /** The name of the database table. */
     public const TABLE = 'tool_excimer_page_groups';
 
+    /** Name of the cache used in this class. */
+    public const CACHE_NAME = 'page_group_metadata';
+
+    /**
+     * Creates a page_group, either from the cache, or fresh.
+     *
+     * @param string $name
+     * @param string $month
+     * @return page_group
+     */
+    public static function get_page_group(string $name, string $month): page_group {
+        // Get the cache and attempt to pull the pag group's record from it.
+        $keydata = ['name' => $name, 'month' => $month];
+        $cachekey = serialize($keydata);
+        $cache = \cache::make('tool_excimer', self::CACHE_NAME);
+        $record = $cache->get($cachekey);
+
+        // The cached record exists, return it.
+        if ($record !== false) {
+            return new page_group(0, $record);
+        }
+
+        // Check if a matching DB record exists. If not, create it.
+        $pagegroup = self::get_record($keydata);
+        if ($pagegroup === false) {
+            // No need to set the cache as it is guaranteed to be set later. So return early.
+            return new page_group(0, (object) $keydata);
+        }
+
+        // The DB record should be cached for future calls.
+        $cache->set($cachekey, $pagegroup->to_record());
+        return $pagegroup;
+    }
+
     /**
      * Returns the fuzzy counts for duration.
      *
@@ -55,6 +89,37 @@ class page_group extends persistent {
     }
 
     /**
+     * Called after the page group is created in the DB.
+     */
+    public function after_create() {
+        $this->update_cache();
+    }
+
+    /**
+     * Called after the DB is updated.
+     *
+     * @param bool $result Whether or not the update was successful.
+     */
+    public function after_update($result) {
+        if ($result) {
+            $this->update_cache();
+        }
+    }
+
+    /**
+     * Updates the cache with the current record.
+     */
+    protected function update_cache() {
+        $keydata = [
+            'name' => $this->get('name'),
+            'month' => $this->get('month'),
+        ];
+        $cachekey = serialize($keydata);
+        $cache = \cache::make('tool_excimer', self::CACHE_NAME);
+        $cache->set($cachekey, $this->to_record());
+    }
+
+    /**
      * Records fuzzy count metadata about a page group.
      *
      * @param profile $profile The profile to pull the information from.
@@ -63,10 +128,7 @@ class page_group extends persistent {
 
         // Get the profile group record, creating a new one if one does not yet exist.
         $month = userdate(time() - 360, '%Y%m'); // YYYYMM format.
-        $pagegroup = self::get_record(['name' => $profile->get('groupby'), 'month' => $month]);
-        if ($pagegroup === false) {
-            $pagegroup = new page_group(0, (object) ['name' => $profile->get('groupby'), 'month' => $month]);
-        }
+        $pagegroup = self::get_page_group($profile->get('groupby'), $month);
 
         $existing = $pagegroup->to_record();
 
