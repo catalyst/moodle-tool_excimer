@@ -52,6 +52,8 @@ $string['auto_settings'] = 'Auto profiling settings';
 $string['auto_settings_desc'] = 'Settings related to automatic profiling.';
 $string['enable_auto'] = 'Enable auto profiling';
 $string['enable_auto_desc'] = 'Any page will be automatically profiled if they exceed the miniumum duration.';
+$string['enable_fuzzy_count'] = 'Enable fuzzy counting';
+$string['enable_fuzzy_count_desc'] = 'This will cause the plugin to maintain an approximate count of page runs using the {$a}. Automatic profiling must also be enabled.';
 $string['expiry_s'] = 'Log expiry (days)';
 $string['expiry_s_desc'] = 'Remove profiles after this long.';
 $string['num_slowest'] = 'Max to save';
@@ -81,7 +83,6 @@ $string['expiry_fuzzy_counts_desc'] = 'The number of full months worth of data t
 $string['task_expire_logs'] = 'Expire excimer logs';
 $string['task_purge_fastest'] = 'Purge fastest excimer profiles';
 $string['task_purge_page_groups'] = 'Purge page group approximate count data';
-
 
 // Tabs.
 $string['slowest_grouped'] = 'Slowest scripts';
@@ -186,3 +187,4 @@ $string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles
 $string['deleteprofiles_filter'] = 'Delete all profiles for this filter';
 $string['edit_lock'] = 'Edit lock';
 $string['fuzzydurationcount_lines'] = '{$a->low}-{$a->high}s: {$a->value}';
+$string['approx_count_algorithm'] = 'approximate counting algorithm';

@@ -125,6 +125,11 @@ class page_group extends persistent {
      * @param profile $profile The profile to pull the information from.
      */
     public static function record_fuzzy_counts(profile $profile) {
+        // Do this only if both auto profiling and fuzzy counting is set.
+        if (!get_config('tool_excimer', 'enable_auto') ||
+            !get_config('tool_excimer', 'enable_fuzzy_count')) {
+            return;
+        }
 
         // Get the profile group record, creating a new one if one does not yet exist.
         $month = userdate(time() - 360, '%Y%m'); // YYYYMM format.

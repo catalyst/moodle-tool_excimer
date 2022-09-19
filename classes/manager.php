@@ -36,6 +36,8 @@ class manager {
     const NO_FLAME_PARAM_NAME = 'DONTFLAMEME';
     /** The size of a PHP integer in bits (64 on Linux x86_64, 32 on Windows). */
     const PHP_INT_SIZE_BITS = 8 * PHP_INT_SIZE;
+    /** Wiki URL for the approximate counting algorithm. */
+    const APPROX_ALGO_WIKI_URL = 'https://en.wikipedia.org/wiki/Approximate_counting_algorithm';
 
     /** @var processor */
     private $processor;

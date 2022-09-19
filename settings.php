@@ -143,6 +143,19 @@ if ($hassiteconfig) {
             )
         );
 
+        $wikilink = html_writer::link(
+            \tool_excimer\manager::APPROX_ALGO_WIKI_URL,
+            get_string('approx_count_algorithm', 'tool_excimer')
+        );
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'tool_excimer/enable_fuzzy_count',
+                get_string('enable_fuzzy_count', 'tool_excimer'),
+                get_string('enable_fuzzy_count_desc', 'tool_excimer', $wikilink),
+                1
+            )
+        );
+
         $item = new admin_setting_configtext(
             'tool_excimer/trigger_ms',
             get_string('request_ms', 'tool_excimer'),
