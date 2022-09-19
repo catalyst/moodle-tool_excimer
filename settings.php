@@ -28,7 +28,6 @@ use tool_excimer\script_metadata;
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-
     $ADMIN->add('modules', new admin_category('tool_excimer_settings', get_string('adminname', 'tool_excimer')));
     $ADMIN->add('development', new admin_category('tool_excimer_reports', get_string('adminname', 'tool_excimer')));
 
@@ -44,10 +43,9 @@ if ($hassiteconfig) {
     );
 
     if ($ADMIN->fulltree) {
-
         // Ensure if particular setting(s) are updated, the cache for profile
         // request metadata is cleared, at most once.
-        $clearprofiletimingscachecallback = function() {
+        $clearprofiletimingscachecallback = function () {
             static $called = false;
             if (!$called) {
                 $called = true;
@@ -75,7 +73,7 @@ if ($hassiteconfig) {
                 'tool_excimer/sample_ms',
                 get_string('period_ms', 'tool_excimer'),
                 get_string('period_ms_desc', 'tool_excimer',
-                    [ 'min' => script_metadata::SAMPLING_PERIOD_MIN * 1000, 'max' => script_metadata::SAMPLING_PERIOD_MAX * 1000]),
+                    ['min' => script_metadata::SAMPLING_PERIOD_MIN * 1000, 'max' => script_metadata::SAMPLING_PERIOD_MAX * 1000]),
                 '10',
                 PARAM_INT
             )
@@ -184,7 +182,6 @@ if ($hassiteconfig) {
         );
         $item->set_updatedcallback($clearprofiletimingscachecallback);
         $settings->add($item);
-
     }
 
     $ADMIN->add(

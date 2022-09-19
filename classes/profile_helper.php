@@ -88,7 +88,7 @@ class profile_helper {
                 $cache->set($cachekey, $result);
             }
         }
-        return (float)$result[$cachefield];
+        return (float) $result[$cachefield];
     }
 
     /**
@@ -131,7 +131,7 @@ class profile_helper {
                 set_config($cachekey, $result, 'tool_excimer');
             }
         }
-        return (float)$result;
+        return (float) $result;
     }
 
     /**

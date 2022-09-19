@@ -41,9 +41,7 @@ class script_metadata {
     ];
 
     /** List of paramteres that are to be recorded in redacted form. */
-    const REDACTLIST = [
-        'sesskey',
-    ];
+    const REDACTLIST = ['sesskey'];
 
     /**
      * List of script names that requires more info for grouping.
@@ -131,7 +129,7 @@ class script_metadata {
     public static function stripparameters(array $parameters): array {
         $parameters = array_filter(
             $parameters,
-            function($i) {
+            function ($i) {
                 return !in_array($i, self::DENYLIST);
             },
             ARRAY_FILTER_USE_KEY
@@ -198,7 +196,6 @@ class script_metadata {
                     list($contenttypewhole) = explode(';', $header, 2);
                     list(, $contenttypevalue) = explode(': ', $contenttypewhole, 2);
                     break;
-
                 }
             }
         }

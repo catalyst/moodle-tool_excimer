@@ -150,11 +150,11 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      */
     public function sampling_limit_provider(): array {
         return [
-            [ 0, 1024 ],
-            [ 1, 1 ],
-            [ 1024, 1024 ],
-            [ 10000, 10000 ],
-            [ -1, 1024 ],
+            [0, 1024],
+            [1, 1],
+            [1024, 1024],
+            [10000, 10000],
+            [-1, 1024],
         ];
     }
 }

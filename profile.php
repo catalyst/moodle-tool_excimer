@@ -52,7 +52,7 @@ const REPORT_SECTIONS = [
 
 $profileid = required_param('id', PARAM_INT);
 
-$params = [ 'id' => $profileid ];
+$params = ['id' => $profileid];
 $url = new \moodle_url('/admin/tool/excimer/profile.php', $params);
 $context = context_system::instance();
 
@@ -139,11 +139,11 @@ if ($profile->get('method') === 'GET') {
     );
 }
 
-$data['script_type_display'] = function($text, $render) {
-    return helper::script_type_display((int)$render($text));
+$data['script_type_display'] = function ($text, $render) {
+    return helper::script_type_display((int) $render($text));
 };
-$data['reason_display'] = function($text, $render) {
-    return helper::reason_display((int)$render($text));
+$data['reason_display'] = function ($text, $render) {
+    return helper::reason_display((int) $render($text));
 };
 
 $data['datasize'] = display_size($profile->get('datasize'));

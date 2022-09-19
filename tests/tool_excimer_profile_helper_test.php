@@ -105,7 +105,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
 
         $log = $this->quick_log(10);
 
-        $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22 ];
+        $times = [0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22];
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
@@ -158,7 +158,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
 
         $log = $this->quick_log(10);
 
-        $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22 ];
+        $times = [0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22];
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
@@ -196,8 +196,8 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
 
         $log = $this->quick_log(10);
 
-        $times = [ 0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22, 0.111, 0.9 ];
-        $reqnames = [ 'a', 'b', 'c', 'a', 'd', 'a', 'a', 'c', 'd', 'c', 'c', 'c' ];
+        $times = [0.345, 0.234, 0.123, 0.456, 0.4, 0.5, 0.88, 0.1, 0.14, 0.22, 0.111, 0.9];
+        $reqnames = ['a', 'b', 'c', 'a', 'd', 'a', 'a', 'c', 'd', 'c', 'c', 'c'];
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
@@ -217,8 +217,8 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
 
         // Should remove a few profiles.
         $numtokeep = 3;
-        $expectedreqcount = [ 'a' => 3, 'b' => 1, 'c' => 3, 'd' => 2 ];
-        $expectedfastest = [ 'a' => 0.456, 'b' => 0.234, 'c' => 0.123, 'd' => 0.14 ];
+        $expectedreqcount = ['a' => 3, 'b' => 1, 'c' => 3, 'd' => 2];
+        $expectedfastest = ['a' => 0.456, 'b' => 0.234, 'c' => 0.123, 'd' => 0.14];
         profile_helper::purge_fastest_by_group($numtokeep);
         $this->assertEquals(array_sum($expectedreqcount) + 3, $DB->count_records(profile::TABLE));
         $records = $DB->get_records_sql(
@@ -246,7 +246,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
-        $times = [ 12345, 23456, 34567, 45678 ];
+        $times = [12345, 23456, 34567, 45678];
         $cutoff1 = 30000;
         $cutoff2 = 20000;
         $cutoff3 = 40000;
@@ -266,7 +266,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->assertEquals(1, profile_helper::get_num_profiles());
         profile_helper::purge_profiles_before_epoch_time($cutoff1);
         $this->assertEquals(1, profile_helper::get_num_profiles());
-        $record = $DB->get_record("tool_excimer_profiles", []);
+        $record = $DB->get_record('tool_excimer_profiles', []);
         $this->assertEquals($times[3], $record->created);
     }
 
@@ -280,7 +280,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(10);
-        $times = [ 12345, 23456, 34567, 45678 ];
+        $times = [12345, 23456, 34567, 45678];
         $cutoff1 = 30000;
         $cutoff2 = 20000;
         $cutoff3 = 40000;

@@ -257,7 +257,7 @@ class profile extends persistent {
      * @param int $currentid
      * @return bool
      */
-    protected function check_update_userid(int $currentid) : bool {
+    protected function check_update_userid(int $currentid): bool {
         global $CFG;
 
         $stored = (int) $this->raw_get('userid');

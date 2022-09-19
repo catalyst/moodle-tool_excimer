@@ -51,7 +51,7 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
             (int) userdate(strtotime('7 months ago'), '%Y%m'),
         ];
         foreach ($months as $month) {
-            $DB->insert_record(page_group::TABLE, (object)['month' => $month, 'fuzzydurationcounts' => '']);
+            $DB->insert_record(page_group::TABLE, (object) ['month' => $month, 'fuzzydurationcounts' => '']);
         }
 
         $count = $DB->count_records(page_group::TABLE);

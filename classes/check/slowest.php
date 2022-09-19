@@ -31,6 +31,7 @@ use core\check\result;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class slowest extends check {
+
     /**
      * Links to the profile list ordered by duration.
      *
@@ -49,7 +50,7 @@ class slowest extends check {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public function get_result() : result {
+    public function get_result(): result {
         $profile = profile::get_slowest_profile();
         if ($profile === false) {
             $status = result::OK;
