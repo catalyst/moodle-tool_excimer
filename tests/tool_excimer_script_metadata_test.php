@@ -37,20 +37,45 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     /**
      * Tests strip_parameters
      *
-     * @covers \tool_excimer\script_metadata::stripparameters
+     * @covers \tool_excimer\script_metadata::strip_parameters
+     * @dataProvider strip_parameters_provider
+     * @param string $config
+     * @param array $params
+     * @param array $expected
      */
-    public function test_strip_parameters() {
-        $param = ['a' => '1', 'b' => 2, 'c' => 3];
-        $paramexpect = $param;
-        $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
+    public function test_strip_parameters(string $config, array $params, array $expected) {
+        set_config('redact_params', $config, 'tool_excimer');
+        $this->assertEquals($expected, script_metadata::strip_parameters($params));
+    }
 
-        $param = ['a' => '1', 'sesskey' => 2, 'c' => 3];
-        $paramexpect = ['a' => '1', 'sesskey' => '', 'c' => 3];
-        $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
-
-        $param = ['a' => '1', 'sesskey' => 2, 'FLAMEME' => 3];
-        $paramexpect = ['a' => '1', 'sesskey' => ''];
-        $this->assertEquals($paramexpect, script_metadata::stripparameters($param));
+    /**
+     * Provider for test_strip_parameters().
+     *
+     * @return array[]
+     */
+    public function strip_parameters_provider(): array {
+        return [
+            [
+                '',
+                ['a' => '1', 'b' => 2, 'c' => 3],
+                ['a' => '1', 'b' => 2, 'c' => 3],
+            ],
+            [
+                '',
+                ['a' => '1', 'sesskey' => 2, 'c' => 3],
+                ['a' => '1', 'sesskey' => '', 'c' => 3],
+            ],
+            [
+                '',
+                ['a' => '1', 'sesskey' => 2, 'FLAMEME' => 3],
+                ['a' => '1', 'sesskey' => ''],
+            ],
+            [
+                'c',
+                ['a' => '1', 'sesskey' => 2, 'c' => 3],
+                ['a' => '1', 'sesskey' => '', 'c' => ''],
+            ],
+        ];
     }
 
     /**
@@ -86,10 +111,10 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $args = [
             ['a=1&b=2&c=3', 'a=1&b=2&c=3'],
         ];
-        foreach (script_metadata::DENYLIST as $tobedenied) {
+        foreach (script_metadata::DENY_LIST as $tobedenied) {
             $args[] = ['a=1&b=2&' . $tobedenied . '=1', 'a=1&b=2'];
         }
-        foreach (script_metadata::REDACTLIST as $toberedacted) {
+        foreach (script_metadata::REDACT_LIST as $toberedacted) {
             $args[] = ['a=1&b=2&' . $toberedacted . '=1', 'a=1&b=2&' . $toberedacted . '='];
         }
         return $args;
@@ -155,6 +180,37 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
             [1024, 1024],
             [10000, 10000],
             [-1, 1024],
+        ];
+    }
+
+    /**
+     * Tests get_redactable_param_names().
+     *
+     * @covers \tool_excimer\script_metadata::get_redactable_param_names
+     * @dataProvider get_redactable_param_names_provider
+     * @param string $config
+     * @param array $expected
+     */
+    public function test_get_redactable_param_names(string $config, array $expected) {
+        set_config('redact_params', $config, 'tool_excimer');
+        $this->assertEquals($expected, script_metadata::get_redactable_param_names());
+    }
+
+    /**
+     * Provider for test_get_redactable_param_names().
+     *
+     * @return array[]
+     */
+    public function get_redactable_param_names_provider(): array {
+        return [
+            [
+                "extra\nfeeble\n",
+                array_merge(script_metadata::REDACT_LIST, ['extra', 'feeble']),
+            ],
+            [
+                "/* multiline \n comment */extra #some comment\n\nfeeble\n",
+                array_merge(script_metadata::REDACT_LIST, ['extra', 'feeble']),
+            ],
         ];
     }
 }

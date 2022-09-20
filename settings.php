@@ -128,6 +128,26 @@ if ($hassiteconfig) {
             )
         );
 
+        // Get a list of builtin redactable params, quoted and separated by commas.
+        $builtin = implode(
+            ', ',
+            array_map(
+                function ($v) {
+                    return "'$v'";
+                },
+                \tool_excimer\script_metadata::REDACT_LIST
+            )
+        );
+        $settings->add(
+            new admin_setting_configtextarea(
+                'tool_excimer/redact_params',
+                get_string('redact_params', 'tool_excimer'),
+                get_string('redact_params_desc', 'tool_excimer', $builtin),
+                '',
+                PARAM_TEXT
+            )
+        );
+
         $settings->add(new admin_setting_heading(
             'tool_excimer/auto',
             get_string('auto_settings', 'tool_excimer'),
