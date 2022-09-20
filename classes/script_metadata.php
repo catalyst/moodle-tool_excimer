@@ -145,24 +145,15 @@ class script_metadata {
     }
 
     /**
-     * Gets the name of the script.
+     * Gets the name of the script that is being run for the request.
      *
      * @return string the request path for this profile.
      */
-    public static function get_request(): string {
-        global $SCRIPT, $ME, $CFG;
+    public static function get_request_script_name(): string {
+        global $SCRIPT;
 
-        if (!isset($ME)) {
-            // If set, it will trim off the leading '/' to normalise web & cli requests.
-            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
-            return $request;
-        }
-
-        $request = (new \moodle_url($ME))->out_omit_querystring();
-        $request = str_replace($CFG->wwwroot, '', $request);
-        $request = ltrim($request, '/');
-        return $request;
-
+        // If set, it will trim off the leading '/' to normalise web & cli requests.
+        $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
         return $request;
     }
 
