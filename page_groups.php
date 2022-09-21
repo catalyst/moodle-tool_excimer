@@ -46,6 +46,7 @@ $output = $PAGE->get_renderer('tool_excimer');
 $pluginname = get_string('pluginname', 'tool_excimer');
 
 $table = new page_group_table('page_group_table');
+$table->sortable(true, 'fuzzydurationsum', SORT_DESC);
 $table->is_downloading($download, 'page_groups', 'group');
 $table->define_baseurl($url);
 $table->make_columns();
