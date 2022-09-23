@@ -193,3 +193,5 @@ $string['deleteprofiles_filter'] = 'Delete all profiles for this filter';
 $string['edit_lock'] = 'Edit lock';
 $string['fuzzydurationcount_lines'] = '{$a->low}-{$a->high}s: {$a->value}';
 $string['approx_count_algorithm'] = 'approximate counting algorithm';
+$string['samples'] = 'samples';
+$string['duration'] = 'duration';

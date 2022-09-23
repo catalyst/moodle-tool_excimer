@@ -27,10 +27,12 @@
 
     Context variables required for this template:
     * id - The id of the profile
+    * lang - Language setting
 
     Example context (json):
     {
-        "id" : 3
+        "id" : 3,
+        "lang" : "en"
     }
 }}
 
@@ -47,6 +49,34 @@
 
 init();
 window.addEventListener('resize', _ => init());
+
+function displaysamplestats(d) {
+    let time = d.value * {{samplerate}};
+    let seconds = time / 1000;
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+    minutes = minutes % 60;
+    seconds = (seconds % 60).toFixed(3);
+
+    let durationstr = '';
+    if (hours) {
+        durationstr += `${hours}h `;
+    }
+    if (minutes) {
+        durationstr += `${minutes}m `;
+    }
+    if (seconds) {
+        if (durationstr !== '') {
+            seconds = Math.round(seconds);
+        }
+        durationstr += `${seconds}s`;
+    }
+
+    const percentage = ((d.x1 - d.x0) * 100).toFixed(3);
+    const samplecount = d.value.toLocaleString("{{lang}}");
+
+    return d.data.name + ` (${percentage}%, ${samplecount} {{#str}} samples, tool_excimer {{/str}}, {{#str}} duration, tool_excimer {{/str}} ~ ${durationstr}})`;
+}
 
 function init() {
 
@@ -73,16 +103,9 @@ function init() {
         draw();
     }
 
-    window.excimerChart.label(function(d) {
-        return d.data.name + ' (' + ((d.x1 - d.x0) * 100).toFixed(3)
-                + '%, ' + d.value + ' samples, duration ~' +  d.value * {{samplerate}} + ' ms)'
-    });
+    window.excimerChart.label(displaysamplestats);
 
-    var tip = flamegraph.tooltip.defaultFlamegraphTooltip().text(function(d) {
-        return d.data.name + ' (' + ((d.x1 - d.x0) * 100).toFixed(3)
-        + '%, ' + d.value + ' samples, duration ~' +  d.value * {{samplerate}} + ' ms)'
-    });
-
+    const tip = flamegraph.tooltip.defaultFlamegraphTooltip().text(displaysamplestats);
     window.excimerChart.tooltip(tip);
 }
 

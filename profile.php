@@ -153,9 +153,22 @@ $data['delete_all_button'] = $output->render($deleteallbutton);
 $data['profile_lock_button'] = $output->render($lockprofilebutton);
 
 $data['responsecode'] = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
-// Totara doesn't like the mustache string helper being called with varaibles.
-$data['numsamples_str'] = get_string('field_numsamples_value', 'tool_excimer',
-    ['samples' => $data['numsamples'], 'samplerate' => $data['samplerate']]);
+
+$decsep = get_string('decsep', 'langconfig');
+$thousandssep = get_string('thousandssep', 'langconfig');
+
+// Totara doesn't like the mustache string helper being called with variables.
+$data['numsamples_str'] = get_string(
+    'field_numsamples_value',
+    'tool_excimer',
+    [
+        'samples' => number_format($data['numsamples'], 0, $decsep, $thousandssep),
+        'samplerate' => $data['samplerate'],
+    ]
+);
+$data['dbreads'] = number_format($data['dbreads'], 0, $decsep, $thousandssep);
+$data['dbwrites'] = number_format($data['dbwrites'], 0, $decsep, $thousandssep);
+$data['dbreplicareads'] = number_format($data['dbreplicareads'], 0, $decsep, $thousandssep);
 
 if ($user) {
     $data['userlink'] = new moodle_url('/user/profile.php', ['id' => $user->id]);
@@ -168,6 +181,7 @@ $data['lockreason'] = format_text($data['lockreason']);
 $tabs = new tabs($url);
 
 $data['tabs'] = $tabs->export_for_template($output)['tabs'];
+$data['lang'] = get_config('core', 'lang');
 
 echo $output->header();
 echo $output->render_from_template('tool_excimer/profile', $data);
