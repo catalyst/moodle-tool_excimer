@@ -29,11 +29,13 @@ class page_group_table extends \table_sql {
     /** Columns to be displayed. */
     const COLUMNS = [
         'name',
-        'month',
         'fuzzycount',
         'fuzzydurationcounts',
         'fuzzydurationsum',
     ];
+
+    /** @var int The month to display in YYYYMM format. */
+    private $month = null;
 
     /**
      * Defines the columns for this table.
@@ -63,15 +65,29 @@ class page_group_table extends \table_sql {
     }
 
     /**
-     * Overrides felxible_table::setup() to do some extra setup.
+     * Sets the month to display the records for.
+     *
+     * @param int $month Month in YYYYMM format.
+     */
+    public function set_month(int $month) {
+        $this->month = $month;
+    }
+
+    /**
+     * Overrides flexible_table::setup() to do some extra setup.
      *
      * @return false|\type|void
+     * @throws \moodle_exception
      */
     public function setup() {
+        if (is_null($this->month)) {
+            throw new \moodle_exception(get_string('no_month_in_page_group_table', 'tool_excimer'));
+        }
         $this->set_sql(
             '*',
             '{' . page_group::TABLE . '}',
-            '1=1'
+            'month = ?',
+            [$this->month]
         );
         $retvalue = parent::setup();
         $this->set_attribute('class', $this->attributes['class'] . ' table-sm');

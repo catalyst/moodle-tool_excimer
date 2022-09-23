@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_excimer/month_selector
+
+    Markup for displaying a month selector pagination bar.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * month - Month being displayed
+    * prevurl - Link to previous month link (or null if no page available)
+    * nexturl - Link to next month (or null if no page available)
+
+    Example context (json):
+    {
+        "month" : "Jun 2022",
+        "prevurl" : "/admin/tool/excimer/page_groups.php?month=202205",
+        "nexturl" : null
+    }
+}}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <b>{{#str}} displaying_month, tool_excimer {{/str}}</b>
+        </div>
+        <div class="col-sm text-center">
+            {{#prevurl}}
+                <a title="{{#str}} previous_month, tool_excimer {{/str}}" href="{{prevurl}}">&lt;</a>
+            {{/prevurl}}
+            {{month}}
+            {{#nexturl}}
+                <a title="{{#str}} next_month, tool_excimer {{/str}}" href="{{nexturl}}">&gt;</a>
+            {{/nexturl}}
+        </div>
+        <div class="col-sm text-right">
+            {{{button}}}
+        </div>
+    </div>
+</div>

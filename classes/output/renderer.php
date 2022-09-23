@@ -31,8 +31,6 @@ class renderer extends \plugin_renderer_base {
      *
      * @param tabs $tabs
      * @return string
-     * @throws \coding_exception
-     * @throws \moodle_exception
      */
     public function render_tabs(tabs $tabs): string {
         $selected = '';
@@ -46,5 +44,15 @@ class renderer extends \plugin_renderer_base {
             $tabobjects[] = $tmp;
         }
         return $this->output->tabtree($tabobjects, $selected);
+    }
+
+    /**
+     * Renders the month selector utility.
+     *
+     * @param array $data Data to be passed to the template.
+     * @return bool|string
+     */
+    public function render_month_selector(array $data) {
+        return $this->render_from_template('tool_excimer/month_selector', $data);
     }
 }
