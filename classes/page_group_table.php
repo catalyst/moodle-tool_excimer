@@ -109,6 +109,25 @@ class page_group_table extends \table_sql {
     }
 
     /**
+     * Construct a line of the fuzzy duration count column.
+     * Line is of the form 2^(k-1) - 2^k : 2^(v-1).
+     *
+     * @param int $durationexponent The exponent (k) of the high end of the duration range.
+     * @param int $count The fuzzy count (v), or zero if no value.
+     * @return string
+     */
+    private function make_fuzzy_duration_line(int $durationexponent, int $count): string {
+        $high = pow(2, $durationexponent);
+        $low = ($high == 1) ? 0 : pow(2, $durationexponent - 1);
+        $val = $count ? pow(2, $count - 1) : 0;
+        return get_string('fuzzydurationcount_lines', 'tool_excimer', [
+            'low'   => $low,
+            'high'  => $high,
+            'value' => $val,
+        ]);
+    }
+
+    /**
      * Fuzzy duration counts column.
      *
      * @param \stdClass $record
@@ -119,15 +138,16 @@ class page_group_table extends \table_sql {
         ksort($counts);
 
         $lines = [];
-        foreach ($counts as $k => $v) {
-            $high = pow(2, $k);
-            $low = ($high == 1) ? 0 : pow(2, $k - 1);
-            $val = pow(2, $v - 1);
-            $lines[] = get_string('fuzzydurationcount_lines', 'tool_excimer', [
-                'low'   => $low,
-                'high'  => $high,
-                'value' => $val,
-            ]);
+        $durationexponent = 0;
+        // Generate a line for each duration range up to the highest stored in the DB.
+        foreach ($counts as $storeddurationexponent => $fuzzycount) {
+            // Fill in lines that do not have stored values.
+            while ($durationexponent < $storeddurationexponent) {
+                $lines[] = $this->make_fuzzy_duration_line($durationexponent, 0);
+                ++$durationexponent;
+            }
+            $lines[] = $this->make_fuzzy_duration_line($storeddurationexponent, $fuzzycount);
+            ++$durationexponent; // Ensures this line is not printed twice.
         }
         return implode(\html_writer::empty_tag('br'), $lines);
     }
