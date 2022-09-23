@@ -78,6 +78,11 @@ $string['stacklimit'] = 'Stack limit';
 $string['stacklimit_desc'] = 'The maximum permitted recursion or stack depth before the task is flagged.';
 $string['expiry_fuzzy_counts'] = 'Months to keep aproximate count data.';
 $string['expiry_fuzzy_counts_desc'] = 'The number of full months worth of data to keep. Leave blank to keep indefinitely.';
+$string['redact_params'] = 'Paramters to be redacted';
+$string['redact_params_desc'] = 'These parameters (one per line) will have their values removed before their profile is saved.
+    Include in this list, any paramters that are potentially sensitive, such as keys, tokens and nonces. Comments, C style (/\*..\*/)
+    and bash style (#), and blank lines will be ignored.<br/>
+    Redacting of parameters {$a} is builtin, and will always be done.';
 
 // Tasks.
 $string['task_expire_logs'] = 'Expire excimer logs';
