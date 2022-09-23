@@ -34,29 +34,35 @@ class script_metadata {
 
 
     /** List of parameters that are not to be recorded at all. */
-    const DENYLIST = [
+    const DENY_LIST = [
         manager::FLAME_ME_PARAM_NAME,
-        manager::FLAME_ON_PARAM_NAME,
         manager::FLAME_OFF_PARAM_NAME,
+        manager::FLAME_ON_PARAM_NAME,
     ];
 
-    /** List of paramteres that are to be recorded in redacted form. */
-    const REDACTLIST = ['sesskey'];
+    /** List of parameters that are to be recorded in redacted form. */
+    const REDACT_LIST = [
+        'authtoken',
+        'key',
+        'nonce',
+        'sesskey',
+        'wstoken',
+    ];
 
     /**
      * List of script names that requires more info for grouping.
      * TODO: This list is incomplete.
      */
     const SCRIPT_NAMES_FOR_GROUP_REFINING = [
+        'admin/category.php',
         'admin/index.php',
         'admin/settings.php',
         'admin/search.php',
-        'admin/category.php',
-        'lib/javascript.php',
         'lib/ajax/service.php',
+        'lib/javascript.php',
         'pluginfile.php',
-        'webservice/pluginfile.php',
         'tokenpluginfile.php',
+        'webservice/pluginfile.php',
     ];
 
     /** Minimum sampling period. */
@@ -116,32 +122,62 @@ class script_metadata {
         }
         $parameters = [];
         parse_str($querystring, $parameters);
-        return http_build_query(self::stripparameters($parameters), '', '&');
+        return http_build_query(self::strip_parameters($parameters), '', '&');
     }
 
     /**
-     * Removes any parameter on DENYLIST.
-     * Redacts any parameters on REDACTLIST.
+     * Removes any parameter on DENY_LIST.
+     * Redacts any parameters on REDACT_LIST.
      *
      * @param array $parameters
      * @return array
      */
-    public static function stripparameters(array $parameters): array {
+    public static function strip_parameters(array $parameters): array {
         $parameters = array_filter(
             $parameters,
             function ($i) {
-                return !in_array($i, self::DENYLIST);
+                return !in_array($i, self::DENY_LIST);
             },
             ARRAY_FILTER_USE_KEY
         );
 
         foreach ($parameters as $i => &$v) {
-            if (in_array($i, self::REDACTLIST)) {
+            if (in_array($i, self::get_redactable_param_names())) {
                 $v = '';
             }
         }
 
         return $parameters;
+    }
+
+    /**
+     * Gets a list of parameter names to be redacted, combining those from settings with
+     * those builtin.
+     *
+     * @return string[]
+     */
+    public static function get_redactable_param_names(): array {
+        $setting = get_config('tool_excimer', 'redact_params');
+
+        // Strip C style comments.
+        $setting = preg_replace('!/\*.*?\*/!s', '', $setting);
+
+        $lines = explode(PHP_EOL, $setting);
+
+        // Get the builtin list, and then add the setting list to it.
+        $paramstoredact = self::REDACT_LIST;
+        foreach ($lines as $line) {
+            // Strip # comments, and trim.
+            $line = trim(preg_replace('/#.*$/', '', $line));
+
+            // Ignore empty lines.
+            if ($line === '') {
+                continue;
+            }
+
+            $paramstoredact[] = $line;
+        }
+        return $paramstoredact;
     }
 
     /**
@@ -161,8 +197,6 @@ class script_metadata {
         $request = (new \moodle_url($ME))->out_omit_querystring();
         $request = str_replace($CFG->wwwroot, '', $request);
         $request = ltrim($request, '/');
-        return $request;
-
         return $request;
     }
 
