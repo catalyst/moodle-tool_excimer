@@ -183,4 +183,58 @@ class helper {
         }
         return $displayedrequest;
     }
+
+    /**
+     * Make a single record for a histogram table.
+     * Row is of the form: 2^(k-1) - 2^k : 2^(v-1).
+     *
+     * @param int $durationexponent The exponent (k) of the high end of the duration range.
+     * @param int $count The fuzzy count (v), or zero if no value.
+     * @return array
+     */
+    private static function make_histogram_record(int $durationexponent, int $count): array {
+        $high = pow(2, $durationexponent);
+        $low = ($high === 1) ? 0 : pow(2, $durationexponent - 1);
+        $val = $count ? pow(2, $count - 1) : 0;
+        return [
+            'low'   => $low,
+            'high'  => $high,
+            'value' => $val,
+        ];
+    }
+
+    /**
+     * Create a histogram table for a page group.
+     *
+     * @param \stdClass $record Page group's record.
+     * @return array
+     */
+    public static function make_histogram(\stdClass $record): array {
+        $counts = json_decode($record->fuzzydurationcounts, true);
+        ksort($counts);
+
+        $histogramrecords = [];
+        $durationexponent = 0;
+        // Generate a line for each duration range up to the highest stored in the DB.
+        foreach ($counts as $storeddurationexponent => $fuzzycount) {
+            // Fill in lines that do not have stored values.
+            while ($durationexponent < $storeddurationexponent) {
+                $histogramrecords[] = self::make_histogram_record($durationexponent, 0);
+                ++$durationexponent;
+            }
+            $histogramrecords[] = self::make_histogram_record($storeddurationexponent, $fuzzycount);
+            ++$durationexponent; // Ensures this line is not printed twice.
+        }
+        return $histogramrecords;
+    }
+
+    /**
+     * Formats a monthint value with the mmm YYYY format. (e.g. Dec 2020).
+     *
+     * @param int $monthint
+     * @return string
+     */
+    public static function monthint_formatted(int $monthint): string {
+        return userdate(monthint::as_timestamp($monthint), get_string('strftime_monyear', 'tool_excimer'));
+    }
 }

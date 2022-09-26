@@ -101,7 +101,8 @@ class page_group_table extends \table_sql {
      * @return string
      */
     public function col_name(\stdClass $record): string {
-        return $record->name;
+        $link = new \moodle_url('/admin/tool/excimer/page_group.php', ['id' => $record->id]);
+        return \html_writer::link($link, $record->name);
     }
 
     /**
@@ -111,7 +112,7 @@ class page_group_table extends \table_sql {
      * @return string
      */
     public function col_month(\stdClass $record): string {
-        return userdate(strtotime($record->month . '01'), '%b %Y');
+        return helper::monthint_formatted($record->month);
     }
 
     /**
@@ -125,45 +126,16 @@ class page_group_table extends \table_sql {
     }
 
     /**
-     * Construct a line of the fuzzy duration count column.
-     * Line is of the form 2^(k-1) - 2^k : 2^(v-1).
-     *
-     * @param int $durationexponent The exponent (k) of the high end of the duration range.
-     * @param int $count The fuzzy count (v), or zero if no value.
-     * @return string
-     */
-    private function make_fuzzy_duration_line(int $durationexponent, int $count): string {
-        $high = pow(2, $durationexponent);
-        $low = ($high == 1) ? 0 : pow(2, $durationexponent - 1);
-        $val = $count ? pow(2, $count - 1) : 0;
-        return get_string('fuzzydurationcount_lines', 'tool_excimer', [
-            'low'   => $low,
-            'high'  => $high,
-            'value' => $val,
-        ]);
-    }
-
-    /**
      * Fuzzy duration counts column.
      *
      * @param \stdClass $record
      * @return string
      */
     public function col_fuzzydurationcounts(\stdClass $record): string {
-        $counts = json_decode($record->fuzzydurationcounts, true);
-        ksort($counts);
-
+        $histogram = helper::make_histogram($record);
         $lines = [];
-        $durationexponent = 0;
-        // Generate a line for each duration range up to the highest stored in the DB.
-        foreach ($counts as $storeddurationexponent => $fuzzycount) {
-            // Fill in lines that do not have stored values.
-            while ($durationexponent < $storeddurationexponent) {
-                $lines[] = $this->make_fuzzy_duration_line($durationexponent, 0);
-                ++$durationexponent;
-            }
-            $lines[] = $this->make_fuzzy_duration_line($storeddurationexponent, $fuzzycount);
-            ++$durationexponent; // Ensures this line is not printed twice.
+        foreach ($histogram as $rec) {
+            $lines[] = get_string('fuzzydurationrange', 'tool_excimer', $rec) . ': '. $rec['value'];
         }
         return implode(\html_writer::empty_tag('br'), $lines);
     }
