@@ -39,7 +39,7 @@ class page_group extends persistent {
      * @return int
      */
     public static function get_current_month(): int {
-        return (int) userdate(time(), '%Y%m');
+        return monthint::from_timestamp(time());
     }
 
     /**
@@ -56,8 +56,8 @@ class page_group extends persistent {
     /**
      * Creates a page_group, either from the cache, or fresh.
      *
-     * @param string $name
-     * @param string $month
+     * @param string $name The name of the page group
+     * @param string $month The month, in YYYYMM format.
      * @return page_group
      */
     public static function get_page_group(string $name, string $month): page_group {
@@ -142,8 +142,9 @@ class page_group extends persistent {
      * Records fuzzy count metadata about a page group.
      *
      * @param profile $profile The profile to pull the information from.
+     * @param int|null $month The month to record the profile under, or null to use the current month.
      */
-    public static function record_fuzzy_counts(profile $profile) {
+    public static function record_fuzzy_counts(profile $profile, ?int $month = null) {
         // Do this only if both auto profiling and fuzzy counting is set.
         if (!get_config('tool_excimer', 'enable_auto') ||
             !get_config('tool_excimer', 'enable_fuzzy_count')) {
@@ -151,7 +152,7 @@ class page_group extends persistent {
         }
 
         // Get the profile group record, creating a new one if one does not yet exist.
-        $month = self::get_current_month();
+        $month = $month ?? self::get_current_month();
         $pagegroup = self::get_page_group($profile->get('groupby'), $month);
 
         $existing = $pagegroup->to_record();

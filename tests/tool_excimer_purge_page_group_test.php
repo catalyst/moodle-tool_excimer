@@ -46,14 +46,14 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
 
         $cutoff = 4;
         $months = [
-            (int) userdate(time(), '%Y%m'),
-            (int) userdate(strtotime('1 month ago'), '%Y%m'),
-            (int) userdate(strtotime('2 months ago'), '%Y%m'),
-            (int) userdate(strtotime('3 months ago'), '%Y%m'),
-            (int) userdate(strtotime('4 months ago'), '%Y%m'),
-            (int) userdate(strtotime('5 months ago'), '%Y%m'),
-            (int) userdate(strtotime('6 months ago'), '%Y%m'),
-            (int) userdate(strtotime('7 months ago'), '%Y%m'),
+            monthint::from_timestamp(time()),
+            monthint::from_timestamp(strtotime('1 month ago')),
+            monthint::from_timestamp(strtotime('2 months ago')),
+            monthint::from_timestamp(strtotime('3 months ago')),
+            monthint::from_timestamp(strtotime('4 months ago')),
+            monthint::from_timestamp(strtotime('5 months ago')),
+            monthint::from_timestamp(strtotime('6 months ago')),
+            monthint::from_timestamp(strtotime('7 months ago')),
         ];
         foreach ($months as $month) {
             $DB->insert_record(page_group::TABLE, (object) ['month' => $month, 'fuzzydurationcounts' => '']);
@@ -80,7 +80,7 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
         $this->assertEquals($cutoff + 1, count($records));
 
         // Check that no month stored is earlier than the cutoff month.
-        $cutoffmonth = (int) userdate(strtotime(($cutoff + 1) . ' months ago'), '%Y%m');
+        $cutoffmonth = monthint::from_timestamp(strtotime(($cutoff + 1) . ' months ago'));
         foreach ($records as $record) {
             $this->assertGreaterThan($cutoffmonth, (int) $record->month);
         }

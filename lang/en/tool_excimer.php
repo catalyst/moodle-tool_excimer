@@ -142,6 +142,8 @@ $string['field_pid'] = 'Process ID';
 $string['field_hostname'] = 'Host name';
 $string['field_useragent'] = 'User agent';
 $string['field_versionhash'] = 'Version Hash';
+
+// Page count table.
 $string['field_name'] = 'Name';
 $string['field_month'] = 'Month';
 $string['field_fuzzycount'] = 'Approx. count';
@@ -179,9 +181,18 @@ $string['profile_updated'] = 'Profile updated';
 
 // Time formats.
 $string['strftime_datetime'] = '%d %b %Y, %H:%M';
+$string['strftime_monyear'] = '%b %Y';
 
 // Privacy.
 $string['privacy:metadata:tool_excimer_profiles'] = 'Excimer';
+
+// Approx counting.
+$string['approx_count_algorithm'] = 'approximate counting algorithm';
+$string['fuzzydurationrange'] = '{$a->low} - {$a->high}s';
+
+// Page count.
+$string['months_to_display'] = 'Months to display';
+$string['histogram_history'] = 'Histogram history';
 
 // Miscellaneous.
 $string['cachedef_request_metadata'] = 'Excimer request metadata cache';
@@ -197,8 +208,6 @@ $string['didnotfinish'] = 'Did not finish';
 $string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles that match this filter. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofiles_filter'] = 'Delete all profiles for this filter';
 $string['edit_lock'] = 'Edit lock';
-$string['fuzzydurationcount_lines'] = '{$a->low}-{$a->high}s: {$a->value}';
-$string['approx_count_algorithm'] = 'approximate counting algorithm';
 $string['samples'] = 'samples';
 $string['duration'] = 'duration';
 $string['no_month_in_page_group_table'] = 'Month value not set in page group table.';

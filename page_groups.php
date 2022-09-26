@@ -73,21 +73,13 @@ if (!$table->is_downloading()) {
         $button = $output->render(new \single_button($url, get_string('to_current_month', 'tool_excimer')));
     }
 
-    // Using an integer in YYYYMM format makes it possible to use arithmetic to manipulute the month.
-    // However, if you want to go from Dec to Jan, you need to add 89. To go from Jan to Dec, subtract 89.
-    $prevmonth = $month - 1;
-    if ($prevmonth % 100 === 0) { // Before January.
-        $prevmonth -= 88; // Subtract 1 year, but add 12 months.
-    }
-    $nextmonth = $month + 1;
-    if ($nextmonth % 100 === 13) { // After December.
-        $nextmonth += 88; // Add one year, but subtract 12 months.
-    }
+    $prevmonth = \tool_excimer\monthint::decrement_month($month);
+    $nextmonth = \tool_excimer\monthint::increment_month($month);
 
     $data = [
         'prevurl' => page_group::record_exists_for_month($prevmonth) ?
             new moodle_url('/admin/tool/excimer/page_groups.php', ['month' => $prevmonth]) : null,
-        'month' => userdate(strtotime($month . '01'), '%b %Y'),
+        'month' => helper::monthint_formatted($month),
         'nexturl' => page_group::record_exists_for_month($nextmonth) ?
             new moodle_url('/admin/tool/excimer/page_groups.php', ['month' => $nextmonth]) : null,
         'button' => $button,

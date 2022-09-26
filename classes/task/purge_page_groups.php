@@ -16,6 +16,7 @@
 
 namespace tool_excimer\task;
 
+use tool_excimer\monthint;
 use tool_excimer\page_group;
 
 /**
@@ -47,7 +48,7 @@ class purge_page_groups extends \core\task\scheduled_task {
         $months = get_config('tool_excimer', 'expiry_fuzzy_counts');
         // Only purge if a value is set.
         if (!empty($months)) {
-            $month = userdate(strtotime(($months + 1) . ' months ago'), '%Y%m');
+            $month = monthint::from_timestamp(strtotime(($months + 1) . ' months ago'));
             $DB->delete_records_select(page_group::TABLE, 'month <= ' . $month);
         }
     }
