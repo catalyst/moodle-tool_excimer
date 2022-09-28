@@ -35,6 +35,25 @@ class page_group extends persistent {
     public const CACHE_NAME = 'page_group_metadata';
 
     /**
+     * Returns the current month in YYYYMM format.
+     * @return int
+     */
+    public static function get_current_month(): int {
+        return (int) userdate(time(), '%Y%m');
+    }
+
+    /**
+     * Gets the number of records stored for a paricular month.
+     *
+     * @param int $month
+     * @return bool
+     */
+    public static function record_exists_for_month(int $month): bool {
+        global $DB;
+        return $DB->record_exists(self::TABLE, ['month' => $month]);
+    }
+
+    /**
      * Creates a page_group, either from the cache, or fresh.
      *
      * @param string $name
@@ -132,7 +151,7 @@ class page_group extends persistent {
         }
 
         // Get the profile group record, creating a new one if one does not yet exist.
-        $month = userdate(time() - 360, '%Y%m'); // YYYYMM format.
+        $month = self::get_current_month();
         $pagegroup = self::get_page_group($profile->get('groupby'), $month);
 
         $existing = $pagegroup->to_record();

@@ -32,6 +32,7 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 $download = optional_param('download', '', PARAM_ALPHA);
+$month = optional_param('month', null, PARAM_INT);
 
 $url = new \moodle_url('/admin/tool/excimer/page_groups.php');
 $context = context_system::instance();
@@ -46,6 +47,13 @@ $output = $PAGE->get_renderer('tool_excimer');
 $pluginname = get_string('pluginname', 'tool_excimer');
 
 $table = new page_group_table('page_group_table');
+
+$currentmonth = page_group::get_current_month();
+if (empty($month)) {
+    $month = $currentmonth;
+}
+
+$table->set_month($month);
 $table->sortable(true, 'fuzzydurationsum', SORT_DESC);
 $table->is_downloading($download, 'page_groups', 'group');
 $table->define_baseurl($url);
@@ -59,6 +67,32 @@ if (!$table->is_downloading()) {
 
     $tabs = new tabs($url);
     echo $output->render_tabs($tabs);
+
+    $button = null;
+    if ($month !== $currentmonth) {
+        $button = $output->render(new \single_button($url, get_string('to_current_month', 'tool_excimer')));
+    }
+
+    // Using an integer in YYYYMM format makes it possible to use arithmetic to manipulute the month.
+    // However, if you want to go from Dec to Jan, you need to add 89. To go from Jan to Dec, subtract 89.
+    $prevmonth = $month - 1;
+    if ($prevmonth % 100 === 0) { // Before January.
+        $prevmonth -= 88; // Subtract 1 year, but add 12 months.
+    }
+    $nextmonth = $month + 1;
+    if ($nextmonth % 100 === 13) { // After December.
+        $nextmonth += 88; // Add one year, but subtract 12 months.
+    }
+
+    $data = [
+        'prevurl' => page_group::record_exists_for_month($prevmonth) ?
+            new moodle_url('/admin/tool/excimer/page_groups.php', ['month' => $prevmonth]) : null,
+        'month' => userdate(strtotime($month . '01'), '%b %Y'),
+        'nexturl' => page_group::record_exists_for_month($nextmonth) ?
+            new moodle_url('/admin/tool/excimer/page_groups.php', ['month' => $nextmonth]) : null,
+        'button' => $button,
+    ];
+    echo $output->render_month_selector($data);
 }
 
 $table->out(40, true); // TODO replace with a value from settings.

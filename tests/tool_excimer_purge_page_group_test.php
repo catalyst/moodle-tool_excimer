@@ -36,6 +36,11 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
         $this->resetAfterTest();
     }
 
+    /**
+     * Tests purging of expired page group records.
+     *
+     * @covers \tool_excimer\task\purge_page_groups::execute
+     */
     public function test_purge() {
         global $DB;
 

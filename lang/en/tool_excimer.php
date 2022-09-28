@@ -98,6 +98,12 @@ $string['tab_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['unfinished'] = 'Unfinished';
 $string['tab_page_groups'] = 'Page Groups';
 
+// Month Selector.
+$string['displaying_month'] = 'Displaying month';
+$string['to_current_month'] = 'To current month';
+$string['previous_month'] = 'Previous month';
+$string['next_month'] = 'Next month';
+
 // Profile table.
 $string['field_id'] = 'ID';
 $string['field_type'] = 'Type';
@@ -195,3 +201,4 @@ $string['fuzzydurationcount_lines'] = '{$a->low}-{$a->high}s: {$a->value}';
 $string['approx_count_algorithm'] = 'approximate counting algorithm';
 $string['samples'] = 'samples';
 $string['duration'] = 'duration';
+$string['no_month_in_page_group_table'] = 'Month value not set in page group table.';
