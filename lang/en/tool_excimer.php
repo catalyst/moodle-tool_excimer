@@ -196,6 +196,7 @@ $string['histogram_history'] = 'Histogram history';
 
 // Miscellaneous.
 $string['cachedef_request_metadata'] = 'Excimer request metadata cache';
+$string['cachedef_page_group_metadata'] = 'Excimer page group metadata cache';
 $string['deleteallwarning'] = 'This will remove ALL stored profiles. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofile'] = 'Delete profile';
 $string['deleteprofilewarning'] = 'This will remove the profile. Continue?';
