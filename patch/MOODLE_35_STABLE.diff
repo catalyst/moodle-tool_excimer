@@ -1,0 +1,36 @@
+From e9fe30c8505a7166e2d984e3eded820bcac7e810 Mon Sep 17 00:00:00 2001
+From: Brendan Heywood <brendan@catalyst-au.net>
+Date: Wed, 22 Jun 2022 16:32:05 +1000
+Subject: [PATCH] MDL-75014 core: Add xyz_before_session_start callback
+
+---
+ lib/setup.php | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/lib/setup.php b/lib/setup.php
+index 1326f1327c2..9109c9b6917 100644
+--- a/lib/setup.php
++++ b/lib/setup.php
+@@ -801,6 +801,19 @@ if (CLI_SCRIPT) {
+ if (empty($CFG->sessiontimeout)) {
+     $CFG->sessiontimeout = 8 * 60 * 60;
+ }
++
++// Allow plugins to callback just before the session is started.
++$pluginswithfunction = get_plugins_with_function('before_session_start', 'lib.php');
++foreach ($pluginswithfunction as $plugins) {
++    foreach ($plugins as $function) {
++        try {
++            $function();
++        } catch (Throwable $e) {
++            debugging("Exception calling '$function'", DEBUG_DEVELOPER, $e->getTrace());
++        }
++    }
++}
++
+ \core\session\manager::start();
+ 
+ // Set default content type and encoding, developers are still required to use
+-- 
+2.34.1
+
