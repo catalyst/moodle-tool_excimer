@@ -80,12 +80,17 @@ class manager {
     /**
      * Get manager instance.
      *
+     * @param bool $initialise If true, will initialise the manager upon creation.
+     *
      * @return manager
      * @throws \dml_exception
      */
-    public static function get_instance(): manager {
+    public static function get_instance(bool $initialise = true): manager {
         if (!self::$instance) {
             self::create();
+            if ($initialise) {
+                self::$instance->init();
+            }
         }
         return self::$instance;
     }

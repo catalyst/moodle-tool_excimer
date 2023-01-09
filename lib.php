@@ -28,18 +28,21 @@ use tool_excimer\check\slowest;
 
 /**
  * Hook to run plugin before session start.
+ *
+ * This is to get the timer started for installations that have the MDL-75014 fix (4.1 or later). Otherwise
+ * the timer will be started as a part of tool_excimer_after_config().
  */
 function tool_excimer_before_session_start() {
     // Start plugin.
     $manager = manager::get_instance();
-    $manager->init();
 }
 
 /**
  * Hook to be run after initial site config.
  *
  * This allows the plugin to selectively activate the ExcimerProfiler while
- * having access to the database. It means that the initialisation of the
+ * having access to the database. If the site does not have the MDL-75014 available, then the timer will be
+ * started at this point. It means that the initialisation of the
  * request up to this point will not be captured by the profiler. This
  * eliminates the need for an auto_prepend_file/auto_append_file.
  *
