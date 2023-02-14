@@ -45,6 +45,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      */
     public function test_strip_parameters(string $config, array $params, array $expected) {
         set_config('redact_params', $config, 'tool_excimer');
+        script_metadata::init();
         $this->assertEquals($expected, script_metadata::strip_parameters($params));
     }
 
@@ -89,6 +90,8 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     public function test_get_parameters(string $querystring, string $expected) {
         global $ME;
 
+        script_metadata::init();
+
         $globalme = $ME ?? null;
         $ME = 'abc.php?' . $querystring;
         $params = script_metadata::get_parameters(profile::SCRIPTTYPE_WEB);
@@ -131,6 +134,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param string $expected
      */
     public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected) {
+        script_metadata::init();
         $profile = new profile();
         $profile->set('request', $request);
         $profile->set('pathinfo', $pathinfo);
@@ -165,6 +169,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     public function test_get_sample_limit(int $limit, int $expected) {
         $this->preventResetByRollback();
         set_config('samplelimit', $limit, 'tool_excimer');
+        script_metadata::init();
         $this->assertEquals($expected, script_metadata::get_sample_limit());
     }
 
@@ -193,6 +198,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      */
     public function test_get_redactable_param_names(string $config, array $expected) {
         set_config('redact_params', $config, 'tool_excimer');
+        script_metadata::init();
         $this->assertEquals($expected, script_metadata::get_redactable_param_names());
     }
 

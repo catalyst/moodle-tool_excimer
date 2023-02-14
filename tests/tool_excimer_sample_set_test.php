@@ -177,6 +177,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
      * @covers \tool_excimer\sample_set::add_many_samples
      */
     public function test_event_count() {
+        script_metadata::init();
         $eventcounts = [1, 1, 4, 1, 2, 1];
         $samples1 = [
             $this->get_log_entry_stub(['a'], 0, $eventcounts[0]),

@@ -46,12 +46,6 @@ $cache = \cache::make('tool_excimer', 'request_metadata');
 if ($deleteall) {
     // Clears all profile metadata caches.
     $cache->purge();
-    // Combine all the reasons - so it can be cleared.
-    $combinedreasons = profile::REASON_NONE;
-    foreach (profile::REASONS as $reason) {
-        $combinedreasons |= $reason;
-    }
-    profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
 
     // Delete all profile records.
     $isemptysql = $DB->sql_isempty(profile::TABLE, 'lockreason', true, true);
@@ -66,7 +60,7 @@ if ($deleteid) {
     $profile = $DB->get_record(profile::TABLE, $conditions, 'request, reason, lockreason');
     if (empty($profile->lockreason)) {
         $cache->delete($profile->request);
-        profile_helper::clear_min_duration_cache_for_reason($profile->reason);
+        $cache->delete(profile_helper::ALL_GROUP_CACHE_KEY);
         // Deletes the profile record.
         $DB->delete_records(profile::TABLE, $conditions);
     }
@@ -85,15 +79,8 @@ if ($filter) {
         // affected reasons.
         if (!empty($requests)) {
             $requests = array_keys($requests);
+            $requests[] = profile_helper::ALL_GROUP_CACHE_KEY;
             $cache->delete_many($requests);
-        }
-        if ($reasons) {
-            $reasons = array_keys($reasons);
-            $combinedreasons = profile::REASON_NONE;
-            foreach ($reasons as $reason) {
-                $combinedreasons |= $reason;
-            }
-            profile_helper::clear_min_duration_cache_for_reason($combinedreasons);
         }
 
         $select = [];

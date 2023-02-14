@@ -27,6 +27,26 @@ namespace tool_excimer;
  */
 class profile_helper {
 
+    /** @var string Name used for group of all */
+    public const ALL_GROUP_CACHE_KEY = '__all__';
+
+    /** @var array Limits for storing profiles of a group. */
+    protected static $groupquotas;
+    /** @var array Limits for storing profiles. */
+    protected static $quotas;
+
+    /**
+     * Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
+     */
+    public static function init() {
+        self::$groupquotas = [];
+        self::$quotas = [];
+        foreach (profile::REASON_STR_MAP as $reason => $reasonstr) {
+            self::$groupquotas[$reason] = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
+            self::$quotas[$reason] = (int) get_config('tool_excimer', "num_$reasonstr");
+        }
+    }
+
     /**
      * The number of profiles stored on disk.
      *
@@ -52,10 +72,7 @@ class profile_helper {
      * @return float
      */
     public static function get_min_duration_for_group_and_reason(string $group, int $reason, bool $usecache = true): float {
-        global $DB;
-
-        $reasonstr = profile::REASON_STR_MAP[$reason];
-        $pagequota = (int) get_config('tool_excimer', 'num_' . $reasonstr . '_by_page');
+        $pagequota = self::$groupquotas[$reason];
 
         // Grab the fastest profile for this page/request, and use that as
         // the lower boundary for any new profiles of this page/request.
@@ -69,14 +86,19 @@ class profile_helper {
             // the fact valid profiles will be added and the limits will be
             // breached for 'some time'. This will keep the constraints as
             // correct as possible.
-            $reasons = $DB->sql_bitand('reason', $reason);
+            $db = manager::get_altconnection();
+            if ($db === false) {
+                debugging('tool_excimer: Alt DB connection failed.');
+                return 0;
+            }
+            $reasons = $db->sql_bitand('reason', $reason);
             $sql = "SELECT duration as min_duration
                       FROM {tool_excimer_profiles}
                      WHERE $reasons != ?
                            AND groupby = ?
                   ORDER BY duration DESC
                      ";
-            $resultset = $DB->get_records_sql($sql, [
+            $resultset = $db->get_records_sql($sql, [
                 profile::REASON_NONE,
                 $group,
             ], $pagequota - 1, 1); // Will fetch the Nth item based on the quota.
@@ -104,51 +126,37 @@ class profile_helper {
      * @return float duration (as seconds) of the fastest profile for a given reason.
      */
     public static function get_min_duration_for_reason(int $reason, bool $usecache = true): float {
-        global $DB;
+        $quota = self::$quotas[$reason];
 
-        $reasonstr = profile::REASON_STR_MAP[$reason];
-        $quota = (int) get_config('tool_excimer', "num_$reasonstr");
+        $cachefield = 'profile_type_' . $reason . '_min_duration_s';
+        $cache = \cache::make('tool_excimer', 'request_metadata');
+        $result = $cache->get(self::ALL_GROUP_CACHE_KEY);
 
-        $cachekey = 'profile_type_' . $reason . '_min_duration_s';
-        $result = get_config('tool_excimer', $cachekey);
-
-        if (!$usecache || $result === false) {
+        if (!$usecache || $result === false || !isset($result[$cachefield])) {
             // Get and set cache.
-            $reasons = $DB->sql_bitand('reason', $reason);
+            $db = manager::get_altconnection();
+            if ($db === false) {
+                debugging('tool_excimer: Alt DB connection failed.');
+                return 0;
+            }
+            $reasons = $db->sql_bitand('reason', $reason);
             $sql = "SELECT duration as min_duration
                       FROM {tool_excimer_profiles}
                      WHERE $reasons != ?
                   ORDER BY duration DESC
                      ";
-            $resultset = $DB->get_records_sql($sql, [
+            $resultset = $db->get_records_sql($sql, [
                 profile::REASON_NONE,
             ], $quota - 1, 1); // Will fetch the Nth item based on the quota.
             // Cache the results in (avoids recalculation later).
             $newvalue = (end($resultset)->min_duration ?? 0.0);
             // Updates the cache value if the calculated value is different.
-            if ($result !== $newvalue) {
-                $result = $newvalue;
-                set_config($cachekey, $result, 'tool_excimer');
+            if (!isset($result[$cachefield]) || $result[$cachefield] !== $newvalue) {
+                $result[$cachefield] = $newvalue;
+                $cache->set(self::ALL_GROUP_CACHE_KEY, $result);
             }
         }
-        return (float) $result;
-    }
-
-    /**
-     * Clears the plugin cache for keys used for the provided reasons
-     *
-     * @author Kevin Pham <kevinpham@catalyst-au.net>
-     *
-     * @param int $reason bitmap of reason(s)
-     */
-    public static function clear_min_duration_cache_for_reason(int $reason): void {
-        foreach (profile::REASONS as $basereason) {
-            if ($reason & $basereason) {
-                // Clear the plugin config cache for this profile's reason.
-                $cachekey = 'profile_type_' . $basereason . '_min_duration_s';
-                unset_config($cachekey, 'tool_excimer');
-            }
-        }
+        return (float) $result[$cachefield];
     }
 
     /**
@@ -186,26 +194,12 @@ class profile_helper {
               WHERE created < :cutoff",
             ['cutoff' => $cutoff]
         );
-        $reasons = $DB->get_fieldset_sql(
-            "SELECT DISTINCT reason
-               FROM {tool_excimer_profiles}
-              WHERE created < :cutoff",
-            ['cutoff' => $cutoff]
-        );
+        $groups[] = self::ALL_GROUP_CACHE_KEY;
 
         // Clears the request_metadata cache for the specific groups and
         // affected reasons.
-        if (!empty($groups)) {
-            $cache = \cache::make('tool_excimer', 'request_metadata');
-            $cache->delete_many($groups);
-        }
-        if ($reasons) {
-            $combinedreasons = profile::REASON_NONE;
-            foreach ($reasons as $reason) {
-                $combinedreasons |= $reason;
-            }
-            self::clear_min_duration_cache_for_reason($combinedreasons);
-        }
+        $cache = \cache::make('tool_excimer', 'request_metadata');
+        $cache->delete_many($groups);
 
         // Purge the profiles older than this time as they are no longer
         // relevant, but keep any locked profiles.
@@ -261,8 +255,8 @@ class profile_helper {
             $requests = array_column($profiles, 'request');
             // Note: Slightly faster than array_unique since the values can be used as keys.
             $uniquerequests = array_flip(array_flip($requests));
+            $uniquerequests[] = self::ALL_GROUP_CACHE_KEY;
             $cache->delete_many($uniquerequests);
-            self::clear_min_duration_cache_for_reason($reason);
         }
     }
 

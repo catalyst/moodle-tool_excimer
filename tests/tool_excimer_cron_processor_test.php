@@ -67,6 +67,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         global $DB;
         $this->preventResetByRollback();
 
+        script_metadata::init();
         $processor = new cron_processor();
         $timer = new \ExcimerTimer();
 
@@ -135,4 +136,3 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         $this->assertEquals(1, $records[1]->numsamples);
     }
 }
-
