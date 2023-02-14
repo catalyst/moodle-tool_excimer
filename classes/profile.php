@@ -154,7 +154,7 @@ class profile extends persistent {
         $this->raw_set('versionhash', $CFG->allversionshash);
 
         // Store the sample rate at the time this profile is created.
-        $this->raw_set('samplerate', get_config('tool_excimer', 'sample_ms'));
+        $this->raw_set('samplerate', script_metadata::$samplems);
 
         $this->raw_set('method', $_SERVER['REQUEST_METHOD'] ?? '');
         $this->raw_set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
@@ -184,6 +184,13 @@ class profile extends persistent {
     public function save_record(): int {
         global $DB, $USER;
 
+        $db = manager::get_altconnection();
+        // If a connection cannot be established, we simply do not record.
+        if ($db === false) {
+            debugging('tool_excimer: Not recording due to the lack of a DB connection.');
+            return 0;
+        }
+
         // Get max memory usage.
         $this->raw_set('memoryusagemax', memory_get_peak_usage());
 
@@ -197,22 +204,6 @@ class profile extends persistent {
 
         $this->raw_set('responsecode', http_response_code());
 
-        $intrans = $DB->is_transaction_started();
-
-        if ($intrans) {
-            $cfg = $DB->export_dbconfig();
-            $db2 = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
-            try {
-                $db2->connect($cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
-            } catch (\moodle_exception $e) {
-                // Rather than engage with complex error handling, we choose to simply not record, and move on.
-                debugging('tool_excimer: failed to open second db connection when saving profile: ' . $e->getMessage());
-                return 0;
-            }
-        } else {
-            $db2 = $DB;
-        }
-
         $now = time();
         $this->raw_set('timemodified', $now);
         $this->raw_set('usermodified', $USER->id);
@@ -223,14 +214,10 @@ class profile extends persistent {
 
         if ($this->raw_get('id') <= 0) {
             $this->raw_set('timecreated', $now);
-            $id = $db2->insert_record(self::TABLE, $this->to_record());
+            $id = $db->insert_record(self::TABLE, $this->to_record());
             $this->raw_set('id', $id);
         } else {
-            $db2->update_record(self::TABLE, $this->to_record());
-        }
-
-        if ($intrans) {
-            $db2->dispose();
+            $db->update_record(self::TABLE, $this->to_record());
         }
 
         // NOTE: Does clearing the cache on partial saves make sense? The cache

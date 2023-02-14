@@ -50,6 +50,53 @@ class manager {
     /** @var manager */
     private static $instance;
 
+    /** @var \moodle_database  Database connection for recording excimer profiles. */
+    private static $altconnection = null;
+
+    /**
+     * Provides a database connection for recording profiles. Will create one if it does not exist.
+     *
+     * NOTE for developers. A profile can be processed at any moment, including in the middle of a database query. It is important
+     * to avoid accessing the database using the same connection while processing profiles, as doing this can cause some database
+     * engines to crash.
+     *
+     * @return false|\moodle_database|null
+     */
+    public static function get_altconnection() {
+        global $DB;
+
+        // Do not use an alternate connection during unit tests.
+        if (PHPUNIT_TEST) {
+            return $DB;
+        }
+
+        if (is_null(self::$altconnection)) {
+            $cfg = $DB->export_dbconfig();
+            self::$altconnection = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
+            try {
+                self::$altconnection->connect(
+                    $cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+            } catch (\moodle_exception $e) {
+                // Rather than engage with complex error handling, we choose to simply not record, and move on.
+                debugging('tool_excimer: failed to open second DB connection when saving profile: ' . $e->getMessage());
+                self::$altconnection = false;
+                return false;
+            }
+
+            // Register a shutdown function to dispose of the database. This should run after all the other shutdown functions
+            // registered by this module.
+            \core_shutdown_manager::register_function(
+                function () {
+                    if (!is_null(manager::$altconnection)) {
+                        manager::$altconnection->dispose();
+                        manager::$altconnection = null;
+                    }
+                }
+            );
+        }
+        return self::$altconnection;
+    }
+
     /**
      * Generates the samples for the script.
      *
@@ -111,6 +158,9 @@ class manager {
      */
     public function init() {
         if (!self::is_testing()) {
+            script_metadata::init();
+            profile_helper::init();
+
             $sampleperiod = script_metadata::get_sampling_period();
             $timerinterval = script_metadata::get_timer_interval();
 
@@ -227,7 +277,7 @@ class manager {
     public function get_reasons(profile $profile): int {
         global $SESSION;
         $reason = profile::REASON_NONE;
-        if ((int) $profile->get('maxstackdepth') > (int) script_metadata::get_stack_limit()) {
+        if ((int) $profile->get('maxstackdepth') > script_metadata::get_stack_limit()) {
             $reason |= profile::REASON_STACK;
         }
         if (self::is_flag_set(self::FLAME_ME_PARAM_NAME)) {

@@ -36,6 +36,20 @@ class web_processor implements processor {
     /** @var sample_set */
     protected $memoryusagesampleset;
 
+    /** @var int */
+    protected $minduration;
+    /** @var int */
+    protected $samplems;
+
+    /**
+     * Construct the web processor.
+     */
+    public function __construct() {
+        // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
+        $this->minduration = (float) get_config('tool_excimer', 'trigger_ms') / 1000.0;
+        $this->samplems = (int) get_config('tool_excimer', 'sample_ms');
+    }
+
     /**
      * Initialises the processor
      *
@@ -79,7 +93,7 @@ class web_processor implements processor {
      * @return float
      */
     public function get_min_duration(): float {
-        return (float) get_config('tool_excimer', 'trigger_ms') / 1000.0;
+        return $this->minduration;
     }
 
     /**
@@ -107,7 +121,7 @@ class web_processor implements processor {
             $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
             $this->profile->set('numsamples', $this->sampleset->count());
-            $this->profile->set('samplerate', $this->sampleset->filter_rate() * get_config('tool_excimer', 'sample_ms'));
+            $this->profile->set('samplerate', $this->sampleset->filter_rate() * $this->samplems);
             $this->profile->save_record();
         }
     }

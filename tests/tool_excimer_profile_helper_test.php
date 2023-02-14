@@ -33,6 +33,8 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest();
+        profile_helper::init();
+        script_metadata::init();
     }
 
     /**
@@ -408,6 +410,8 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
         set_config('num_slowest', 4, 'tool_excimer'); // 5 max slowest
         set_config('trigger_ms', 2, 'tool_excimer'); // Should capture anything at least 1ms slow.
         get_config('tool_excimer', 'trigger_ms');
+
+        profile_helper::init();
 
         // Emulate a scenario where all breakpoints are met (request quota, system quota, etc).
         $startreads = $DB->perf_get_reads();

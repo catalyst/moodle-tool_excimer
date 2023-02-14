@@ -39,6 +39,9 @@ class cron_processor implements processor {
     /** @var sample_set A sample set for memory usage recorded while processing a task */
     protected $memoryusagesampleset;
 
+    /** @var int */
+    protected $samplems;
+
     /**
      * Initialises the processor
      *
@@ -50,6 +53,9 @@ class cron_processor implements processor {
         $manager->get_timer()->setCallback(function () use ($manager) {
             $this->on_interval($manager);
         });
+
+        // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
+        $this->samplems = (int) get_config('tool_excimer', 'sample_ms');
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {
@@ -175,7 +181,7 @@ class cron_processor implements processor {
             $profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
             $profile->set('numsamples', $this->tasksampleset->count());
-            $profile->set('samplerate', $this->tasksampleset->filter_rate() * get_config('tool_excimer', 'sample_ms'));
+            $profile->set('samplerate', $this->tasksampleset->filter_rate() * $this->samplems);
             $profile->save_record();
         }
         return $profile;

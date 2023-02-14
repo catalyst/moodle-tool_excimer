@@ -83,6 +83,32 @@ class script_metadata {
     /** Default sample limit. */
     const SAMPLE_LIMIT_DEFAULT = 1024;
 
+    /** @var int Stack limit config. */
+    protected static $stacklimit;
+    /** @var int Sample limit config. */
+    protected static $samplelimit;
+    /** @var int Sampling period */
+    public static $samplems;
+    /** @var string */
+    protected static $redactparams;
+
+    /**
+     * Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
+     */
+    public static function init() {
+        self::$stacklimit = (int) get_config('tool_excimer', 'stacklimit');
+        if (self::$stacklimit <= 0) {
+            self::$stacklimit = self::STACK_DEPTH_LIMIT;
+        }
+
+        self::$samplelimit = (int) get_config('tool_excimer', 'samplelimit');
+        if (self::$samplelimit <= 0) {
+            self::$samplelimit = self::SAMPLE_LIMIT_DEFAULT;
+        }
+        self::$samplems = get_config('tool_excimer', 'sample_ms');
+        self::$redactparams = get_config('tool_excimer', 'redact_params');
+    }
+
     /**
      * Gets the script type of the request.
      *
@@ -157,10 +183,8 @@ class script_metadata {
      * @return string[]
      */
     public static function get_redactable_param_names(): array {
-        $setting = get_config('tool_excimer', 'redact_params');
-
         // Strip C style comments.
-        $setting = preg_replace('!/\*.*?\*/!s', '', $setting);
+        $setting = preg_replace('!/\*.*?\*/!s', '', self::$redactparams);
 
         $lines = explode(PHP_EOL, $setting);
 
@@ -400,11 +424,7 @@ class script_metadata {
      * @throws \dml_exception
      */
     public static function get_sample_limit(): int {
-        $limit = (int) get_config('tool_excimer', 'samplelimit');
-        if ($limit <= 0) {
-            return self::SAMPLE_LIMIT_DEFAULT;
-        }
-        return $limit;
+        return self::$samplelimit;
     }
 
     /**
@@ -413,11 +433,6 @@ class script_metadata {
      * @return integer
      */
     public static function get_stack_limit(): int {
-        $depth = (int) get_config('tool_excimer', 'stacklimit');
-        if ($depth <= 0) {
-            set_config('stacklimit', self::STACK_DEPTH_LIMIT, 'tool_excimer');
-            return self::STACK_DEPTH_LIMIT;
-        }
-        return $depth;
+        return self::$stacklimit;
     }
 }
