@@ -180,10 +180,10 @@ if ($user) {
 $data['lockreason'] = format_text($data['lockreason']);
 $tabs = new tabs($url);
 
-$data['tabs'] = $tabs->export_for_template($output)['tabs'];
 $data['lang'] = get_config('core', 'lang');
 
 echo $output->header();
+echo $output->render_tabs($tabs);
 echo $output->render_from_template('tool_excimer/profile', $data);
 echo $output->render_from_template('tool_excimer/flamegraph', $data);
 echo $output->render_from_template('tool_excimer/memoryusagegraph', $data);
