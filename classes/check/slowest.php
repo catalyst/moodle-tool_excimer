@@ -39,7 +39,7 @@ class slowest extends check {
      * @throws \coding_exception
      */
     public function get_action_link(): ?\action_link {
-        $url = new \moodle_url('/admin/tool/excimer/slowest.php');
+        $url = new \moodle_url('/admin/tool/excimer/slowest_web.php');
         return new \action_link($url, get_string('checkslowest:action', 'tool_excimer'));
     }
 
