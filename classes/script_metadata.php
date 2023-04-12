@@ -346,10 +346,17 @@ class script_metadata {
             if ($params != '') {
                 $val .= '?' . self::redact_parameters($params);
             }
+            if (empty($val)) {
+                // Must always have a groupby value.
+                return '?';
+            }
             return $val;
-        } else {
-            return $request;
         }
+        if (empty($request)) {
+            // Must always have a groupby value.
+            return 'index.php';
+        }
+        return $request;
     }
 
     /**
