@@ -260,6 +260,9 @@ class manager {
      */
     public static function is_cron(): bool {
         global $SCRIPT;
+
+        if (empty($SCRIPT)) { return false; }
+
         return (
             strpos($SCRIPT, 'admin/cli/cron.php') !== false ||
             strpos($SCRIPT, 'admin/cli/adhoc_task.php') !== false ||

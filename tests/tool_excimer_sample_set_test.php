@@ -16,6 +16,8 @@
 
 namespace tool_excimer;
 
+require_once(__DIR__ . "/excimer_testcase.php"); // This is needed. File will not be automatically included.
+
 /**
  * Defines names of plugin types and some strings used at the plugin managment
  *
