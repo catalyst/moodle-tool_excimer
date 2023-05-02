@@ -61,6 +61,12 @@ class tabs implements \templatable {
                     'text' => get_string('tab_slowest_other', 'tool_excimer'),
                 ],
                 [
+                    'id' => 'course',
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/slow_course.php')]],
+                    'title' => get_string('tab_page_course', 'tool_excimer'),
+                    'text' => get_string('tab_page_course', 'tool_excimer'),
+                ],
+                [
                     'id' => 'recent',
                     'link' => [['link' => new \moodle_url('/admin/tool/excimer/recent.php')]],
                     'title' => get_string('report_recent', 'tool_excimer'),

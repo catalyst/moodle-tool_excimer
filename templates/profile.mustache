@@ -53,6 +53,7 @@
         "buffering" : 1,
         "fullname" : "Admin User",
         "userlink" : "https://some.domain://user/profile?id=1",
+        "course": "<a> My course </a>"
     }
 }}
 
@@ -164,6 +165,10 @@
                 <tr>
                     <th>{{#str}} field_dbreplicareads, tool_excimer {{/str}}</th>
                     <td>{{dbreplicareads}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_course, tool_excimer {{/str}}</th>
+                    <td>{{{ course }}}</td>
                 </tr>
             </table>
         </div>

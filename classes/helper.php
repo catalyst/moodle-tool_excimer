@@ -17,6 +17,7 @@
 namespace tool_excimer;
 
 use core_filetypes;
+use moodle_url;
 
 /**
  * Helpers for displaying stuff.
@@ -236,5 +237,37 @@ class helper {
      */
     public static function monthint_formatted(int $monthint): string {
         return userdate(monthint::as_timestamp($monthint), get_string('strftime_monyear', 'tool_excimer'));
+    }
+
+    /**
+     * Returns link HTML which links to the course with corresponding display text.
+     * @param mixed $courseid Id of course, or null. If null, returns an empty string.
+     * @return string html string.
+     */
+    public static function course_display_link($courseid = null): string {
+        if (empty($courseid)) {
+            return '';
+        }
+
+        $url = new moodle_url('/course/view.php', ['id' => $courseid]);
+        return \html_writer::link($url, self::course_display_name($courseid));
+    }
+
+    /**
+     * Returns the display name for a course, even if the course is deleted.
+     * @param int $courseid ID of moodle course
+     * @return string display name
+     */
+    public static function course_display_name(int $courseid): string {
+        global $DB;
+
+        // Try find course name - it's possible it may not exist anymore.
+        $course = $DB->get_record('course', ['id' => $courseid], 'fullname', IGNORE_MISSING);
+
+        if (empty($course)) {
+            return get_string('deletedcourse', 'tool_excimer', $courseid);
+        }
+
+        return $course->fullname;
     }
 }

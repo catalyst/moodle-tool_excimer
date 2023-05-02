@@ -35,6 +35,7 @@ class recent_profile_table extends profile_table {
         'type',
         'duration',
         'userid',
+        'course'
     ];
 
     /**
