@@ -182,7 +182,7 @@ class profile extends persistent {
      * @throws \dml_exception
      */
     public function save_record(): int {
-        global $DB, $USER;
+        global $DB, $USER, $COURSE;
 
         $db = manager::get_altconnection();
         // If a connection cannot be established, we simply do not record.
@@ -210,6 +210,10 @@ class profile extends persistent {
 
         if ($this->check_update_userid($USER->id)) {
             $this->raw_set('userid', $USER->id);
+        }
+
+        if ($this->check_update_courseid($COURSE->id)) {
+            $this->raw_set('courseid', $COURSE->id);
         }
 
         if ($this->raw_get('id') <= 0) {
@@ -275,6 +279,24 @@ class profile extends persistent {
     }
 
     /**
+     * Decide if the course id stored with this profile should be updated with the current $COURSE->id.
+     *
+     * @param int $currentid
+     * @return bool
+     */
+    protected function check_update_courseid(int $currentid): bool {
+        $stored = (int) $this->raw_get('courseid');
+
+        // We may not have obtained a valid courseid when the profile record was created.
+        // If the stored courseid is 0, and there's now a valid $COURSE->id, update the stored courseid.
+        if ($currentid && !$stored) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the slowest profile on record.
      *
      * @return false|mixed The slowest profile, or false if no profiles are stored.
@@ -331,6 +353,7 @@ class profile extends persistent {
             'dbwrites' => ['type' => PARAM_INT, 'default' => 0],
             'dbreplicareads' => ['type' => PARAM_INT, 'default' => 0],
             'lockreason' => ['type' => PARAM_TEXT, 'default' => ''],
+            'courseid' => ['type' => PARAM_INT, 'default' => null]
         ];
     }
 }

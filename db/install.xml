@@ -44,6 +44,7 @@
         <FIELD NAME="memoryusagemax" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum memory usage recorded for this given run. Note that CLI profiles might store the max for previous connected runs within the same process."/>
         <FIELD NAME="samplerate" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Base sample rate at the time the profile was recorded"/>
         <FIELD NAME="lockreason" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Holds reasons for keeping this profile. Any non-empty value will prevent purging."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The id of $COURSE at the time of profiling"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

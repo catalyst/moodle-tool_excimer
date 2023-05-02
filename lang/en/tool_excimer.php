@@ -36,6 +36,7 @@ $string['report_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['report_recent'] = 'Recently profiled';
 $string['report_unfinished'] = 'Currently profiling';
 $string['report_page_groups'] = 'Page Group Metadata';
+$string['report_page_slow_course'] = 'Slow by course';
 
 // Check API.
 $string['checkslowest'] = 'Excimer profiles';
@@ -97,6 +98,7 @@ $string['tab_slowest_web'] = 'Slow web pages';
 $string['tab_slowest_other'] = 'Slow tasks / CLI / WS';
 $string['unfinished'] = 'Unfinished';
 $string['tab_page_groups'] = 'Page Groups';
+$string['tab_page_course'] = 'Courses';
 
 // Month Selector.
 $string['displaying_month'] = 'Displaying month';
@@ -142,6 +144,7 @@ $string['field_pid'] = 'Process ID';
 $string['field_hostname'] = 'Host name';
 $string['field_useragent'] = 'User agent';
 $string['field_versionhash'] = 'Version Hash';
+$string['field_course'] = 'Course';
 
 // Page count table.
 $string['field_name'] = 'Name';
@@ -204,6 +207,8 @@ $string['allprofilesdeleted'] = 'All profiles have been deleted.';
 $string['profiledeleted'] = 'Profile has been deleted.';
 $string['deleteprofiles_script_warning'] = 'This will remove all stored profiles for the script. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['deleteprofiles_script'] = 'Delete all profiles for script';
+$string['deleteprofiles_course'] = 'Delete all profiles for course';
+$string['deleteprofiles_course_warning'] = 'This will remove all stored profiles for the course. Continue?<br/><i>Locked profiles will not be removed.</i>';
 $string['profilesdeleted'] = 'Profiles have been deleted';
 $string['didnotfinish'] = 'Did not finish';
 $string['deleteprofiles_filter_warning'] = 'This will remove all stored profiles that match this filter. Continue?<br/><i>Locked profiles will not be removed.</i>';
@@ -212,3 +217,4 @@ $string['edit_lock'] = 'Edit lock';
 $string['samples'] = 'samples';
 $string['duration'] = 'duration';
 $string['no_month_in_page_group_table'] = 'Month value not set in page group table.';
+$string['deletedcourse'] = 'Deleted course id: {$a}';

@@ -182,6 +182,8 @@ $tabs = new tabs($url);
 
 $data['lang'] = get_config('core', 'lang');
 
+$data['course'] = helper::course_display_link($data['courseid']);
+
 echo $output->header();
 echo $output->render_tabs($tabs);
 echo $output->render_from_template('tool_excimer/profile', $data);

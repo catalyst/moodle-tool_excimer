@@ -249,4 +249,26 @@ class tool_excimer_profile_test extends \advanced_testcase {
             $this->assertTrue((bool) ($recordedreason & $reason));
         }
     }
+
+    /**
+     * Tests $COURSE->id is saved when logging.
+     *
+     * @covers \tool_excimer\profile::save_record
+     */
+    public function test_save_course() {
+        global $COURSE, $DB;
+        $this->preventResetByRollback();
+
+        // Set global $COURSE.
+        $COURSE = $this->getDataGenerator()->create_course();
+
+        // Trigger a log.
+        $log = $this->quick_log(0);
+        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_NONE, 2.345);
+
+        // Ensure the courseid was recorded correctly.
+        $record = $DB->get_record(profile::TABLE, ['id' => $id]);
+        $this->assertNotEmpty($record);
+        $this->assertSame($COURSE->id, $record->courseid);
+    }
 }
