@@ -33,6 +33,8 @@ class tool_excimer_profile_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();
         $this->resetAfterTest();
+        profile_helper::init();
+        script_metadata::init();
     }
 
     /**

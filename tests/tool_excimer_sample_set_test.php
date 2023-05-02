@@ -16,6 +16,10 @@
 
 namespace tool_excimer;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . "/excimer_testcase.php");
+
 /**
  * Defines names of plugin types and some strings used at the plugin managment
  *
