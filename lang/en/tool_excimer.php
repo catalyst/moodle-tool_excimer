@@ -115,7 +115,7 @@ $string['field_contenttypecategory'] = 'Content Type (category)';
 $string['field_contenttypekey'] = 'Content Type (extension/key)';
 $string['field_contenttypevalue'] = 'Content Type (actual value)';
 $string['field_reason'] = 'Reason';
-$string['field_group'] = 'Group';
+$string['field_scriptgroup'] = 'Script group';
 $string['field_created'] = 'Created';
 $string['field_finished'] = 'Finished';
 $string['field_userid'] = 'User';
@@ -144,7 +144,7 @@ $string['field_pid'] = 'Process ID';
 $string['field_hostname'] = 'Host name';
 $string['field_useragent'] = 'User agent';
 $string['field_versionhash'] = 'Version Hash';
-$string['field_course'] = 'Course';
+$string['field_courseid'] = 'Course';
 
 // Page count table.
 $string['field_name'] = 'Name';

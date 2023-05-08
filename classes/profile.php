@@ -163,7 +163,7 @@ class profile extends persistent {
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
         $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
         $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
-        $this->raw_set('groupby', script_metadata::get_groupby_value($this));
+        $this->raw_set('scriptgroup', script_metadata::get_groupby_value($this));
 
         list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
         $this->raw_set('contenttypevalue', $contenttypevalue);
@@ -235,7 +235,7 @@ class profile extends persistent {
 
         // Updates the request_metadata and per reason cache with more recent values.
         if ($this->get('reason') & self::REASON_SLOW) {
-            profile_helper::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
+            profile_helper::get_min_duration_for_group_and_reason($this->get('scriptgroup'), self::REASON_SLOW, false);
             profile_helper::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
@@ -326,7 +326,7 @@ class profile extends persistent {
             'finished' => ['type' => PARAM_INT, 'default' => 0],
             'duration' => ['type' => PARAM_FLOAT, 'default' => 0],
             'request' => ['type' => PARAM_TEXT, 'default' => ''],
-            'groupby' => ['type' => PARAM_TEXT, 'default' => ''],
+            'scriptgroup' => ['type' => PARAM_TEXT, 'default' => ''],
             'pathinfo' => ['type' => PARAM_SAFEPATH, 'default' => ''],
             'parameters' => ['type' => PARAM_TEXT, 'default' => ''],
             'sessionid' => ['type' => PARAM_ALPHANUM, 'default' => ''],

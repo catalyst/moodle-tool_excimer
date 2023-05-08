@@ -421,7 +421,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022091500, 'tool', 'excimer');
     }
 
-    if ($oldversion < 2023050400) {
+    if ($oldversion < 2023050800) {
 
         // Define field id to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
@@ -432,8 +432,16 @@ function xmldb_tool_excimer_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
+        // Rename groupby to scriptgroup.
+        $field = new xmldb_field('groupby', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'request');
+
+        // Launch rename field scriptgroup.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'scriptgroup');
+        }
+
         // Excimer savepoint reached.
-        upgrade_plugin_savepoint(true, 2023050400, 'tool', 'excimer');
+        upgrade_plugin_savepoint(true, 2023050800, 'tool', 'excimer');
     }
 
     return true;

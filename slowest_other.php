@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\grouped_profile_table;
+use tool_excimer\grouped_script_profile_table;
 use tool_excimer\profile;
 use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
@@ -48,12 +48,12 @@ if ($script || $group) {
         $url->params(['script' => $script]);
     }
     if ($group) {
-        $table->add_filter('groupby', $group);
+        $table->add_filter('scriptgroup', $group);
         $url->params(['group' => $group]);
         $PAGE->navbar->add($group);
     }
 } else {
-    $table = new grouped_profile_table('profile_table_slowest_other');
+    $table = new grouped_script_profile_table('profile_table_slowest_other');
     $table->set_url_path($url);
     $table->sortable(true, 'maxduration', SORT_DESC);
 }

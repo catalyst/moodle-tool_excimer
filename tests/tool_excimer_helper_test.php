@@ -27,17 +27,11 @@ namespace tool_excimer;
  */
 class tool_excimer_helper_test extends \advanced_testcase {
     /**
-     * Set up before each test
-     */
-    protected function setUp(): void {
-        parent::setUp();
-        $this->resetAfterTest();
-    }
-
-    /**
      * Tests course_display_name function
      */
     public function test_course_display_name() {
+        $this->resetAfterTest(true);
+
         // Test with real course.
         $course = $this->getDataGenerator()->create_course();
         $this->assertEquals($course->fullname, helper::course_display_name($course->id));
@@ -51,11 +45,13 @@ class tool_excimer_helper_test extends \advanced_testcase {
      * Tests course_display_link function
      */
     public function test_course_display_link() {
-         // Test with real course.
-         $course = $this->getDataGenerator()->create_course();
-         $this->assertNotEmpty(helper::course_display_link($course->id));
+        $this->resetAfterTest(true);
 
-         // Test with null (should return empty string).
-         $this->assertEquals('', helper::course_display_link());
+        // Test with real course.
+        $course = $this->getDataGenerator()->create_course();
+        $this->assertNotEmpty(helper::course_display_link($course->id));
+
+        // Test with null (should return empty string).
+        $this->assertEquals('', helper::course_display_link());
     }
 }

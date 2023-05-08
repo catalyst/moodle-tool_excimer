@@ -35,7 +35,7 @@ class profile_table extends \table_sql {
         'type',
         'created',
         'userid',
-        'course',
+        'courseid',
     ];
 
     /** Columns to be displayed, but not sorted. */
@@ -376,7 +376,7 @@ class profile_table extends \table_sql {
      * @param \stdClass $record
      * @return string
      */
-    public function col_course(\stdClass $record) {
+    public function col_courseid(\stdClass $record) {
         return helper::course_display_link($record->courseid);
     }
 }

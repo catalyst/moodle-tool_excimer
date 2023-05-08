@@ -126,7 +126,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     /**
      * Test script_metadata::get_groupby_value().
      *
-     * @dataProvider group_by_value_provider
+     * @dataProvider scriptgroup_value_provider
      * @covers \tool_excimer\script_metadata::get_groupby_value
      * @param string $request
      * @param string $pathinfo
@@ -148,7 +148,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      *
      * @return \string[][]
      */
-    public function group_by_value_provider(): array {
+    public function scriptgroup_value_provider(): array {
         return [
             ['admin/index.php', '', '', 'admin/index.php'],
             ['admin/index.php', '/a/54/c', '', 'admin/index.php/a/x/c'],
