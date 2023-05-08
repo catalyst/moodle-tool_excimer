@@ -17,37 +17,35 @@
 namespace tool_excimer;
 
 /**
- * Display table for profile report index page.
+ * Table for displaying profiles grouped by course.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
+ * @copyright 2023, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class recent_profile_table extends profile_table {
-
-    /** Columns to be displayed */
-    const COLUMNS = [
-        'created',
-        'responsecode',
-        'request',
-        'reason',
-        'type',
-        'duration',
-        'userid',
-        'courseid'
-    ];
+class grouped_courses_profile_table extends grouped_profile_table {
+    /**
+     * Group by courseid.
+     */
+    protected function get_group_by(): string {
+        return 'courseid';
+    }
 
     /**
-     * returns the columns defined for the table.
+     * Course column.
      *
-     * @return string[]
+     * @param \stdClass $record
+     * @return string
      */
-    protected function get_columns(): array {
-        $columns = self::COLUMNS;
-        if (!$this->is_downloading()) {
-            $columns[] = 'actions';
+    public function col_courseid(\stdClass $record): string {
+        // This should always be set, but still double check.
+        if (empty($record->courseid)) {
+            return '';
         }
-        return $columns;
+
+        // Create a drill-down url for this course instead of linking to the course itself.
+        $url = new \moodle_url($this->urlpath, ['courseid' => $record->courseid]);
+        return \html_writer::link($url, helper::course_display_name($record->courseid));
     }
 }

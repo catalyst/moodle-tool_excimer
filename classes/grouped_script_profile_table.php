@@ -17,37 +17,41 @@
 namespace tool_excimer;
 
 /**
- * Display table for profile report index page.
+ * Table for displaying profiles grouped by script.
  *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class recent_profile_table extends profile_table {
-
-    /** Columns to be displayed */
-    const COLUMNS = [
-        'created',
-        'responsecode',
-        'request',
-        'reason',
-        'type',
-        'duration',
-        'userid',
-        'courseid'
-    ];
+class grouped_script_profile_table extends grouped_profile_table {
+    /**
+     * Group by 'scriptgroup'
+     */
+    protected function get_group_by(): string {
+        return 'scriptgroup';
+    }
 
     /**
-     * returns the columns defined for the table.
+     * Profile group column.
      *
-     * @return string[]
+     * @param \stdClass $record
+     * @return string
      */
-    protected function get_columns(): array {
-        $columns = self::COLUMNS;
-        if (!$this->is_downloading()) {
-            $columns[] = 'actions';
+    public function col_scriptgroup(\stdClass $record): string {
+        $displayedvalue = $record->scriptgroup;
+
+        if ($this->is_downloading()) {
+            return $displayedvalue;
+        } else {
+            $url = clone $this->urlpath;
+            $url->param('group', $record->scriptgroup);
+            return \html_writer::link(
+                $url,
+                shorten_text($displayedvalue, 100, true, '…'),
+                ['title' => $displayedvalue, 'style' => 'word-break: break-all']
+            );
         }
-        return $columns;
     }
 }

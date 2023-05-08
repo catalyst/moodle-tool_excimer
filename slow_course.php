@@ -24,9 +24,9 @@
 
 use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
-use tool_excimer\slow_course_table;
+use tool_excimer\grouped_courses_profile_table;
 
-require_once('../../../config.php');
+require_once(__DIR__.'/../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -44,7 +44,7 @@ if ($courseid) {
     $PAGE->navbar->add($courseid);
 } else {
     // Else show profiles grouped by each course, 1 course per row.
-    $table = new slow_course_table('profile_table_slow_course');
+    $table = new grouped_courses_profile_table('profile_table_slow_course');
     $table->set_url_path($url);
     $table->sortable(true, 'maxduration', SORT_DESC);
 }

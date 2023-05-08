@@ -17,7 +17,6 @@
 namespace tool_excimer;
 
 use core_filetypes;
-use moodle_url;
 
 /**
  * Helpers for displaying stuff.
@@ -249,7 +248,7 @@ class helper {
             return '';
         }
 
-        $url = new moodle_url('/course/view.php', ['id' => $courseid]);
+        $url = new \moodle_url('/course/view.php', ['id' => $courseid]);
         return \html_writer::link($url, self::course_display_name($courseid));
     }
 

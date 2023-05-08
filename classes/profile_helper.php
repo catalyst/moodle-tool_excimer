@@ -95,7 +95,7 @@ class profile_helper {
             $sql = "SELECT duration as min_duration
                       FROM {tool_excimer_profiles}
                      WHERE $reasons != ?
-                           AND groupby = ?
+                           AND scriptgroup = ?
                   ORDER BY duration DESC
                      ";
             $resultset = $db->get_records_sql($sql, [
@@ -186,10 +186,10 @@ class profile_helper {
     public static function purge_profiles_before_epoch_time(int $cutoff): void {
         global $DB;
 
-        // Fetch unique groupby and reasons that will be purged by the cutoff
+        // Fetch unique scriptgroup and reasons that will be purged by the cutoff
         // datetime, so that we can selectively clear the cache.
         $groups = $DB->get_fieldset_sql(
-            "SELECT DISTINCT groupby
+            "SELECT DISTINCT scriptgroup
                FROM {tool_excimer_profiles}
               WHERE created < :cutoff",
             ['cutoff' => $cutoff]
@@ -273,7 +273,7 @@ class profile_helper {
 
         $purgablereasons = $DB->sql_bitand('reason', profile::REASON_SLOW);
         $records = $DB->get_records_sql(
-            "SELECT id, groupby, reason, lockreason
+            "SELECT id, scriptgroup, reason, lockreason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
            ORDER BY duration ASC
@@ -282,12 +282,12 @@ class profile_helper {
 
         // Group profiles by request / page.
         $groupedprofiles = array_reduce($records, function ($acc, $record) {
-            $acc[$record->groupby] = $acc[$record->groupby] ?? [
+            $acc[$record->scriptgroup] = $acc[$record->scriptgroup] ?? [
                 'count' => 0,
                 'profiles' => [],
             ];
-            $acc[$record->groupby]['count']++;
-            $acc[$record->groupby]['profiles'][] = $record;
+            $acc[$record->scriptgroup]['count']++;
+            $acc[$record->scriptgroup]['profiles'][] = $record;
             return $acc;
         }, []);
 

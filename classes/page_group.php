@@ -153,7 +153,7 @@ class page_group extends persistent {
 
         // Get the profile group record, creating a new one if one does not yet exist.
         $month = $month ?? self::get_current_month();
-        $pagegroup = self::get_page_group($profile->get('groupby'), $month);
+        $pagegroup = self::get_page_group($profile->get('scriptgroup'), $month);
 
         $existing = $pagegroup->to_record();
 

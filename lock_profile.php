@@ -57,8 +57,8 @@ if ($data = $form->get_data()) {
     $form->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);
 }
 
-$prevurl = new moodle_url('/admin/tool/excimer/' . $reporttype. '.php', ['group' => $profile->get('groupby')]);
-$PAGE->navbar->add($profile->get('groupby'), $prevurl);
+$prevurl = new moodle_url('/admin/tool/excimer/' . $reporttype. '.php', ['group' => $profile->get('scriptgroup')]);
+$PAGE->navbar->add($profile->get('scriptgroup'), $prevurl);
 
 $profileurl = new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $profileid]);
 $PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'), $profileurl);

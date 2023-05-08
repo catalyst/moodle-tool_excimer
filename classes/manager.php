@@ -327,7 +327,8 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = profile_helper::get_min_duration_for_group_and_reason($profile->get('groupby'), profile::REASON_SLOW);
+        $requestminduration = profile_helper::get_min_duration_for_group_and_reason($profile->get('scriptgroup'),
+            profile::REASON_SLOW);
         if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }
