@@ -261,7 +261,9 @@ class manager {
     public static function is_cron(): bool {
         global $SCRIPT;
 
-        if (empty($SCRIPT)) { return false; }
+        if (empty($SCRIPT)) {
+            return false;
+        }
 
         return (
             strpos($SCRIPT, 'admin/cli/cron.php') !== false ||
