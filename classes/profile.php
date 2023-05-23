@@ -163,7 +163,7 @@ class profile extends persistent {
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
         $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
         $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
-        $this->raw_set('groupby', script_metadata::get_groupby_value($this));
+        $this->raw_set('scriptgroup', script_metadata::get_groupby_value($this));
 
         list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
         $this->raw_set('contenttypevalue', $contenttypevalue);
@@ -182,7 +182,7 @@ class profile extends persistent {
      * @throws \dml_exception
      */
     public function save_record(): int {
-        global $DB, $USER;
+        global $DB, $USER, $COURSE;
 
         $db = manager::get_altconnection();
         // If a connection cannot be established, we simply do not record.
@@ -212,6 +212,10 @@ class profile extends persistent {
             $this->raw_set('userid', $USER->id);
         }
 
+        if ($this->check_update_courseid($COURSE->id)) {
+            $this->raw_set('courseid', $COURSE->id);
+        }
+
         if ($this->raw_get('id') <= 0) {
             $this->raw_set('timecreated', $now);
             $id = $db->insert_record(self::TABLE, $this->to_record());
@@ -231,7 +235,7 @@ class profile extends persistent {
 
         // Updates the request_metadata and per reason cache with more recent values.
         if ($this->get('reason') & self::REASON_SLOW) {
-            profile_helper::get_min_duration_for_group_and_reason($this->get('groupby'), self::REASON_SLOW, false);
+            profile_helper::get_min_duration_for_group_and_reason($this->get('scriptgroup'), self::REASON_SLOW, false);
             profile_helper::get_min_duration_for_reason(self::REASON_SLOW, false);
         }
 
@@ -275,6 +279,24 @@ class profile extends persistent {
     }
 
     /**
+     * Decide if the course id stored with this profile should be updated with the current $COURSE->id.
+     *
+     * @param int $currentid
+     * @return bool
+     */
+    protected function check_update_courseid(int $currentid): bool {
+        $stored = (int) $this->raw_get('courseid');
+
+        // We may not have obtained a valid courseid when the profile record was created.
+        // If the stored courseid is 0, and there's now a valid $COURSE->id, update the stored courseid.
+        if ($currentid && !$stored) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the slowest profile on record.
      *
      * @return false|mixed The slowest profile, or false if no profiles are stored.
@@ -304,7 +326,7 @@ class profile extends persistent {
             'finished' => ['type' => PARAM_INT, 'default' => 0],
             'duration' => ['type' => PARAM_FLOAT, 'default' => 0],
             'request' => ['type' => PARAM_TEXT, 'default' => ''],
-            'groupby' => ['type' => PARAM_TEXT, 'default' => ''],
+            'scriptgroup' => ['type' => PARAM_TEXT, 'default' => ''],
             'pathinfo' => ['type' => PARAM_SAFEPATH, 'default' => ''],
             'parameters' => ['type' => PARAM_TEXT, 'default' => ''],
             'sessionid' => ['type' => PARAM_ALPHANUM, 'default' => ''],
@@ -331,6 +353,7 @@ class profile extends persistent {
             'dbwrites' => ['type' => PARAM_INT, 'default' => 0],
             'dbreplicareads' => ['type' => PARAM_INT, 'default' => 0],
             'lockreason' => ['type' => PARAM_TEXT, 'default' => ''],
+            'courseid' => ['type' => PARAM_INT, 'default' => null]
         ];
     }
 }

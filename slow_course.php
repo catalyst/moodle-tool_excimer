@@ -15,49 +15,38 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Slowest Excimer profiling data in a table.
- *
+ * Excimer profiling data grouped by course in a table.
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
+ * @copyright 2023, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\grouped_script_profile_table;
-use tool_excimer\profile;
 use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
+use tool_excimer\grouped_courses_profile_table;
 
-require_once('../../../config.php');
+require_once(__DIR__.'/../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-// The script can either be a URL, or a task name, or whatever may be used
-// for a request name. So we need to accept TEXT input.
-$script = optional_param('script', '', PARAM_TEXT);
-$group = optional_param('group', '', PARAM_TEXT);
+$courseid = optional_param('courseid', 0, PARAM_INT);
 
-admin_externalpage_setup('tool_excimer_report_slowest_web');
+admin_externalpage_setup('tool_excimer_report_page_slow_course');
 
-$url = new moodle_url('/admin/tool/excimer/slowest_web.php');
+$url = new moodle_url('/admin/tool/excimer/slow_course.php');
 
-if ($script || $group) {
-    $table = new profile_table('profile_table_slowest_web');
+if ($courseid) {
+    // If courseid given, show profiles only for this course.
+    $table = new profile_table('profile_table_slow_course');
     $table->sortable(true, 'duration', SORT_DESC);
-    if ($script) {
-        $table->add_filter('request', $script);
-        $url->params(['script' => $script]);
-    }
-    if ($group) {
-        $table->add_filter('scriptgroup', $group);
-        $url->params(['group' => $group]);
-        $PAGE->navbar->add($group);
-    }
+    $table->add_filter('courseid', $courseid);
+    $url->params(['courseid' => $courseid]);
+    $PAGE->navbar->add($courseid);
 } else {
-    $table = new grouped_script_profile_table('profile_table_slowest_web');
+    // Else show profiles grouped by each course, 1 course per row.
+    $table = new grouped_courses_profile_table('profile_table_slow_course');
     $table->set_url_path($url);
     $table->sortable(true, 'maxduration', SORT_DESC);
 }
-
-$table->set_scripttypes([profile::SCRIPTTYPE_WEB]);
 
 profile_table_page::display($table, $url);

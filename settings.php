@@ -266,4 +266,14 @@ if ($hassiteconfig) {
             'moodle/site:config'
         )
     );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_report_page_slow_course',
+            get_string('report_page_slow_course', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/slow_course.php'),
+            'moodle/site:config'
+        )
+    );
 }

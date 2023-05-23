@@ -19,17 +19,21 @@ namespace tool_excimer;
 /**
  * Table for displaying grouped profile lists.
  *
+ * Subclasses extending this class only need to implement the get_group_by() function.
+ * This adds a column by the same name, and updates the SQL to group by this column in the tool_excimer_profiles table.
+ * For more complex cases, subclasses can also overwrite put_sql()
+ *
  * @package   tool_excimer
  * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
+ * @author    Matthew Hilton <matthewhilton@catalyst-au.net>
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class grouped_profile_table extends profile_table {
+abstract class grouped_profile_table extends profile_table {
 
-    /** Columns to be displayed. */
+    /** Columns to be displayed.*/
     const COLUMNS = [
         'maxduration',
-        'group',
         'requestcount',
         'maxcreated',
         'mincreated',
@@ -49,10 +53,14 @@ class grouped_profile_table extends profile_table {
     }
 
     /**
+     * Returns what column in the tool_excimer_profiles is used to group the profiles by.
+     */
+    abstract protected function get_group_by(): string;
+
+    /**
      * Sets the SQL for the table.
      */
     protected function put_sql(): void {
-
         list($filterstring, $filterparams) = $this->get_filter_for_sql();
 
         $this->set_count_sql(
@@ -62,13 +70,15 @@ class grouped_profile_table extends profile_table {
             $filterparams
         );
 
-        $filterstring .= " GROUP BY groupby, scripttype";
+        $groupby = $this->get_group_by();
+
+        $filterstring .= " AND " . $groupby . " IS NOT NULL GROUP BY " . $groupby;
         $this->set_sql(
-            'groupby, count(request) as requestcount, scripttype, max(created) as maxcreated, min(created) as mincreated,
-             max(duration) as maxduration, min(duration) as minduration',
-            '{tool_excimer_profiles}',
-            $filterstring,
-            $filterparams
+            $groupby . ', COUNT(request) as requestcount, MAX(created) as maxcreated, MIN(created) as mincreated,
+            MAX(duration) as maxduration, MIN(duration) as minduration',
+           '{tool_excimer_profiles}',
+           $filterstring,
+           $filterparams
         );
     }
 
@@ -78,33 +88,15 @@ class grouped_profile_table extends profile_table {
      * @return string[]
      */
     protected function get_columns(): array {
-        $columns = self::COLUMNS;
+        $columns = array_merge(
+            [$this->get_group_by()],
+            $this::COLUMNS
+        );
+
         if (!$this->is_downloading()) {
             $columns[] = 'actions';
         }
         return $columns;
-    }
-
-    /**
-     * Profile group column.
-     *
-     * @param \stdClass $record
-     * @return string
-     */
-    public function col_group(\stdClass $record): string {
-        $displayedvalue = $record->groupby;
-
-        if ($this->is_downloading()) {
-            return $displayedvalue;
-        } else {
-            $url = clone $this->urlpath;
-            $url->param('group', $record->groupby);
-            return \html_writer::link(
-                $url,
-                shorten_text($displayedvalue, 100, true, '…'),
-                ['title' => $displayedvalue, 'style' => 'word-break: break-all']
-            );
-        }
     }
 
     /**
@@ -158,8 +150,12 @@ class grouped_profile_table extends profile_table {
             return '';
         }
         global $OUTPUT;
+
+        $groupby = $this->get_group_by();
+        $filter = json_encode([$groupby => $record->$groupby]);
+
         $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php',
-                ['filter' => json_encode(['groupby' => $record->groupby]), 'sesskey' => sesskey()]);
+                ['filter' => $filter, 'sesskey' => sesskey()]);
         $confirmaction = new \confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
         $deleteicon = new \pix_icon('t/delete', get_string('deleteprofiles_script', 'tool_excimer'));
         $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);

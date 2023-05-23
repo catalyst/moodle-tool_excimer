@@ -83,8 +83,8 @@ $url = new moodle_url("/admin/tool/excimer/index.php");
 
 $profile = new profile($profileid);
 
-$prevurl = new moodle_url('/admin/tool/excimer/' . $report. '.php', ['group' => $profile->get('groupby')]);
-$PAGE->navbar->add($profile->get('groupby'), $prevurl);
+$prevurl = new moodle_url('/admin/tool/excimer/' . $report. '.php', ['group' => $profile->get('scriptgroup')]);
+$PAGE->navbar->add($profile->get('scriptgroup'), $prevurl);
 
 $PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'));
 $PAGE->set_title($pluginname);
@@ -181,6 +181,8 @@ $data['lockreason'] = format_text($data['lockreason']);
 $tabs = new tabs($url);
 
 $data['lang'] = get_config('core', 'lang');
+
+$data['course'] = helper::course_display_link($data['courseid']);
 
 echo $output->header();
 echo $output->render_tabs($tabs);
