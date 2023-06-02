@@ -81,7 +81,7 @@ class profile_helper {
         $cache = \cache::make('tool_excimer', 'request_metadata');
         $result = $cache->get($cachekey) ?: array();
 
-        if (!$usecache || $result === false || !isset($result[$cachefield])) {
+        if (!$usecache || empty($result) || !isset($result[$cachefield])) {
             // NOTE: Opting to query this way instead of using MIN due to
             // the fact valid profiles will be added and the limits will be
             // breached for 'some time'. This will keep the constraints as
@@ -132,7 +132,7 @@ class profile_helper {
         $cache = \cache::make('tool_excimer', 'request_metadata');
         $result = $cache->get(self::ALL_GROUP_CACHE_KEY) ?: array();
 
-        if (!$usecache || $result === false || !isset($result[$cachefield])) {
+        if (!$usecache || empty($result) || !isset($result[$cachefield])) {
             // Get and set cache.
             $db = manager::get_altconnection();
             if ($db === false) {
