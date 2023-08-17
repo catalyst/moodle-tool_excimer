@@ -1,6 +1,8 @@
-# moodle-tool_excimer
+<a href="https://github.com/catalyst/moodle-tool_excimer/actions/workflows/ci.yml?query=branch%3AMOODLE_35_STABLE">
+<img src="https://github.com/catalyst/moodle-tool_excimer/workflows/ci/badge.svg?branch=MOODLE_35_STABLE">
+</a>
 
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-tool_excimer/ci/MOODLE_35_STABLE)
+# moodle-tool_excimer
 
 * [What is this plugin?](#what-is-this-plugin)
 * [What this plugin is not](#what-this-plugin-is-not)
