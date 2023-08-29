@@ -444,5 +444,20 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023050800, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2023082900) {
+
+        // Define field id to be changed in tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('referer', XMLDB_TYPE_TEXT, null, null, false);
+
+        // Conditionally change the referer field.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2023082900, 'tool', 'excimer');
+    }
+
     return true;
 }
