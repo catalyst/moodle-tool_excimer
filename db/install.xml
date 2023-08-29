@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/excimer/db" VERSION="20230216" COMMENT="XMLDB file for Moodle admin/tool/excimer"
+<XMLDB PATH="admin/tool/excimer/db" VERSION="20230829" COMMENT="XMLDB file for Moodle admin/tool/excimer"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -23,7 +23,7 @@
         <FIELD NAME="cookies" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Are any cookies set?"/>
         <FIELD NAME="buffering" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Is buffering set?"/>
         <FIELD NAME="responsecode" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="HTTP response code, or 0/1 for command line"/>
-        <FIELD NAME="referer" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Refering URL, if any"/>
+        <FIELD NAME="referer" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Refering URL, if any"/>
         <FIELD NAME="pid" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Process ID"/>
         <FIELD NAME="hostname" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Host name (empty for CLI scripts)"/>
         <FIELD NAME="useragent" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="User agent (empty for CLI scripts)"/>
