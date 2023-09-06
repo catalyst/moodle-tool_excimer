@@ -59,7 +59,9 @@ class web_processor implements processor {
         // Record and set initial memory usage at this point.
         $memoryusage = memory_get_usage();
 
-        $request = script_metadata::get_request();
+        global $ME, $SCRIPT;
+
+        $request = script_metadata::get_normalised_relative_script_path($ME, $SCRIPT);
         $starttime = (int) $manager->get_starttime();
         $this->sampleset = new sample_set($request, $starttime);
 

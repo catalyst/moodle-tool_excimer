@@ -205,23 +205,40 @@ class script_metadata {
     }
 
     /**
-     * Gets the name of the script.
-     *
+     * Gets the name of the script. Parameters share the names of globals as a hint to the caller.
+     * @param string|null $me
+     * @param string|null $script
      * @return string the request path for this profile.
      */
-    public static function get_request(): string {
-        global $SCRIPT, $ME, $CFG;
-
-        if (!isset($ME)) {
-            // If set, it will trim off the leading '/' to normalise web & cli requests.
-            $request = isset($SCRIPT) ? ltrim($SCRIPT, '/') : self::REQUEST_UNKNOWN;
-            return $request;
+    public static function get_normalised_relative_script_path($me, $script): string {
+        if (isset($me)) {
+            $scriptpath = $me;
+        } else if (isset($script)) {
+            $scriptpath = $script;
+        } else {
+            return self::REQUEST_UNKNOWN;
         }
 
-        $request = (new \moodle_url($ME))->out_omit_querystring();
-        $request = str_replace($CFG->wwwroot, '', $request);
-        $request = ltrim($request, '/');
-        return $request;
+        // Remove consecutive slashes.
+        $scriptpath = preg_replace('/\/+/', '/', $scriptpath);
+
+        // Strip pathinfo.
+        $scriptpath = preg_replace('/\.php.*$/', '.php', $scriptpath, 1);
+
+        // Strip off the query string ($ME includes this).
+        $scriptpath = preg_replace('/\?.*$/', '', $scriptpath);
+
+        // Remove 'index.php' from the end ($SCRIPT includes this).
+        $scriptpath = preg_replace('/\/index\.php$/', '', $scriptpath, 1);
+
+        // Remove leading and trailing slashes.
+        $scriptpath = trim($scriptpath, '/');
+
+        if ($scriptpath === '') {
+            return '/';
+        }
+
+        return $scriptpath;
     }
 
     /**
@@ -401,7 +418,7 @@ class script_metadata {
     public static function get_sampling_period(): float {
         $period = get_config('tool_excimer', 'sample_ms') / 1000;
         $insensiblerange = $period >= self::SAMPLING_PERIOD_MIN && $period <= self::SAMPLING_PERIOD_MAX;
-        if (! $insensiblerange) {
+        if (!$insensiblerange) {
             set_config('sample_ms', self::SAMPLING_PERIOD_DEFAULT * 1000, 'tool_excimer');
             $period = self::SAMPLING_PERIOD_DEFAULT;
         }
