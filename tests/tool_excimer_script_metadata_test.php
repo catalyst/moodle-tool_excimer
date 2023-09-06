@@ -189,6 +189,72 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
     }
 
     /**
+     * Tests script_metadata::get_request().
+     * @dataProvider relative_script_path_provider
+     * @covers \tool_excimer\script_metadata::get_request
+     * @param string $path
+     * @param string $expected
+     */
+    public function test_get_request(string $path, string $expected) {
+        script_metadata::init();
+
+        global $SCRIPT, $ME;
+        $globalscript = $SCRIPT ?? null;
+        $globalme = $ME ?? null;
+
+        $SCRIPT = $path;
+        $ME = $path;
+        $this->assertEquals($expected, script_metadata::get_request());
+
+        $SCRIPT = $globalscript;
+        $ME = $globalme;
+    }
+
+    /**
+     * Tests script_metadata::get_normalised_relative_script_path().
+     * @dataProvider relative_script_path_provider
+     * @covers \tool_excimer\script_metadata::get_normalised_relative_script_path
+     * @param string $path
+     * @param string $expected
+     */
+    public function test_get_normalised_relative_script_path(string $path, string $expected) {
+        script_metadata::init();
+        $this->assertEquals($expected, script_metadata::get_normalised_relative_script_path($path, null));
+        $this->assertEquals($expected, script_metadata::get_normalised_relative_script_path(null, $path));
+    }
+
+    /**
+     * Provider for test_get_normalised_relative_script_path().
+     * @return \string[][]
+     */
+    public function relative_script_path_provider(): array {
+        return [
+            ['', ''],
+            ['/', ''],
+            ['//', ''],
+            ['///', ''],
+            ['home', 'home'],
+            ['/home', 'home'],
+            ['home/', 'home/'],
+            ['/home/', 'home/'],
+            ['hello/world', 'hello/world'],
+            ['/hello/world', 'hello/world'],
+            ['/hello/world/', 'hello/world/'],
+            ['/////hello////world///', 'hello////world///'],
+            ['/////hello////world/index.php', 'hello////world/index.php'],
+            ['/////hello////world///index.php', 'hello////world///index.php'],
+            ['/////hello////world/index.php///', 'hello////world/index.php'],
+            ['/index.php', 'index.php'],
+            ['/my//index.php////', 'my//index.php'],
+            ['/my//index.php////index.php', 'my//index.php'],
+            ['/my//index.php////index.php/', 'my//index.php'],
+            ['/my//index.php////index.php/hello/world?param=value&param2=value', 'my//index.php'],
+            ['https://example.com//index.php', 'https://example.com//index.php'],
+            ['https://example.com/index.php/', 'https://example.com/index.php'],
+        ];
+    }
+
+    /**
      * Tests get_redactable_param_names().
      *
      * @covers \tool_excimer\script_metadata::get_redactable_param_names
