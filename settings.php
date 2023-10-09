@@ -200,7 +200,7 @@ if ($hassiteconfig) {
             'tool_excimer/num_slowest',
             get_string('num_slowest', 'tool_excimer'),
             get_string('num_slowest_desc', 'tool_excimer'),
-            '100',
+            '1000',
             PARAM_INT
         );
         $item->set_updatedcallback($clearprofiletimingscachecallback);
