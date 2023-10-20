@@ -4,14 +4,26 @@
 
 # moodle-tool_excimer
 
-* [What is this plugin?](#what-is-this-plugin)
-* [What this plugin is not](#what-this-plugin-is-not)
-* [Design principles](#design-principles)
-* [Branches](#branches)
-* [Installation](#installation)
-* [Troubleshooting](#troubleshooting)
-* [Support](#support)
-* [Credits](#credits)
+- [moodle-tool\_excimer](#moodle-tool_excimer)
+  - [What is this plugin?](#what-is-this-plugin)
+  - [What this plugin is not](#what-this-plugin-is-not)
+  - [Design principles](#design-principles)
+    - [1) Do no harm](#1-do-no-harm)
+    - [2) Don't make me think](#2-dont-make-me-think)
+    - [3) Auto tune configuration](#3-auto-tune-configuration)
+    - [4) It's always current](#4-its-always-current)
+  - [Branches](#branches)
+  - [Installation](#installation)
+    - [PHP Extension](#php-extension)
+      - [Using apt](#using-apt)
+      - [Using PECL](#using-pecl)
+    - [Moodle Plugin](#moodle-plugin)
+  - [Applying core patches](#applying-core-patches)
+      - [Moodle 3.5 - 4.0:](#moodle-35---40)
+  - [Troubleshooting](#troubleshooting)
+  - [Usage](#usage)
+  - [Support](#support)
+  - [Credits](#credits)
 
 ## What is this plugin?
 
@@ -139,6 +151,14 @@ git am --whitespace=nowarn < admin/tool/excimer/patch/MOODLE_35_STABLE.diff
 **ExcimerProfiler class does not exist**.
 If you use containers, and install the package via apt/PECL, you may see this error. When this happens, you may need to stop and start up the container again, as it sometimes does not load installed packages fully whilst running, and afterwards it should work.
 
+## Usage
+When auto profiling is enabled, profiling will happen automatically when request exceeds the Minimum request duration (for webservice or webpage requests) or Task min duration (for adhoc and scheduled tasks)
+
+However profiling can be forced by specifing the `FLAMEME` parameter. 
+
+For example:
+- Via web: `/course/view.php?id=1&FLAMEME=1`
+- Via CLI: `export FLAMEME=1 && php admin/cli/upgrade.php`
 
 ## Support
 
