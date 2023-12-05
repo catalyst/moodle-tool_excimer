@@ -74,17 +74,27 @@ class web_processor implements processor {
         $this->profile->set('created', $this->sampleset->starttime);
 
         $manager->get_timer()->setCallback(function () use ($manager) {
-            $this->process($manager, false);
+            try {
+                $this->process($manager, false);
+            } catch (\dml_exception $e) {
+                // Ignore errors during processing.
+                debugging('tool_excimer: Timer callback failed: ' . $e->getMessage());
+            }
         });
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {
-                $manager->get_timer()->stop();
-                $manager->get_profiler()->stop();
+                try {
+                    $manager->get_timer()->stop();
+                    $manager->get_profiler()->stop();
 
-                // Keep an approximate count of each profile.
-                $this->process($manager, true);
-                page_group::record_fuzzy_counts($this->profile);
+                    // Keep an approximate count of each profile.
+                    $this->process($manager, true);
+                    page_group::record_fuzzy_counts($this->profile);
+                } catch (\dml_exception $e) {
+                    // Ignore errors during processing.
+                    debugging('tool_excimer: Shutdown callback failed: ' . $e->getMessage());
+                }
             }
         );
     }
