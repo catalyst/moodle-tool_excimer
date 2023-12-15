@@ -91,7 +91,7 @@ function init() {
 
     if (window.excimerData === undefined) {
         setLoading(true);
-        d3.json('/admin/tool/excimer/flamegraph.json.php?profileid={{id}}')
+        d3.json('flamegraph.json.php?profileid={{id}}')
             .then(function(data) {
                 setLoading(false);
                 window.excimerData = data;
