@@ -355,16 +355,19 @@ class manager {
     public static function approximate_increment(int $current): int {
         // If the number of events is ever expected to be more than 2 billion, a refactor may be needed.
 
-        $bits = random_int(PHP_INT_MIN, PHP_INT_MAX);
+        $bits = random_int(0, 2 ** $current);
 
-        // This gives us a number of bits equal to the current count. The rest are all zeroed.
-        $bits = $bits << (self::PHP_INT_SIZE_BITS - $current);
+$bin = decbin($bits);
+$bin = str_pad($bin, 10, 0, STR_PAD_LEFT);
+
+        $return = $current;
 
         // If the bits are all zero (equiv to all coin tosses = tails), then we increment the counter.
         if ($bits == 0) {
-            return $current + 1;
+            $return += 1;
         }
+error_log("$bits $bin  $current -> $return ");
 
-        return $current;
+        return $return;
     }
 }

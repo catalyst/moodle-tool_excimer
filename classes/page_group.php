@@ -168,20 +168,20 @@ class page_group extends persistent {
         if ($exp < 0) {
             $exp = 0;
         }
-        $fuzzydurationcounts[$exp] = manager::approximate_increment($fuzzydurationcounts[$exp] ?? 0);
-        $pagegroup->set('fuzzydurationcounts', $fuzzydurationcounts);
+        // $fuzzydurationcounts[$exp] = manager::approximate_increment($fuzzydurationcounts[$exp] ?? 0);
+        // $pagegroup->set('fuzzydurationcounts', $fuzzydurationcounts);
 
         // Add the duration to the fuzzy sum, treating each second as an event for counting.
         $fuzzydurationsum = $pagegroup->get('fuzzydurationsum');
         $duration = (int) round($duration);
         for ($i = 0; $i < $duration; ++$i) {
-            $fuzzydurationsum = manager::approximate_increment($fuzzydurationsum);
+            // $fuzzydurationsum = manager::approximate_increment($fuzzydurationsum);
         }
         $pagegroup->set('fuzzydurationsum', $fuzzydurationsum);
 
-        if ($existing != $pagegroup->to_record()) {
+        // if ($existing != $pagegroup->to_record()) {
             $pagegroup->save();
-        }
+        // }
     }
 
     /**
