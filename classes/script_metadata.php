@@ -343,7 +343,7 @@ class script_metadata {
                 }
             }
             $params = $profile->get('parameters');
-            if ($params != '') {
+            if ($params != '' && !in_array($request, self::PLUGINFILE_SCRIPTS)) {
                 $val .= '?' . self::redact_parameters($params);
             }
             if (empty($val)) {
@@ -398,6 +398,8 @@ class script_metadata {
     public static function redact_pluginfile_pathinfo(string $pathinfo): string {
         $segments = explode('/', ltrim($pathinfo, '/'), 4);
         $segments[0] = 'x';
+        // Contextid for tokenpluginfile.php can be in $segments[1] depending on $CFG->slasharguments.
+        $segments[1] = ctype_digit($segments[1]) ? 'x' : $segments[1];
         $segments[3] = 'xxx';
         return '/' . implode('/', $segments);
     }

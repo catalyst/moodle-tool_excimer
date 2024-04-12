@@ -155,6 +155,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
             ['admin/index.php', '', 'a=1&b&c=3', 'admin/index.php?a=&b&c='],
             ['admin/index.php', '/1/2/3/', 'a=1&b&c=3', 'admin/index.php/x/x/x/?a=&b&c='],
             ['pluginfile.php', '/12/mod/book/3242/3/tool.png', '', 'pluginfile.php/x/mod/book/xxx'],
+            ['tokenpluginfile.php', '/token/12/user/private/0/image.png', '', 'tokenpluginfile.php/x/x/user/xxx'],
         ];
     }
 
