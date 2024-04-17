@@ -174,9 +174,7 @@ class page_group extends persistent {
         // Add the duration to the fuzzy sum, treating each second as an event for counting.
         $fuzzydurationsum = $pagegroup->get('fuzzydurationsum');
         $duration = (int) round($duration);
-        for ($i = 0; $i < $duration; ++$i) {
-            $fuzzydurationsum = manager::approximate_increment($fuzzydurationsum);
-        }
+        $fuzzydurationsum = manager::approximate_increment($fuzzydurationsum, $duration);
         $pagegroup->set('fuzzydurationsum', $fuzzydurationsum);
 
         if ($existing != $pagegroup->to_record()) {

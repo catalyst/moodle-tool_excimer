@@ -345,26 +345,31 @@ class manager {
 
     /**
      * Increments a counter using the approximate counting algorithm.
-     * Can handle up to PHP_INT_SIZE_BITS counts (2^PHP_INT_SIZE_BITS events).
      *
      * See https://en.wikipedia.org/wiki/Approximate_counting_algorithm
      *
      * @param int $current The current count.
+     * @param int $increment The raw increment in count.
+     * @param float|null $random random number between 0 and 1, for unit testing.
      * @return int The new count.
      */
-    public static function approximate_increment(int $current): int {
-        // If the number of events is ever expected to be more than 2 billion, a refactor may be needed.
+    public static function approximate_increment(int $current, int $increment = 1, ?float $random = null): int {
+        $approx = 2 ** $current;
+        // If we are incrementing by more than the current approximation, we can bump the count.
+        if ($increment > $approx) {
+            $total = $increment + $approx;
 
-        $bits = random_int(PHP_INT_MIN, PHP_INT_MAX);
+            // Bump $current to the new minimum count and update approximation.
+            $current = floor(log($total, 2));
+            $approx = 2 ** $current;
 
-        // This gives us a number of bits equal to the current count. The rest are all zeroed.
-        $bits = $bits << (self::PHP_INT_SIZE_BITS - $current);
-
-        // If the bits are all zero (equiv to all coin tosses = tails), then we increment the counter.
-        if ($bits == 0) {
-            return $current + 1;
+            // Increment by the remainder.
+            $increment = $total - $approx;
         }
 
-        return $current;
+        // Increase the count a percentage of the time based on likelihood.
+        $random = $random ?? mt_rand() / mt_getrandmax();
+        $likelihood = $increment / $approx;
+        return ($random <= $likelihood) ? $current + 1 : $current;
     }
 }
