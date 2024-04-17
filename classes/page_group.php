@@ -57,10 +57,10 @@ class page_group extends persistent {
      * Creates a page_group, either from the cache, or fresh.
      *
      * @param string $name The name of the page group
-     * @param string $month The month, in YYYYMM format.
+     * @param int $month The month, in YYYYMM format.
      * @return page_group
      */
-    public static function get_page_group(string $name, string $month): page_group {
+    public static function get_page_group(string $name, int $month): page_group {
         // Get the cache and attempt to pull the pag group's record from it.
         $keydata = ['name' => $name, 'month' => $month];
         $cachekey = serialize($keydata);
