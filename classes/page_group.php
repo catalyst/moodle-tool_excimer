@@ -157,8 +157,12 @@ class page_group extends persistent {
 
         $existing = $pagegroup->to_record();
 
+        // Check if the page group existed before this call, can be determined by fuzzydurationcounts.
+        $fuzzydurationcounts = $pagegroup->get('fuzzydurationcounts');
+        $pagegroupexisted = !empty($fuzzydurationcounts);
+
         // Fuzzy increment the count.
-        $fuzzycount = manager::approximate_increment($pagegroup->get('fuzzycount'));
+        $fuzzycount = $pagegroupexisted ? manager::approximate_increment($pagegroup->get('fuzzycount')) : 0;
         $pagegroup->set('fuzzycount', $fuzzycount);
 
         // Fuzzy increment count for the duration slice.
@@ -168,7 +172,8 @@ class page_group extends persistent {
         if ($exp < 0) {
             $exp = 0;
         }
-        $fuzzydurationcounts[$exp] = manager::approximate_increment($fuzzydurationcounts[$exp] ?? 0);
+        $fuzzydurationexists = $pagegroupexisted && isset($fuzzydurationcounts[$exp]);
+        $fuzzydurationcounts[$exp] = $fuzzydurationexists ? manager::approximate_increment($fuzzydurationcounts[$exp]) : 0;
         $pagegroup->set('fuzzydurationcounts', $fuzzydurationcounts);
 
         // Add the duration to the fuzzy sum, treating each second as an event for counting.

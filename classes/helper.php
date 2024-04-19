@@ -189,13 +189,13 @@ class helper {
      * Row is of the form: 2^(k-1) - 2^k : 2^(v-1).
      *
      * @param int $durationexponent The exponent (k) of the high end of the duration range.
-     * @param int $count The fuzzy count (v), or zero if no value.
+     * @param int|null $count The fuzzy count (v), or null if no value.
      * @return array
      */
-    private static function make_histogram_record(int $durationexponent, int $count): array {
+    private static function make_histogram_record(int $durationexponent, ?int $count = null): array {
         $high = pow(2, $durationexponent);
         $low = ($high === 1) ? 0 : pow(2, $durationexponent - 1);
-        $val = $count ? pow(2, $count - 1) : 0;
+        $val = isset($count) ? pow(2, $count) : 0;
         return [
             'low'   => $low,
             'high'  => $high,
@@ -219,7 +219,7 @@ class helper {
         foreach ($counts as $storeddurationexponent => $fuzzycount) {
             // Fill in lines that do not have stored values.
             while ($durationexponent < $storeddurationexponent) {
-                $histogramrecords[] = self::make_histogram_record($durationexponent, 0);
+                $histogramrecords[] = self::make_histogram_record($durationexponent);
                 ++$durationexponent;
             }
             $histogramrecords[] = self::make_histogram_record($storeddurationexponent, $fuzzycount);
