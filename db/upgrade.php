@@ -459,5 +459,36 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023082900, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2024050700) {
+
+        // Define field id to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('lockheld', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field id to be added to tool_excimer_profiles.
+        $field = new xmldb_field('lockwait', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field id to be added to tool_excimer_profiles.
+        $field = new xmldb_field('lockwaiturl', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2024050700, 'tool', 'excimer');
+    }
+
     return true;
 }

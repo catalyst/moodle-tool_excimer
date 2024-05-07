@@ -145,6 +145,10 @@ $string['field_hostname'] = 'Host name';
 $string['field_useragent'] = 'User agent';
 $string['field_versionhash'] = 'Version Hash';
 $string['field_courseid'] = 'Course';
+$string['field_lockheld'] = 'Session held';
+$string['field_lockwait'] = 'Session wait';
+$string['field_lockwaiturl'] = 'Locking URL';
+$string['field_lockwaiturl_help'] = 'Information about this page may only be available when $CFG->debugsessionlock is set.';
 
 // Page count table.
 $string['field_name'] = 'Name';
@@ -218,3 +222,6 @@ $string['samples'] = 'samples';
 $string['duration'] = 'duration';
 $string['no_month_in_page_group_table'] = 'Month value not set in page group table.';
 $string['deletedcourse'] = 'Deleted course id: {$a}';
+$string['unknown'] = 'Unknown';
+$string['link'] = 'Direct link';
+$string['lockwaitnotification'] = 'The majority of the duration was spent waiting for a session lock, the page may not be slow.';

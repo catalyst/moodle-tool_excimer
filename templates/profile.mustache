@@ -124,6 +124,20 @@
                     <th>{{#str}} field_memoryusagemax, tool_excimer {{/str}}</th>
                     <td>{{memoryusagemax}}</td>
                 </tr>
+                <tr>
+                    <th{{#waitnotification}} class="alert alert-warning"{{/waitnotification}}>{{#str}} field_lockwait, tool_excimer {{/str}}</th>
+                    <td{{#waitnotification}} class="alert alert-warning"{{/waitnotification}}>
+                        {{#lockwait}}{{{lockwait}}}{{/lockwait}}
+                        {{^lockwait}}{{#str}} unknown, tool_excimer {{/str}}{{/lockwait}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_lockheld, tool_excimer {{/str}}</th>
+                    <td>
+                        {{#lockheld}}{{{lockheld}}}{{/lockheld}}
+                        {{^lockheld}}{{#str}} unknown, tool_excimer {{/str}}{{/lockheld}}
+                    </td>
+                </tr>
             </table>
         </div>
         <div class="">
@@ -169,6 +183,13 @@
                 <tr>
                     <th>{{#str}} field_courseid, tool_excimer {{/str}}</th>
                     <td>{{{ course }}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_lockwaiturl, tool_excimer {{/str}}</th>
+                    <td>
+                        {{{lockwaiturl}}}
+                        {{#lockwaiturlhelp}} {{>core/help_icon}} {{/lockwaiturlhelp}}
+                    </td>
                 </tr>
             </table>
         </div>

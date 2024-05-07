@@ -124,6 +124,9 @@ class web_processor implements processor {
             $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
             $this->profile->set('numsamples', $this->sampleset->count());
             $this->profile->set('samplerate', $this->sampleset->filter_rate() * $this->samplems);
+            foreach (script_metadata::get_lock_info() as $field => $value) {
+                $this->profile->set($field, $value);
+            }
             $this->profile->save_record();
         }
     }

@@ -121,7 +121,23 @@ $data = (array) $profile->to_record();
 $data['created'] = userdate($data['created']);
 $data['finished'] = userdate($data['finished']);
 
-$data['duration'] = format_time(round($data['duration'], 3));
+$duration = $data['duration'];
+$data['duration'] = helper::duration_display($duration, true);
+if (isset($data['lockwait'])) {
+    $lockwait = $data['lockwait'];
+    $data['lockwait'] = helper::duration_display($lockwait, true);
+    $data['lockheld'] = helper::duration_display($data['lockheld'], true);
+    $data['lockwaiturl'] = helper::lockwait_display_link($data['lockwaiturl'], $lockwait);
+    $data['lockwaiturlhelp'] = helper::lockwait_display_help($OUTPUT, $data['lockwaiturl']);
+
+    $processing = $duration - $lockwait;
+    if (($processing / $duration) < 0.1 && $processing < 10) {
+        \core\notification::warning(get_string('lockwaitnotification', 'tool_excimer'));
+        $data['waitnotification'] = true;
+    }
+} else {
+    $data['lockwaiturl'] = '-';
+}
 
 $data['request'] = helper::full_request($profile->to_record());
 

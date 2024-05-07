@@ -45,6 +45,9 @@
         <FIELD NAME="samplerate" TYPE="int" LENGTH="11" NOTNULL="false" SEQUENCE="false" COMMENT="Base sample rate at the time the profile was recorded"/>
         <FIELD NAME="lockreason" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Holds reasons for keeping this profile. Any non-empty value will prevent purging."/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The id of $COURSE at the time of profiling"/>
+        <FIELD NAME="lockheld" TYPE="number" LENGTH="12" NOTNULL="false" SEQUENCE="false" DECIMALS="6" COMMENT="Length of time a lock was held in seconds"/>
+        <FIELD NAME="lockwait" TYPE="number" LENGTH="12" NOTNULL="false" SEQUENCE="false" DECIMALS="6" COMMENT="Wait time on a lock in seconds"/>
+        <FIELD NAME="lockwaiturl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="URL of the page holding the lock, if known"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -34,6 +34,7 @@ class recent_profile_table extends profile_table {
         'reason',
         'type',
         'duration',
+        'lockwait',
         'userid',
         'courseid'
     ];

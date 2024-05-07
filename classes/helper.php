@@ -88,7 +88,7 @@ class helper {
     }
 
     /**
-     * Returns a formatted time duration in m:s.ms format.
+     * Returns a formatted time duration in a human readable format.
      *
      * @param float $duration
      * @param bool $markup If true, then use markup on the result.
@@ -104,10 +104,14 @@ class helper {
             } else {
                 // Add one decimal place.
                 $usetime = round($duration, 1);
-                // Fallback case to prevent format_time() returning the translated string 'now' when $usetime is less than 100ms.
-                // It will still appear if less than 1ms rounded. Discuss.
-                if ($usetime < 0.1) {
-                    $usetime = round($duration, 3);
+                // Fallback to prevent format_time returning the translated string 'now' when the rounded version is 0.
+                if ($usetime == 0) {
+                    // Try rounding to 3 decimal places, otherwise return 0 secs.
+                    if (round($duration, 3) > 0) {
+                        $usetime = round($duration, 3);
+                    } else {
+                        return '-';
+                    }
                 }
             }
             // This currently works with floats, but relies on undocumented behaviour of format_time(), which normally takes an int.
@@ -268,5 +272,42 @@ class helper {
         }
 
         return $course->fullname;
+    }
+
+    /**
+     * Returns a HTML link based on the lockwait url.
+     * @param string|null $lockwaiturl Relative lockwait url
+     * @param float $lockwait Time spent waiting for the lock
+     * @return string html string
+     */
+    public static function lockwait_display_link(?string $lockwaiturl, float $lockwait) {
+        if (empty($lockwaiturl)) {
+            return ($lockwait > 1) ? get_string('unknown', 'tool_excimer') : '-';
+        }
+
+        // Ideally we should link to an excimer profile of the url, but it's more reliable to link to group.
+        $profile = new profile();
+        $profile->add_env(script_metadata::get_normalised_relative_script_path($lockwaiturl, null));
+        $groupurl = new \moodle_url('slowest_web.php?group=' . $profile->get('scriptgroup'));
+
+        // Keep the link text short, but show the full url when hovering over it.
+        return \html_writer::link($groupurl, get_string('checkslowest', 'tool_excimer'), ['title' => $lockwaiturl]);
+    }
+
+    /**
+     * Returns lockwait help formatted after exporting for template.
+     * @param \renderer_base $output
+     * @param string $lockwaiturl lockwait display link url
+     * @return array export for template
+     */
+    public static function lockwait_display_help(\renderer_base $output, string $lockwaiturl) {
+        GLOBAL $CFG;
+
+        // Only show help information if we have an 'Unknown' url and debug session lock is off.
+        if ($lockwaiturl === get_string('unknown', 'tool_excimer') && empty($CFG->debugsessionlock)) {
+            $help = new \help_icon('field_lockwaiturl', 'tool_excimer');
+            return $help->export_for_template($output);
+        }
+        return [];
     }
 }
