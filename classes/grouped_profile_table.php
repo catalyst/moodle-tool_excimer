@@ -34,10 +34,10 @@ abstract class grouped_profile_table extends profile_table {
     /** Columns to be displayed.*/
     const COLUMNS = [
         'maxduration',
+        'minduration',
         'requestcount',
         'maxcreated',
         'mincreated',
-        'minduration',
     ];
 
     /** @var \moodle_url URL path to use for linking to profile groups. */
@@ -80,6 +80,25 @@ abstract class grouped_profile_table extends profile_table {
            $filterstring,
            $filterparams
         );
+    }
+
+    /**
+     * Defines the columns for this table.
+     *
+     * @throws \coding_exception
+     */
+    public function make_columns(): void {
+        $headers = [];
+        $columns = $this->get_columns();
+        foreach ($columns as $column) {
+            $headers[] = get_string('field_' . $column, 'tool_excimer');
+        }
+
+        $this->define_columns($columns);
+        $this->column_class('maxduration', 'text-right');
+        $this->column_class('minduration', 'text-right');
+        $this->column_class('requestcount', 'text-center');
+        $this->define_headers($headers);
     }
 
     /**

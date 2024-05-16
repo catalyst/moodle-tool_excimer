@@ -122,11 +122,11 @@ $data['created'] = userdate($data['created']);
 $data['finished'] = userdate($data['finished']);
 
 $duration = $data['duration'];
-$data['duration'] = helper::duration_display($duration, true);
+$data['duration'] = helper::duration_display_text($duration, true);
 if (isset($data['lockwait'])) {
     $lockwait = $data['lockwait'];
-    $data['lockwait'] = helper::duration_display($lockwait, true);
-    $data['lockheld'] = helper::duration_display($data['lockheld'], true);
+    $data['lockwait'] = helper::duration_display_text($lockwait, true);
+    $data['lockheld'] = helper::duration_display_text($data['lockheld'], true);
     $data['lockwaiturl'] = helper::lockwait_display_link($data['lockwaiturl'], $lockwait);
     $data['lockwaiturlhelp'] = helper::lockwait_display_help($OUTPUT, $data['lockwaiturl']);
 

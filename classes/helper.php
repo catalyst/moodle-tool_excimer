@@ -88,7 +88,7 @@ class helper {
     }
 
     /**
-     * Returns a formatted time duration in a human readable format.
+     * Returns a formatted time duration in h:m:s format.
      *
      * @param float $duration
      * @param bool $markup If true, then use markup on the result.
@@ -96,6 +96,29 @@ class helper {
      * @throws \Exception
      */
     public static function duration_display(float $duration, bool $markup = true): string {
+        if (!$markup) {
+            return $duration;
+        }
+
+        $s = (int) $duration;
+        $h = $s / 3600;
+        $m = ($s % 3600) / 60;
+        $s = $s % 60;
+        $formatted = ($h >= 1) ? sprintf('%d:%02d:%02d', $h, $m, $s) : sprintf('%d:%02d', $m, $s);
+
+        // Make text monospace.
+        return \html_writer::tag('pre', $formatted, ['class' => 'm-0', 'style' => 'font-size: inherit;']);
+    }
+
+    /**
+     * Returns a formatted time duration in a human readable format.
+     *
+     * @param float $duration
+     * @param bool $markup If true, then use markup on the result.
+     * @return string
+     * @throws \Exception
+     */
+    public static function duration_display_text(float $duration, bool $markup = true): string {
         // Variable $markup allows a different format when viewed (true) vs downloaded (false).
         if ($markup) {
             if (intval($duration) > 10) {
