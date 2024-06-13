@@ -176,6 +176,15 @@ if ($hassiteconfig) {
             )
         );
 
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'tool_excimer/enable_partial_save',
+                get_string('enable_partial_save', 'tool_excimer'),
+                get_string('enable_partial_save_desc', 'tool_excimer'),
+                0
+            )
+        );
+
         $item = new admin_setting_configtext(
             'tool_excimer/trigger_ms',
             get_string('request_ms', 'tool_excimer'),

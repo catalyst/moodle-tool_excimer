@@ -40,6 +40,8 @@ class web_processor implements processor {
     protected $minduration;
     /** @var int */
     protected $samplems;
+    /** @var bool */
+    protected $partialsave;
 
     /**
      * Construct the web processor.
@@ -48,6 +50,7 @@ class web_processor implements processor {
         // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
         $this->minduration = (float) get_config('tool_excimer', 'trigger_ms') / 1000.0;
         $this->samplems = (int) get_config('tool_excimer', 'sample_ms');
+        $this->partialsave = get_config('tool_excimer', 'enable_partial_save');
     }
 
     /**
@@ -73,9 +76,11 @@ class web_processor implements processor {
         $this->profile->add_env($this->sampleset->name);
         $this->profile->set('created', $this->sampleset->starttime);
 
-        $manager->get_timer()->setCallback(function () use ($manager) {
-            $this->process($manager, false);
-        });
+        if ($this->partialsave) {
+            $manager->get_timer()->setCallback(function () use ($manager) {
+                $this->process($manager, false);
+            });
+        }
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {

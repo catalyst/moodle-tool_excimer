@@ -55,6 +55,10 @@ $string['enable_auto'] = 'Enable auto profiling';
 $string['enable_auto_desc'] = 'Any page will be automatically profiled if they exceed the miniumum duration.';
 $string['enable_fuzzy_count'] = 'Enable fuzzy counting';
 $string['enable_fuzzy_count_desc'] = 'This will cause the plugin to maintain an approximate count of page runs using the {$a}. Automatic profiling must also be enabled.';
+$string['enable_partial_save'] = 'Enable partial save';
+$string['enable_partial_save_desc'] = 'This will save partial profiles of slow web processes every processing interval. This
+    provides information about these processes while they are still running or if a container gets reaped, but the extra writes
+    can be problematic when experiencing large scale database issues.';
 $string['expiry_s'] = 'Log expiry (days)';
 $string['expiry_s_desc'] = 'Remove profiles after this long.';
 $string['num_slowest'] = 'Max to save';
@@ -66,8 +70,9 @@ $string['request_ms_desc'] = 'Record a profile only if it runs at least this lon
 $string['num_slowest_by_page'] = 'Max to save by page';
 $string['num_slowest_by_page_desc'] = 'Only the N slowest profiles will be kept for each script page.';
 $string['noexcimerprofiler'] = 'ExcimerProfiler class does not exist so profiling cannot continue. Please check the installation instructions {$a}.';
-$string['long_interval_s'] = 'Partial save interval (seconds)';
-$string['long_interval_s_desc'] = 'For long running taks, save a partial profile every N seconds.';
+$string['long_interval_s'] = 'Processing interval (seconds)';
+$string['long_interval_s_desc'] = 'Checks the current status of long running tasks every N seconds and processes as required.
+    This includes saving profiles of finished cron tasks and partial saves of ongoing web processes if enabled.';
 $string['task_min_duration'] = 'Task min duration (seconds)';
 $string['task_min_duration_desc'] = 'For scheduled and ad-hoc tasks, the minimum approx duration, in seconds.';
 $string['samplelimit'] = 'Sample limit';
