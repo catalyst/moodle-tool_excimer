@@ -143,8 +143,9 @@ class page_group extends persistent {
      *
      * @param profile $profile The profile to pull the information from.
      * @param int|null $month The month to record the profile under, or null to use the current month.
+     * @param bool $retry Whether to allow one retry for unique key errors.
      */
-    public static function record_fuzzy_counts(profile $profile, ?int $month = null) {
+    public static function record_fuzzy_counts(profile $profile, ?int $month = null, $retry = true) {
         // Do this only if both auto profiling and fuzzy counting is set.
         if (!get_config('tool_excimer', 'enable_auto') ||
             !get_config('tool_excimer', 'enable_fuzzy_count')) {
@@ -183,7 +184,17 @@ class page_group extends persistent {
         $pagegroup->set('fuzzydurationsum', $fuzzydurationsum);
 
         if ($existing != $pagegroup->to_record()) {
-            $pagegroup->save();
+            try {
+                $pagegroup->save();
+            } catch (\dml_exception $e) {
+                // We have a minor loss in data with concurrent updates that can cause duplicate rows.
+                // When creating new page groups we can catch unique key errors and then retry an update.
+                // Updates are harder to detect, but will only occur when fuzzycount is low, so can ignore.
+                if (!$pagegroupexisted && $retry) {
+                    // One retry should be enough to resolve unique key errors.
+                    self::record_fuzzy_counts($profile, $month, false);
+                }
+            }
         }
     }
 

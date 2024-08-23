@@ -490,5 +490,66 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024050700, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2024082301) {
+
+        // Change precision of name to 255 so it can be used as an index.
+        // First we need to drop a few edge cases that have a length of 256.
+        $DB->delete_records_select('tool_excimer_page_groups', $DB->sql_length('name') . ' > 255');
+
+        // Changing precision of field name on table tool_excimer_page_groups to (255).
+        $table = new xmldb_table('tool_excimer_page_groups');
+        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'id');
+
+        // Launch change of precision for field name.
+        $dbman->change_field_precision($table, $field);
+
+        // Find all non-unique page groups and remove duplicates.
+        $sql = "
+            SELECT pgroups.id, pgroups.name, pgroups.month, pgroups.fuzzycount
+            FROM {tool_excimer_page_groups} pgroups
+            JOIN (
+                SELECT name, month
+                FROM {tool_excimer_page_groups}
+                GROUP BY name, month
+                HAVING COUNT(*) > 1
+            ) dupl ON pgroups.name = dupl.name AND pgroups.month = dupl.month
+            ORDER BY pgroups.name, pgroups.month, pgroups.fuzzycount DESC
+        ";
+        $duplicates = $DB->get_records_sql($sql);
+
+        if (!empty($duplicates)) {
+            $previouskey = '';
+            $removeids = [];
+
+            // Duplicates are ordered, so only keep the first occurence.
+            foreach ($duplicates as $row) {
+                $key = $row->name . '_' . $row->month;
+                if ($key === $previouskey) {
+                    $removeids[] = $row->id;
+                } else {
+                    $previouskey = $key;
+                }
+            }
+
+            // Remove the duplicate rows.
+            if (!empty($removeids)) {
+                $removeids = implode(',', $removeids);
+                $DB->delete_records_select('tool_excimer_page_groups', "id IN ($removeids)");
+            }
+        }
+
+        // Define index pagegroup (unique) to be added to tool_excimer_page_groups.
+        $table = new xmldb_table('tool_excimer_page_groups');
+        $index = new xmldb_index('pagegroup', XMLDB_INDEX_UNIQUE, ['name', 'month']);
+
+        // Conditionally launch add index pagegroup.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2024082301, 'tool', 'excimer');
+    }
+
     return true;
 }

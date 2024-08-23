@@ -61,7 +61,7 @@
     <TABLE NAME="tool_excimer_page_groups" COMMENT="Metadata about groups of profiles.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="name" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Group name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Group name"/>
         <FIELD NAME="month" TYPE="int" LENGTH="6" NOTNULL="true" SEQUENCE="false" COMMENT="Month in YYYYMM format."/>
         <FIELD NAME="fuzzycount" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="A approximate count of hits for this group using the approximate counting algorithm."/>
         <FIELD NAME="fuzzydurationcounts" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Breakdown of fuzzy counts for durations"/>
@@ -70,6 +70,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="pagegroup" UNIQUE="true" FIELDS="name, month"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>
