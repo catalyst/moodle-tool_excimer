@@ -504,16 +504,22 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         $dbman->change_field_precision($table, $field);
 
         // Find all non-unique page groups and remove duplicates.
-        $sql = "
-            SELECT pgroups.id, pgroups.name, pgroups.month, pgroups.fuzzycount
-            FROM {tool_excimer_page_groups} pgroups
-            JOIN (
-                SELECT name, month
-                FROM {tool_excimer_page_groups}
-                GROUP BY name, month
-                HAVING COUNT(*) > 1
-            ) dupl ON pgroups.name = dupl.name AND pgroups.month = dupl.month
-            ORDER BY pgroups.name, pgroups.month, pgroups.fuzzycount DESC
+        $sql = " SELECT pgroups.id,
+                        LOWER(pgroups.name) name,
+                        pgroups.month,
+                        pgroups.fuzzycount
+                   FROM {tool_excimer_page_groups} pgroups
+                   JOIN (
+                         SELECT LOWER(name) name,
+                                month
+                           FROM {tool_excimer_page_groups}
+                       GROUP BY LOWER(name),
+                                month
+                         HAVING COUNT(*) > 1
+                        ) dupl ON LOWER(pgroups.name) = dupl.name AND pgroups.month = dupl.month
+               ORDER BY LOWER(pgroups.name),
+                        pgroups.month,
+                        pgroups.fuzzycount DESC
         ";
         $duplicates = $DB->get_records_sql($sql);
 
