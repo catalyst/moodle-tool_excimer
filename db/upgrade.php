@@ -496,13 +496,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         // First we need to drop a few edge cases that have a length of 256.
         $DB->delete_records_select('tool_excimer_page_groups', $DB->sql_length('name') . ' > 255');
 
-        // Changing precision of field name on table tool_excimer_page_groups to (255).
-        $table = new xmldb_table('tool_excimer_page_groups');
-        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'id');
-
-        // Launch change of precision for field name.
-        $dbman->change_field_precision($table, $field);
-
         // Find all non-unique page groups and remove duplicates.
         $sql = " SELECT pgroups.id,
                         LOWER(pgroups.name) name,
@@ -543,6 +536,13 @@ function xmldb_tool_excimer_upgrade($oldversion) {
                 $DB->delete_records_select('tool_excimer_page_groups', "id IN ($removeids)");
             }
         }
+
+        // Changing precision of field name on table tool_excimer_page_groups to (255).
+        $table = new xmldb_table('tool_excimer_page_groups');
+        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'id');
+
+        // Launch change of precision for field name.
+        $dbman->change_field_precision($table, $field);
 
         // Define index pagegroup (unique) to be added to tool_excimer_page_groups.
         $table = new xmldb_table('tool_excimer_page_groups');
