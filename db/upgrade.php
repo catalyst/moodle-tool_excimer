@@ -491,53 +491,21 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024082301) {
-
-        // Change precision of name to 255 so it can be used as an index.
         // First we need to drop a few edge cases that have a length of 256.
         $DB->delete_records_select('tool_excimer_page_groups', $DB->sql_length('name') . ' > 255');
 
-        // Find all non-unique page groups and remove duplicates.
-        $sql = " SELECT pgroups.id,
-                        LOWER(pgroups.name) name,
-                        pgroups.month,
-                        pgroups.fuzzycount
-                   FROM {tool_excimer_page_groups} pgroups
-                   JOIN (
-                         SELECT LOWER(name) name,
-                                month
-                           FROM {tool_excimer_page_groups}
-                       GROUP BY LOWER(name),
-                                month
-                         HAVING COUNT(*) > 1
-                        ) dupl ON LOWER(pgroups.name) = dupl.name AND pgroups.month = dupl.month
-               ORDER BY LOWER(pgroups.name),
-                        pgroups.month,
-                        pgroups.fuzzycount DESC
-        ";
-        $duplicates = $DB->get_records_sql($sql);
+        // SQL to delete duplicates while keeping the first occurrence.
+        $sql = "DELETE FROM {tool_excimer_page_groups}
+                 WHERE id NOT IN (
+                     SELECT MIN(id)
+                       FROM {tool_excimer_page_groups}
+                   GROUP BY LOWER(name), month
+                 )";
 
-        if (!empty($duplicates)) {
-            $previouskey = '';
-            $removeids = [];
+        // Execute the delete query.
+        $DB->execute($sql);
 
-            // Duplicates are ordered, so only keep the first occurence.
-            foreach ($duplicates as $row) {
-                $key = $row->name . '_' . $row->month;
-                if ($key === $previouskey) {
-                    $removeids[] = $row->id;
-                } else {
-                    $previouskey = $key;
-                }
-            }
-
-            // Remove the duplicate rows.
-            if (!empty($removeids)) {
-                $removeids = implode(',', $removeids);
-                $DB->delete_records_select('tool_excimer_page_groups', "id IN ($removeids)");
-            }
-        }
-
-        // Changing precision of field name on table tool_excimer_page_groups to (255).
+        // Change precision of name to 255 so it can be used as an index.
         $table = new xmldb_table('tool_excimer_page_groups');
         $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'id');
 
