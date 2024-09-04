@@ -498,7 +498,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         $sql = "DELETE FROM {tool_excimer_page_groups}
                  WHERE id NOT IN (
                      SELECT MIN(id)
-                       FROM {tool_excimer_page_groups}
+                       FROM (select * from {tool_excimer_page_groups}) a
                    GROUP BY LOWER(name), month
                  )";
 
