@@ -14,24 +14,41 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_excimer;
+
 /**
- * Version.
+ * Display table for profile reports with session lock information.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Benjamin Walker <benjaminwalker@catalyst-au.net>
+ * @copyright 2024, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class session_profile_table extends profile_table {
 
-defined('MOODLE_INTERNAL') || die();
+    /** Columns to be displayed */
+    const COLUMNS = [
+        'duration',
+        'lockheld',
+        'responsecode',
+        'request',
+        'reason',
+        'type',
+        'created',
+        'userid',
+        'courseid',
+    ];
 
-$plugin->version = 2024091000;
-$plugin->release = 2024091000;
-$plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
-$plugin->supported = [35, 401];     // Supports Moodle 3.5 or later.
-// TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
-
-$plugin->component = 'tool_excimer';
-$plugin->maturity  = MATURITY_STABLE;
-
-$plugin->dependencies = [];
+    /**
+     * returns the columns defined for the table.
+     *
+     * @return string[]
+     */
+    protected function get_columns(): array {
+        $columns = self::COLUMNS;
+        if (!$this->is_downloading()) {
+            $columns[] = 'actions';
+        }
+        return $columns;
+    }
+}

@@ -285,4 +285,14 @@ if ($hassiteconfig) {
             'moodle/site:config'
         )
     );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_report_session_locks',
+            get_string('report_session_locks', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/session_locks.php'),
+            'moodle/site:config'
+        )
+    );
 }
