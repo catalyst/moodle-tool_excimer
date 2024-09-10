@@ -58,6 +58,6 @@ if ($script || $group) {
     $table->sortable(true, 'maxduration', SORT_DESC);
 }
 
-$table->set_scripttypes([profile::SCRIPTTYPE_WEB]);
+$table->set_scripttypes([profile::SCRIPTTYPE_WEB, profile::SCRIPTTYPE_AJAX]);
 
 profile_table_page::display($table, $url);
