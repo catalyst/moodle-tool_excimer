@@ -43,17 +43,17 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
      */
     public function test_purge() {
         global $DB;
-
         $cutoff = 4;
+        $firstofthismonth = date('Y-m') . '-01';
         $months = [
             monthint::from_timestamp(time()),
-            monthint::from_timestamp(strtotime('1 month ago')),
-            monthint::from_timestamp(strtotime('2 months ago')),
-            monthint::from_timestamp(strtotime('3 months ago')),
-            monthint::from_timestamp(strtotime('4 months ago')),
-            monthint::from_timestamp(strtotime('5 months ago')),
-            monthint::from_timestamp(strtotime('6 months ago')),
-            monthint::from_timestamp(strtotime('7 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '1 month ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '2 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '3 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '4 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '5 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '6 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . '7 months ago')),
         ];
         foreach ($months as $month) {
             $DB->insert_record(page_group::TABLE, (object) ['month' => $month, 'fuzzydurationcounts' => '']);

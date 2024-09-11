@@ -57,10 +57,10 @@ class page_group extends persistent {
      * Creates a page_group, either from the cache, or fresh.
      *
      * @param string $name The name of the page group
-     * @param string $month The month, in YYYYMM format.
+     * @param int $month The month, in YYYYMM format.
      * @return page_group
      */
-    public static function get_page_group(string $name, string $month): page_group {
+    public static function get_page_group(string $name, int $month): page_group {
         // Get the cache and attempt to pull the pag group's record from it.
         $keydata = ['name' => $name, 'month' => $month];
         $cachekey = serialize($keydata);
@@ -143,8 +143,9 @@ class page_group extends persistent {
      *
      * @param profile $profile The profile to pull the information from.
      * @param int|null $month The month to record the profile under, or null to use the current month.
+     * @param bool $retry Whether to allow one retry for unique key errors.
      */
-    public static function record_fuzzy_counts(profile $profile, ?int $month = null) {
+    public static function record_fuzzy_counts(profile $profile, ?int $month = null, $retry = true) {
         // Do this only if both auto profiling and fuzzy counting is set.
         if (!get_config('tool_excimer', 'enable_auto') ||
             !get_config('tool_excimer', 'enable_fuzzy_count')) {
@@ -157,8 +158,12 @@ class page_group extends persistent {
 
         $existing = $pagegroup->to_record();
 
+        // Check if the page group existed before this call, can be determined by fuzzydurationcounts.
+        $fuzzydurationcounts = $pagegroup->get('fuzzydurationcounts');
+        $pagegroupexisted = !empty($fuzzydurationcounts);
+
         // Fuzzy increment the count.
-        $fuzzycount = manager::approximate_increment($pagegroup->get('fuzzycount'));
+        $fuzzycount = $pagegroupexisted ? manager::approximate_increment($pagegroup->get('fuzzycount')) : 0;
         $pagegroup->set('fuzzycount', $fuzzycount);
 
         // Fuzzy increment count for the duration slice.
@@ -168,19 +173,28 @@ class page_group extends persistent {
         if ($exp < 0) {
             $exp = 0;
         }
-        $fuzzydurationcounts[$exp] = manager::approximate_increment($fuzzydurationcounts[$exp] ?? 0);
+        $fuzzydurationexists = $pagegroupexisted && isset($fuzzydurationcounts[$exp]);
+        $fuzzydurationcounts[$exp] = $fuzzydurationexists ? manager::approximate_increment($fuzzydurationcounts[$exp]) : 0;
         $pagegroup->set('fuzzydurationcounts', $fuzzydurationcounts);
 
         // Add the duration to the fuzzy sum, treating each second as an event for counting.
         $fuzzydurationsum = $pagegroup->get('fuzzydurationsum');
         $duration = (int) round($duration);
-        for ($i = 0; $i < $duration; ++$i) {
-            $fuzzydurationsum = manager::approximate_increment($fuzzydurationsum);
-        }
+        $fuzzydurationsum = manager::approximate_increment($fuzzydurationsum, $duration);
         $pagegroup->set('fuzzydurationsum', $fuzzydurationsum);
 
         if ($existing != $pagegroup->to_record()) {
-            $pagegroup->save();
+            try {
+                $pagegroup->save();
+            } catch (\dml_exception $e) {
+                // We have a minor loss in data with concurrent updates that can cause duplicate rows.
+                // When creating new page groups we can catch unique key errors and then retry an update.
+                // Updates are harder to detect, but will only occur when fuzzycount is low, so can ignore.
+                if (!$pagegroupexisted && $retry) {
+                    // One retry should be enough to resolve unique key errors.
+                    self::record_fuzzy_counts($profile, $month, false);
+                }
+            }
         }
     }
 

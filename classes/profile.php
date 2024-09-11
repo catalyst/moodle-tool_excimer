@@ -353,7 +353,10 @@ class profile extends persistent {
             'dbwrites' => ['type' => PARAM_INT, 'default' => 0],
             'dbreplicareads' => ['type' => PARAM_INT, 'default' => 0],
             'lockreason' => ['type' => PARAM_TEXT, 'default' => ''],
-            'courseid' => ['type' => PARAM_INT, 'default' => null]
+            'courseid' => ['type' => PARAM_INT, 'default' => null],
+            'lockheld' => ['type' => PARAM_FLOAT, 'default' => 0],
+            'lockwait' => ['type' => PARAM_FLOAT, 'default' => 0],
+            'lockwaiturl' => ['type' => PARAM_TEXT, 'default' => ''],
         ];
     }
 }

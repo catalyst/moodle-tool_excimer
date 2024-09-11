@@ -40,6 +40,8 @@ class web_processor implements processor {
     protected $minduration;
     /** @var int */
     protected $samplems;
+    /** @var bool */
+    protected $partialsave;
 
     /**
      * Construct the web processor.
@@ -48,6 +50,7 @@ class web_processor implements processor {
         // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
         $this->minduration = (float) get_config('tool_excimer', 'trigger_ms') / 1000.0;
         $this->samplems = (int) get_config('tool_excimer', 'sample_ms');
+        $this->partialsave = get_config('tool_excimer', 'enable_partial_save');
     }
 
     /**
@@ -59,7 +62,9 @@ class web_processor implements processor {
         // Record and set initial memory usage at this point.
         $memoryusage = memory_get_usage();
 
-        $request = script_metadata::get_request();
+        global $ME, $SCRIPT;
+
+        $request = script_metadata::get_normalised_relative_script_path($ME, $SCRIPT);
         $starttime = (int) $manager->get_starttime();
         $this->sampleset = new sample_set($request, $starttime);
 
@@ -71,9 +76,11 @@ class web_processor implements processor {
         $this->profile->add_env($this->sampleset->name);
         $this->profile->set('created', $this->sampleset->starttime);
 
-        $manager->get_timer()->setCallback(function () use ($manager) {
-            $this->process($manager, false);
-        });
+        if ($this->partialsave) {
+            $manager->get_timer()->setCallback(function () use ($manager) {
+                $this->process($manager, false);
+            });
+        }
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {
@@ -122,6 +129,9 @@ class web_processor implements processor {
             $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
             $this->profile->set('numsamples', $this->sampleset->count());
             $this->profile->set('samplerate', $this->sampleset->filter_rate() * $this->samplems);
+            foreach (script_metadata::get_lock_info() as $field => $value) {
+                $this->profile->set($field, $value);
+            }
             $this->profile->save_record();
         }
     }

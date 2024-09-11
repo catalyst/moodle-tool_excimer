@@ -15,18 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Slowest Excimer profiling data in a table.
+ * Long session lock data in a table.
  *
  * @package   tool_excimer
- * @author    Jason den Dulk <jasondendulk@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Benjamin Walker <benjaminwalker@catalyst-au.net>
+ * @copyright 2024, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_excimer\grouped_script_profile_table;
-use tool_excimer\profile;
-use tool_excimer\profile_table;
+use tool_excimer\grouped_session_profile_table;
 use tool_excimer\profile_table_page;
+use tool_excimer\session_profile_table;
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -36,13 +35,13 @@ require_once($CFG->libdir.'/adminlib.php');
 $script = optional_param('script', '', PARAM_TEXT);
 $group = optional_param('group', '', PARAM_TEXT);
 
-admin_externalpage_setup('tool_excimer_report_slowest_web');
+admin_externalpage_setup('tool_excimer_report_session_locks');
 
-$url = new moodle_url('/admin/tool/excimer/slowest_web.php');
+$url = new moodle_url("/admin/tool/excimer/session_locks.php");
 
 if ($script || $group) {
-    $table = new profile_table('profile_table_slowest_web');
-    $table->sortable(true, 'duration', SORT_DESC);
+    $table = new session_profile_table('profile_table_session_locks');
+    $table->sortable(true, 'lockheld', SORT_DESC);
     if ($script) {
         $table->add_filter('request', $script);
         $url->params(['script' => $script]);
@@ -53,11 +52,10 @@ if ($script || $group) {
         $PAGE->navbar->add($group);
     }
 } else {
-    $table = new grouped_script_profile_table('profile_table_slowest_web');
+    $table = new grouped_session_profile_table('profile_table_session_locks');
     $table->set_url_path($url);
-    $table->sortable(true, 'maxduration', SORT_DESC);
+    $table->set_lockheld_threshold(1);
+    $table->sortable(true, 'maxlockheld', SORT_DESC);
 }
-
-$table->set_scripttypes([profile::SCRIPTTYPE_WEB, profile::SCRIPTTYPE_AJAX]);
 
 profile_table_page::display($table, $url);

@@ -444,5 +444,114 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023050800, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2023082900) {
+
+        // Define field id to be changed in tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('referer', XMLDB_TYPE_TEXT, null, null, false);
+
+        // Conditionally change the referer field.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2023082900, 'tool', 'excimer');
+    }
+
+    if ($oldversion < 2024050700) {
+
+        // Define field id to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('lockheld', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field id to be added to tool_excimer_profiles.
+        $field = new xmldb_field('lockwait', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field id to be added to tool_excimer_profiles.
+        $field = new xmldb_field('lockwaiturl', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2024050700, 'tool', 'excimer');
+    }
+
+    if ($oldversion < 2024082301) {
+        $exists = $DB->record_exists_select('tool_excimer_page_groups', $DB->sql_length('name') . ' > 255');
+        if ($exists) {
+            // Change precision of name to 255 so it can be used as an index.
+            // First we need to drop a few edge cases that have a length of 256.
+            $DB->delete_records_select('tool_excimer_page_groups', $DB->sql_length('name') . ' > 255');
+        }
+
+        // Check if there are any duplicates to be deleted by counting the
+        // expected total against the number of records in the table.
+        $expectedcount = $DB->count_records_sql('
+            SELECT count(*) FROM (
+                SELECT MIN(id) AS id
+                  FROM mdl_tool_excimer_page_groups
+                GROUP BY LOWER(name), month
+            ) a
+        ');
+        $recordcount = $DB->count_records('tool_excimer_page_groups');
+        $needsdedupe = $expectedcount !== $recordcount;
+
+        if ($needsdedupe) {
+            // Get ids to delete. This is still faster to query than handling
+            // everything in a DELETE WHERE NOT IN on certain DBs.
+            $removeids = $DB->get_fieldset_sql('
+                SELECT id
+                  FROM {tool_excimer_page_groups}
+                 WHERE id NOT IN (
+                     SELECT MIN(id)
+                       FROM {tool_excimer_page_groups}
+                      GROUP BY LOWER(name), month
+                 )');
+
+            // Remove the records in batch sizes of the following.
+            // Batchsize is arbitrary.
+            $batchsize = 1000;
+            $chunks = array_chunk($removeids, $batchsize);
+
+            foreach ($chunks as $chunk) {
+                [$insql, $inparams] = $DB->get_in_or_equal($chunk);
+                $DB->delete_records_select('tool_excimer_page_groups', "id $insql", $inparams);
+            }
+        }
+
+        // Change precision of name to 255 so it can be used as an index.
+        $table = new xmldb_table('tool_excimer_page_groups');
+        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'id');
+
+        // Launch change of precision for field name.
+        $dbman->change_field_precision($table, $field);
+
+        // Define index pagegroup (unique) to be added to tool_excimer_page_groups.
+        $table = new xmldb_table('tool_excimer_page_groups');
+        $index = new xmldb_index('pagegroup', XMLDB_INDEX_UNIQUE, ['name', 'month']);
+
+        // Conditionally launch add index pagegroup.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2024082301, 'tool', 'excimer');
+    }
+
     return true;
 }

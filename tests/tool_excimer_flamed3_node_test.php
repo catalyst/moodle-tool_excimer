@@ -63,25 +63,31 @@ class tool_excimer_flamed3_node_test extends excimer_testcase {
 
         $trace = [['function' => 'a'], ['function' => 'd'], ['function' => 'e']];
         $node->add_excimer_trace_tail($trace, 1);
+        $nodechildname = $node->children[0]->name;
+        $nodedoublechildname = $node->children[0]->children[0]->name;
+        $nodetriplechildname = $node->children[0]->children[0]->children[0]->name;
         $this->assertEquals(3, $node->value);
         $this->assertEquals(1, count($node->children));
-        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals('a', $nodechildname);
         $this->assertEquals(2, $node->children[0]->value);
-        $this->assertEquals('b', $node->children[0]->children[0]->name);
-        $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
+        $this->assertEquals('b', $nodedoublechildname);
+        $this->assertEquals('c', $nodetriplechildname);
         $this->assertEquals('a', $node->children[0]->name);
         $this->assertEquals('d', $node->children[0]->children[1]->name);
         $this->assertEquals('e', $node->children[0]->children[1]->children[0]->name);
 
         $trace = [['function' => 'm'], ['function' => 'n'], ['function' => 'e']];
         $node->add_excimer_trace_tail($trace, 1);
+        $nodechildname = $node->children[0]->name;
+        $nodedoublechildname = $node->children[0]->children[0]->name;
+        $nodetriplechildname = $node->children[0]->children[0]->children[0]->name;
         $this->assertEquals(4, $node->value);
         $this->assertEquals(2, count($node->children));
-        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals('a', $nodechildname);
         $this->assertEquals(2, $node->children[0]->value);
-        $this->assertEquals('b', $node->children[0]->children[0]->name);
-        $this->assertEquals('c', $node->children[0]->children[0]->children[0]->name);
-        $this->assertEquals('a', $node->children[0]->name);
+        $this->assertEquals('b', $nodedoublechildname);
+        $this->assertEquals('c', $nodetriplechildname);
+        $this->assertEquals('a', $nodechildname);
         $this->assertEquals('d', $node->children[0]->children[1]->name);
         $this->assertEquals('e', $node->children[0]->children[1]->children[0]->name);
         $this->assertEquals('m', $node->children[1]->name);

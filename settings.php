@@ -176,6 +176,15 @@ if ($hassiteconfig) {
             )
         );
 
+        $settings->add(
+            new admin_setting_configcheckbox(
+                'tool_excimer/enable_partial_save',
+                get_string('enable_partial_save', 'tool_excimer'),
+                get_string('enable_partial_save_desc', 'tool_excimer'),
+                0
+            )
+        );
+
         $item = new admin_setting_configtext(
             'tool_excimer/trigger_ms',
             get_string('request_ms', 'tool_excimer'),
@@ -200,7 +209,7 @@ if ($hassiteconfig) {
             'tool_excimer/num_slowest',
             get_string('num_slowest', 'tool_excimer'),
             get_string('num_slowest_desc', 'tool_excimer'),
-            '100',
+            '1000',
             PARAM_INT
         );
         $item->set_updatedcallback($clearprofiletimingscachecallback);
@@ -273,6 +282,16 @@ if ($hassiteconfig) {
             'tool_excimer_report_page_slow_course',
             get_string('report_page_slow_course', 'tool_excimer'),
             new moodle_url('/admin/tool/excimer/slow_course.php'),
+            'moodle/site:config'
+        )
+    );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_report_session_locks',
+            get_string('report_session_locks', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/session_locks.php'),
             'moodle/site:config'
         )
     );

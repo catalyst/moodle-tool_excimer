@@ -67,6 +67,12 @@ class tabs implements \templatable {
                     'text' => get_string('tab_page_course', 'tool_excimer'),
                 ],
                 [
+                    'id' => 'session_locks',
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/session_locks.php')]],
+                    'title' => get_string('report_session_locks', 'tool_excimer'),
+                    'text' => get_string('tab_session_locks', 'tool_excimer'),
+                ],
+                [
                     'id' => 'recent',
                     'link' => [['link' => new \moodle_url('/admin/tool/excimer/recent.php')]],
                     'title' => get_string('report_recent', 'tool_excimer'),

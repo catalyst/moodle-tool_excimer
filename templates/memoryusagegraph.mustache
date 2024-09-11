@@ -84,7 +84,7 @@ const memUsageInit = async () => {
     if (excimerData === undefined) {
         setLoading(true);
         try {
-            const data = await d3.json('/admin/tool/excimer/memoryusagegraph.json.php?profileid={{id}}')
+            const data = await d3.json('memoryusagegraph.json.php?profileid={{id}}')
             setLoading(false);
             excimerData = data;
             processGraph('memoryusagegraph', excimerData);

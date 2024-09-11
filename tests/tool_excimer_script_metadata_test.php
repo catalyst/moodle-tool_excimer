@@ -155,6 +155,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
             ['admin/index.php', '', 'a=1&b&c=3', 'admin/index.php?a=&b&c='],
             ['admin/index.php', '/1/2/3/', 'a=1&b&c=3', 'admin/index.php/x/x/x/?a=&b&c='],
             ['pluginfile.php', '/12/mod/book/3242/3/tool.png', '', 'pluginfile.php/x/mod/book/xxx'],
+            ['tokenpluginfile.php', '/token/12/user/private/0/image.png', '', 'tokenpluginfile.php/x/x/user/xxx'],
         ];
     }
 
@@ -185,6 +186,50 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
             [1024, 1024],
             [10000, 10000],
             [-1, 1024],
+        ];
+    }
+
+    /**
+     * Tests script_metadata::get_normalised_relative_script_path().
+     * @dataProvider relative_script_path_provider
+     * @covers \tool_excimer\script_metadata::get_normalised_relative_script_path
+     * @param string $path
+     * @param string $expected
+     */
+    public function test_get_normalised_relative_script_path(string $path, string $expected) {
+        script_metadata::init();
+        $this->assertEquals($expected, script_metadata::get_normalised_relative_script_path($path, null));
+        $this->assertEquals($expected, script_metadata::get_normalised_relative_script_path(null, $path));
+    }
+
+    /**
+     * Provider for test_get_normalised_relative_script_path().
+     * @return \string[][]
+     */
+    public function relative_script_path_provider(): array {
+        return [
+            ['', '/'],
+            ['/', '/'],
+            ['//', '/'],
+            ['///', '/'],
+            ['home', 'home'],
+            ['/home', 'home'],
+            ['home/', 'home'],
+            ['/home/', 'home'],
+            ['hello/world', 'hello/world'],
+            ['/hello/world', 'hello/world'],
+            ['/hello/world/', 'hello/world'],
+            ['/////hello////world///', 'hello/world'],
+            ['/////hello////world/index.php', 'hello/world'],
+            ['/////hello////world///index.php', 'hello/world'],
+            ['/////hello////world/index.php///', 'hello/world'],
+            ['/index.php', '/'],
+            ['/my//index.php////', 'my'],
+            ['/my//index.php////index.php', 'my'],
+            ['/my//index.php////index.php/', 'my'],
+            ['/my//index.php////index.php/hello/world?param=value&param2=value', 'my'],
+            ['https://example.com//index.php', 'https:/example.com'],
+            ['https://example.com/index.php/', 'https:/example.com'],
         ];
     }
 

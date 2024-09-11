@@ -29,6 +29,7 @@ class profile_table extends \table_sql {
     /** Columns to be displayed. */
     const COLUMNS = [
         'duration',
+        'lockwait',
         'responsecode',
         'request',
         'reason',
@@ -96,6 +97,8 @@ class profile_table extends \table_sql {
 
         $this->define_columns($columns);
         $this->column_class('duration', 'text-right');
+        $this->column_class('lockwait', 'text-right');
+        $this->column_class('lockheld', 'text-right');
         $this->column_class('responsecode', 'text-right');
         $this->define_headers($headers);
     }
@@ -187,7 +190,9 @@ class profile_table extends \table_sql {
             'middlename',
             'alternatename',
             'lockreason',
-            'courseid'
+            'courseid',
+            'lockwait',
+            'lockheld',
         ];
         $fieldsstr = implode(',', $fields);
 
@@ -292,6 +297,32 @@ class profile_table extends \table_sql {
      */
     public function col_duration(\stdClass $record): string {
         return helper::duration_display($record->duration, !$this->is_downloading());
+    }
+
+    /**
+     * Display value for 'lockwait' column entries.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
+    public function col_lockwait(\stdClass $record): string {
+        if (!isset($record->lockwait)) {
+            return get_string('unknown', 'tool_excimer');
+        }
+        return helper::duration_display($record->lockwait, !$this->is_downloading());
+    }
+
+    /**
+     * Display value for 'lockheld' column entries.
+     *
+     * @param \stdClass $record
+     * @return string
+     */
+    public function col_lockheld(\stdClass $record): string {
+        if (!isset($record->lockheld)) {
+            return get_string('unknown', 'tool_excimer');
+        }
+        return helper::duration_display($record->lockheld, !$this->is_downloading());
     }
 
     /**
