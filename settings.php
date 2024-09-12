@@ -295,4 +295,14 @@ if ($hassiteconfig) {
             'moodle/site:config'
         )
     );
+
+    $ADMIN->add(
+        'tool_excimer_reports',
+        new admin_externalpage(
+            'tool_excimer_import_profile',
+            get_string('import_profile', 'tool_excimer'),
+            new moodle_url('/admin/tool/excimer/import.php'),
+            'moodle/site:config'
+        )
+    );
 }

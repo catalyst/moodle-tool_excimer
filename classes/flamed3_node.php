@@ -87,6 +87,31 @@ class flamed3_node {
     }
 
     /**
+     * Loads data from an import. This will generally be a stdClass that has been loaded from json.
+     *
+     * @param \stdClass $data loaded from json
+     * @return flamed3_node|null flamed3_node if valid, null if any part of the import is invalid
+     */
+    public static function from_import(\stdClass $data): ?flamed3_node {
+        // Validate whether the stdClass is a flamed3_node.
+        if (!isset($data->name) || !isset($data->value) || !isset($data->children)) {
+            return null;
+        }
+
+        // Map children to flamenode instances.
+        $children = [];
+        foreach ($data->children as $child) {
+            $node = self::from_import($child);
+            if (empty($node)) {
+                return null;
+            }
+            $children[] = $node;
+        }
+
+        return new flamed3_node($data->name, $data->value, $children);
+    }
+
+    /**
      * Returns a name to represent the call in the trace node.
      *
      * @param array $tracenode Associative array containing info about the function

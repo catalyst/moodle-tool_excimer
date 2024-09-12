@@ -115,6 +115,9 @@ $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning',
 $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $profileid]);
 $lockprofilebutton = new \single_button($lockprofileurl, get_string('edit_lock', 'tool_excimer'), 'GET');
 
+$exporturl = new \moodle_url('/admin/tool/excimer/export.php', ['exportid' => $profileid]);
+$exportbutton = new \single_button($exporturl, get_string('export_profile', 'tool_excimer'), 'GET');
+
 $data = (array) $profile->to_record();
 
 // Totara doesn't like userdate being called within mustache.
@@ -167,6 +170,7 @@ $data['memoryusagemax'] = display_size($profile->get('memoryusagemax'));
 $data['delete_button'] = $output->render($deletebutton);
 $data['delete_all_button'] = $output->render($deleteallbutton);
 $data['profile_lock_button'] = $output->render($lockprofilebutton);
+$data['export_button'] = $output->render($exportbutton);
 
 $data['responsecode'] = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
 

@@ -84,6 +84,9 @@ class helper {
         if ($reason & profile::REASON_STACK) {
             $reasonsmatched[] = get_string('reason_stack', 'tool_excimer');
         }
+        if ($reason & profile::REASON_IMPORT) {
+            $reasonsmatched[] = get_string('reason_import', 'tool_excimer');
+        }
         return implode(',', $reasonsmatched);
     }
 

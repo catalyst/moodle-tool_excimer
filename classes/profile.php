@@ -47,6 +47,8 @@ class profile extends persistent {
     /** Reason - STACK - Set when maxstackdepth exceeds a predefined limit. */
     const REASON_STACK = 0b1000;
 
+    /** Reason - IMPORTED - Set when a profile is imported. */
+    const REASON_IMPORT = 0b010000;
 
     /** Reasons for profiling (bitmask flags). NOTE: Excluding the NONE option intentionally. */
     const REASONS = [
@@ -54,6 +56,7 @@ class profile extends persistent {
         self::REASON_SLOW,
         self::REASON_FLAMEALL,
         self::REASON_STACK,
+        self::REASON_IMPORT,
     ];
 
     /** String map for profiling reasons.  */
@@ -62,6 +65,7 @@ class profile extends persistent {
         self::REASON_SLOW => 'slowest',
         self::REASON_FLAMEALL => 'flameall',
         self::REASON_STACK => 'stackdepth',
+        self::REASON_IMPORT => 'import',
     ];
 
     /** Ajax scripts */
@@ -89,9 +93,9 @@ class profile extends persistent {
     /**
      * Custom getter for flame data.
      *
-     * @return string
+     * @return array|\stdClass|null json decoded value
      */
-    protected function get_flamedatad3(): string {
+    protected function get_flamedatad3() {
         return json_decode($this->get_flamedatad3json());
     }
 
@@ -101,7 +105,7 @@ class profile extends persistent {
      * @return string
      */
     public function get_flamedatad3json(): string {
-        return gzuncompress($this->raw_get('flamedatad3'));
+        return $this->get_uncompressed_json('flamedatad3');
     }
 
     /**
@@ -117,9 +121,9 @@ class profile extends persistent {
     /**
      * Custom getter for memory usage data.
      *
-     * @return string
+     * @return array|\stdClass|null json decoded value
      */
-    protected function get_memoryusagedatad3(): string {
+    protected function get_memoryusagedatad3() {
         return json_decode($this->get_uncompressed_json('memoryusagedatad3'));
     }
 
@@ -135,6 +139,76 @@ class profile extends persistent {
             return gzuncompress($rawdata);
         }
         return json_encode(null);
+    }
+
+    /**
+     * Gets the JSON for an export.
+     *
+     * @param mixed $removesitedata whether to remove site specific data
+     * @return string JSON
+     */
+    protected function get_export_json($removesitedata = true): string {
+        $data = new \stdClass();
+
+        // Remove unneeded properties from the export.
+        $allproperties = array_keys(static::properties_definition());
+        $removeproperties = ['id'];
+        if ($removesitedata) {
+            // Also remove data that is site specific or contains full urls.
+            $removeproperties += ['referer', 'userid', 'courseid', 'sessionid', 'lockreason', 'lockwaiturl'];
+        }
+        $properties = array_diff($allproperties, $removeproperties);
+
+        // Load data the same way as to_record(), but use get() to transform d3 data.
+        foreach ($properties as $property) {
+            $data->$property = $this->get($property);
+        }
+
+        return json_encode($data);
+    }
+
+    /**
+     * Download the profile in JSON format.
+     */
+    public function download(): void {
+        $id = $this->raw_get('id');
+        $filename = "excimer-profile-$id.json";
+
+        header('Content-Type: application/json; charset: utf-8');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+
+        echo $this->get_export_json();
+        exit();
+    }
+
+    /**
+     * Imports a prfile from JSON format.
+     *
+     * @param string $json
+     * @return bool|int the id of the imported profile, or false if unsuccessful
+     */
+    public static function import(string $json) {
+        global $DB;
+
+        $profile = new profile();
+        $data = json_decode($json);
+
+        // Don't mark this as slow on external sites.
+        $data->reason = self::REASON_IMPORT;
+
+        // Convert flamedatad3 to flame_node.
+        if (isset($data->flamedatad3)) {
+            $data->flamedatad3 = flamed3_node::from_import($data->flamedatad3);
+        }
+
+        foreach ($data as $property => $value) {
+            if (isset($value)) {
+                $profile->set($property, $value);
+            }
+        }
+
+        // The normal profile->save() doesn't work with flamedatad3 and memoryuseagedatad3.
+        return $DB->insert_record(self::TABLE, $profile->to_record());
     }
 
     /**

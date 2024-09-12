@@ -185,6 +185,7 @@ $string['reason_auto'] = 'Auto';
 $string['reason_slow'] = 'Slow';
 $string['reason_flameall'] = 'Flame All';
 $string['reason_stack'] = 'Recursion';
+$string['reason_import'] = 'Import';
 
 // Lock reason form.
 $string['lock_profile'] = 'Lock Profile';
@@ -209,6 +210,14 @@ $string['fuzzydurationrange'] = '{$a->low} - {$a->high}s';
 // Page count.
 $string['months_to_display'] = 'Months to display';
 $string['histogram_history'] = 'Histogram history';
+
+// Import/export profiles.
+$string['export_profile'] = 'Export profile';
+$string['import_profile'] = 'Import profile';
+$string['import_success'] = 'Profile imported successfully.';
+$string['import_error'] = 'Error saving the imported file contents.';
+$string['no_profile_file'] = 'No profile file found.';
+$string['profile_file'] = 'Profile file';
 
 // Miscellaneous.
 $string['cachedef_request_metadata'] = 'Excimer request metadata cache';

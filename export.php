@@ -15,23 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version.
+ * Export profiles.
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Benjamin Walker <benjaminwalker@catalyst-au.net>
+ * @copyright 2024, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+use tool_excimer\profile;
 
-$plugin->version = 2024091200;
-$plugin->release = 2024091200;
-$plugin->requires = 2017051500;    // Moodle 3.3 for Totara support.
-$plugin->supported = [35, 401];     // Supports Moodle 3.5 or later.
-// TODO $plugin->incompatible = ;  // Available as of Moodle 3.9.0 or later.
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
 
-$plugin->component = 'tool_excimer';
-$plugin->maturity  = MATURITY_STABLE;
+require_login();
+$context = context_system::instance();
 
-$plugin->dependencies = [];
+// Check for caps.
+require_capability('moodle/site:config', context_system::instance());
+
+$exportid = required_param('exportid', PARAM_INT);
+
+$profile = new profile($exportid);
+$profile->download();
