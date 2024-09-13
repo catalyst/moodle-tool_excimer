@@ -28,23 +28,31 @@
     Context variables required for this template:
     * id - The id of the profile
     * locale - Language setting (a BCP 47 language tag)
+    * memoryusagedatad3 - Memory usage data, only used to determine if a graph can be displayed.
 
     Example context (json):
     {
         "id" : 3,
-        "locale": "en"
+        "locale": "en",
+        "memoryusagedatad3": "true"
     }
 }}
 
 <h4>Memory Usage</h4>
 
 <div id="loadingmemoryusagegraph">
-    Loading...
+    {{#memoryusagedatad3}}
+        Loading...
+    {{/memoryusagedatad3}}
+    {{^memoryusagedatad3}}
+        No memory usage data is available.
+    {{/memoryusagedatad3}}
 </div>
 
 <div id="memoryusagegraph" style="margin-top: 1rem;"></div>
 <div id="memoryusagedetails" style="min-height: 1.5rem; clear: both;"></div>
 
+{{#memoryusagedatad3}}
 <script>
 
 /**
@@ -205,3 +213,4 @@ function processGraph(id, data) {
 }
 
 </script>
+{{/memoryusagedatad3}}
