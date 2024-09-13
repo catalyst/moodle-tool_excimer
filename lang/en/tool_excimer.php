@@ -106,6 +106,7 @@ $string['tab_session_locks'] = 'Long session locks';
 $string['unfinished'] = 'Unfinished';
 $string['tab_page_groups'] = 'Page Groups';
 $string['tab_page_course'] = 'Courses';
+$string['tab_import'] = 'Import';
 
 // Month Selector.
 $string['displaying_month'] = 'Displaying month';

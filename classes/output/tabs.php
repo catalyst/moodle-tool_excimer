@@ -90,6 +90,12 @@ class tabs implements \templatable {
                     'title' => get_string('report_page_groups', 'tool_excimer'),
                     'text' => get_string('tab_page_groups', 'tool_excimer'),
                 ],
+                [
+                    'id' => 'import',
+                    'link' => [['link' => new \moodle_url('/admin/tool/excimer/import.php')]],
+                    'title' => get_string('import_profile', 'tool_excimer'),
+                    'text' => get_string('tab_import', 'tool_excimer'),
+                ],
             ],
         ];
 

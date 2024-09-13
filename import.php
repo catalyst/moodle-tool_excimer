@@ -39,14 +39,13 @@ $context = context_system::instance();
 // Check for caps.
 require_capability('moodle/site:config', context_system::instance());
 
-$overviewurl = new moodle_url('/admin/category.php?category=tool_excimer_reports');
 $url = new moodle_url('/admin/tool/excimer/import.php');
 $PAGE->set_url($url);
 
 $customdata = [];
 $form = new import_form($PAGE->url->out(false), $customdata);
 if ($form->is_cancelled()) {
-    redirect($overviewurl);
+    redirect($url);
 }
 
 if (($data = $form->get_data())) {
@@ -58,7 +57,7 @@ if (($data = $form->get_data())) {
         if (empty($id)) {
             // Failed to save the imported profile.
             \core\notification::error(get_string('import_error', 'tool_excimer'));
-            redirect($overviewurl);
+            redirect($url);
         }
 
         // The import was a success, so redirect to the imported profile.
@@ -81,8 +80,9 @@ $PAGE->set_title($title);
 $PAGE->set_heading(get_string('pluginname', 'tool_excimer'));
 echo $OUTPUT->header();
 
-// Output headings.
-echo $OUTPUT->heading($heading);
+$renderer = $PAGE->get_renderer('tool_excimer');
+$tabs = new tool_excimer\output\tabs($url);
+echo $renderer->render_tabs($tabs);
 
 // And display the form, and its validation errors if there are any.
 $form->display();
