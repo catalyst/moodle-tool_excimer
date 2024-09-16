@@ -79,6 +79,21 @@ class profile extends persistent {
     /** Cron tasks */
     const SCRIPTTYPE_TASK = 4;
 
+    /** Profile fields to ignore during imports */
+    const IMPORT_IGNORE = [
+        'id',
+        'siteidentifier',
+    ];
+
+    /** Profile fields that are site specific and should be locked behind a site check during imports */
+    const IMPORT_CHECK_SITE = [
+        'referer',
+        'userid',
+        'usermodified',
+        'courseid',
+        'lockwaiturl',
+    ];
+
     /**
      * Custom setter to set the flame data.
      *
@@ -144,22 +159,16 @@ class profile extends persistent {
     /**
      * Gets the JSON for an export.
      *
-     * @param mixed $removesitedata whether to remove site specific data
      * @return string JSON
      */
-    protected function get_export_json($removesitedata = true): string {
+    protected function get_export_json(): string {
         $data = new \stdClass();
 
-        // Remove unneeded properties from the export.
-        $allproperties = array_keys(static::properties_definition());
-        $removeproperties = ['id'];
-        if ($removesitedata) {
-            // Also remove data that is site specific or contains full urls.
-            $removeproperties += ['referer', 'userid', 'courseid', 'sessionid', 'lockreason', 'lockwaiturl'];
-        }
-        $properties = array_diff($allproperties, $removeproperties);
+        // Add siteidentifier so imports can match sites.
+        $data->siteidentifier = md5(get_site_identifier());
 
         // Load data the same way as to_record(), but use get() to transform d3 data.
+        $properties = array_keys(static::properties_definition());
         foreach ($properties as $property) {
             $data->$property = $this->get($property);
         }
@@ -193,8 +202,22 @@ class profile extends persistent {
         $profile = new profile();
         $data = json_decode($json);
 
-        // Don't mark this as slow on external sites.
-        $data->reason = self::REASON_IMPORT;
+        // Remove properties that shouldn't be imported.
+        $removeproperties = self::IMPORT_IGNORE;
+
+        // If uploading to a different site, we should also remove data that is site specific.
+        if (!isset($data->siteidentifier) || $data->siteidentifier !== md5(get_site_identifier())) {
+            // Remove ids and full urls.
+            $removeproperties = array_merge($removeproperties, self::IMPORT_CHECK_SITE);
+
+            // Don't copy the reason to external sites.
+            $data->reason = 0;
+        }
+
+        // Add import to reasons.
+        if (isset($data->reason) && $data->reason !== self::REASON_IMPORT) {
+            $data->reason += self::REASON_IMPORT;
+        }
 
         // Convert flamedatad3 to flame_node.
         if (isset($data->flamedatad3)) {
@@ -202,7 +225,7 @@ class profile extends persistent {
         }
 
         foreach ($data as $property => $value) {
-            if (isset($value)) {
+            if (isset($value) && !in_array($property, $removeproperties)) {
                 $profile->set($property, $value);
             }
         }
