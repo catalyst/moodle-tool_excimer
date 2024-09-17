@@ -51,7 +51,8 @@ admin_externalpage_setup('tool_excimer_report_' . $reporttype);
 $form = new \tool_excimer\form\lock_reason_form($url);
 
 if ($data = $form->get_data()) {
-    $DB->update_record('tool_excimer_profiles', (object) ['id' => $profileid, 'lockreason' => trim($data->lockreason)]);
+    $lockreason = trim($data->lockreason);
+    $profile->update_lock($lockreason);
     redirect($data->returnurl);
 } else {
     $form->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);

@@ -53,6 +53,9 @@ class provider implements \core_privacy\local\metadata\provider,
                 'pathinfo' => 'field_pathinfo',
                 'parameters' => 'field_parameters',
                 'referer' => 'field_referer',
+                'usermodified' => 'field_usermodified',
+                'lockreason' => 'field_lockreason',
+                'timemodified' => 'field_timemodified',
             ],
             'privacy:metadata:tool_excimer_profiles'
         );
@@ -82,6 +85,7 @@ class provider implements \core_privacy\local\metadata\provider,
         $userid = $contextlist->get_user()->id;
         foreach ($contextlist as $context) {
             if ($context->contextlevel == CONTEXT_SYSTEM) {
+                // Profile data.
                 $list = [];
                 $rows = $DB->get_records(profile::TABLE, ['userid' => $userid]);
                 foreach ($rows as $row) {
@@ -92,6 +96,19 @@ class provider implements \core_privacy\local\metadata\provider,
                         'pathinfo' => $row->pathinfo,
                         'parameters' => $row->parameters,
                         'referer' => $row->referer,
+                    ];
+                }
+                // Lock data.
+                $rows = $DB->get_records(profile::TABLE, ['usermodified' => $userid]);
+                foreach ($rows as $row) {
+                    // Ignore if we have no lock and usermodified is covered by the profile.
+                    if (empty($row->lockreason) && $row->userid === $userid) {
+                        continue;
+                    }
+                    $list[] = [
+                        'usermodified' => $userid,
+                        'lockreason' => $row->lockreason,
+                        'timemodified' => $row->timemodified,
                     ];
                 }
                 writer::with_context($context)->export_data(
@@ -125,6 +142,7 @@ class provider implements \core_privacy\local\metadata\provider,
         foreach ($contextlist as $context) {
             if ($context->contextlevel == CONTEXT_SYSTEM) {
                 $DB->delete_records(profile::TABLE, ['userid' => $userid]);
+                $DB->set_field(profile::TABLE, 'usermodified', 0, ['usermodified' => $userid]);
             }
         }
     }
@@ -139,6 +157,7 @@ class provider implements \core_privacy\local\metadata\provider,
         if ($context->contextlevel == CONTEXT_SYSTEM) {
             $sql = "SELECT * FROM {tool_excimer_profiles}";
             $userlist->add_from_sql('userid', $sql, []);
+            $userlist->add_from_sql('usermodified', $sql, []);
         }
     }
 
@@ -154,6 +173,7 @@ class provider implements \core_privacy\local\metadata\provider,
             $users = $userlist->get_users();
             foreach ($users as $user) {
                 $DB->delete_records(profile::TABLE, ['userid' => $user->id]);
+                $DB->set_field(profile::TABLE, 'usermodified', 0, ['usermodified' => $user->id]);
             }
         }
     }

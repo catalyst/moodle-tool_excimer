@@ -301,6 +301,46 @@ class helper {
     }
 
     /**
+     * Displays the user who locked the profile and the date it was locked.
+     * @param profile $profile
+     * @return string
+     */
+    public static function lock_display_modified($profile): string {
+        global $DB;
+
+        // Only proceed if there's a lock.
+        if (empty($profile->get('lockreason'))) {
+            return '';
+        }
+
+        // Locks are the only time a profile should be modified after being fully saved.
+        $userid = $profile->get('usermodified');
+        $modified = $profile->get('timemodified');
+
+        // If we have neither userid or time modified a lock doesn't exist.
+        if (empty($userid) && empty($modified)) {
+            return '';
+        }
+
+        // We don't want to show user modified if it was set before the lock (i.e. during creation).
+        // No exact comparison, but can check it's different from created or greater than finished plus a small buffer.
+        if ($modified === $profile->get('timecreated') || ($profile->get('finished') + 10) > $modified) {
+            return '';
+        }
+
+        $user = $DB->get_record('user', ['id' => $userid]);
+        if ($user) {
+            $link = new \moodle_url('/user/profile.php', ['id' => $userid]);
+            $userdisplay = \html_writer::link($link, fullname($user));
+        } else {
+            $userdisplay = get_string('unknown', 'tool_excimer');
+        }
+        $date = userdate($modified, get_string('strftimedate', 'core_langconfig'));
+
+        return get_string('lockedinfo', 'tool_excimer', ['user' => $userdisplay, 'date' => $date]);
+    }
+
+    /**
      * Returns a HTML link based on the lockwait url.
      * @param string|null $lockwaiturl Relative lockwait url
      * @param float $lockwait Time spent waiting for the lock
@@ -327,7 +367,7 @@ class helper {
      * @return array export for template
      */
     public static function lockwait_display_help(\renderer_base $output, string $lockwaiturl) {
-        GLOBAL $CFG;
+        global $CFG;
 
         // Only show help information if we have an 'Unknown' url and debug session lock is off.
         if ($lockwaiturl === get_string('unknown', 'tool_excimer') && empty($CFG->debugsessionlock)) {

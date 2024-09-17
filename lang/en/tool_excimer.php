@@ -154,6 +154,10 @@ $string['field_pid'] = 'Process ID';
 $string['field_hostname'] = 'Host name';
 $string['field_useragent'] = 'User agent';
 $string['field_versionhash'] = 'Version Hash';
+$string['field_usermodified'] = 'User modified';
+$string['field_timecreated'] = 'Time created';
+$string['field_timemodified'] = 'Time modified';
+$string['field_lockreason'] = 'Lock reason';
 $string['field_courseid'] = 'Course';
 $string['field_lockheld'] = 'Session held';
 $string['field_lockwait'] = 'Session wait';
@@ -191,6 +195,7 @@ $string['reason_import'] = 'Import';
 // Lock reason form.
 $string['lock_profile'] = 'Lock Profile';
 $string['locked'] = 'Profile is locked';
+$string['lockedinfo'] = 'Locked by {$a->user} on {$a->date}';
 $string['lockreason'] = 'Lock Profile Reason';
 $string['lockreason_help'] = 'Submitting text will prevent this profile from being deleted.
     It will not be purged during cleanup tasks, nor can it be deleted manually (will also be excluded from group deletes).

@@ -198,6 +198,7 @@ if ($user) {
     $data['fullname'] = '-';
 }
 $data['lockreason'] = format_text($data['lockreason']);
+$data['lockmodified'] = helper::lock_display_modified($profile);
 $tabs = new tabs($url);
 
 // JavaScript locale string. Arguably "localecldr/langconfig" would be a better

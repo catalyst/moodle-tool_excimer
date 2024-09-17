@@ -63,6 +63,9 @@
 {{#lockreason}}
     <div class="alert alert-info alert-block">
         <h4>{{#str}} locked, tool_excimer {{/str}}</h4>
+        {{#lockmodified}}
+            <div class="mb-2">{{{lockmodified}}}</div>
+        {{/lockmodified}}
         {{{lockreason}}}
     </div>
 {{/lockreason}}

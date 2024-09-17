@@ -394,6 +394,40 @@ class profile extends persistent {
     }
 
     /**
+     * Updates the lock status of a profile.
+     *
+     * @param string $lockreason reason for the lock, or an empty string to remove the lock.
+     * @return void
+     */
+    public function update_lock(string $lockreason) {
+        global $DB, $USER;
+
+        $previousreason = $this->get('lockreason');
+        $updatefields = [
+            'id' => $this->get('id'),
+            'lockreason' => $lockreason,
+        ];
+
+        $now = time();
+
+        // Update modified info when creating a new lock.
+        if ($lockreason && !$previousreason) {
+            $updatefields['usermodified'] = $USER->id;
+            $updatefields['timemodified'] = $now;
+        }
+
+        // Reset modified info when removing a lock.
+        if (!$lockreason) {
+            // Return usermodified to what it was originally (userid should be an exact match).
+            $updatefields['usermodified'] = $this->get('userid');
+            $updatefields['timemodified'] = $now;
+        }
+
+        // Update directly as save() won't work with memoryusagedatad3 and flamedatad3.
+        $DB->update_record('tool_excimer_profiles', (object) $updatefields);
+    }
+
+    /**
      * Returns the slowest profile on record.
      *
      * @return false|mixed The slowest profile, or false if no profiles are stored.
