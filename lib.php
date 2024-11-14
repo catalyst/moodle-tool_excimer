@@ -38,23 +38,6 @@ function tool_excimer_before_session_start() {
 }
 
 /**
- * Hook to be run after initial site config.
- *
- * This allows the plugin to selectively activate the ExcimerProfiler while
- * having access to the database. If the site does not have the MDL-75014 available, then the timer will be
- * started at this point. It means that the initialisation of the
- * request up to this point will not be captured by the profiler. This
- * eliminates the need for an auto_prepend_file/auto_append_file.
- *
- * See also https://docs.moodle.org/dev/Login_callbacks#after_config.
- */
-function tool_excimer_after_config(): void {
-    // Start processor.
-    $manager = manager::get_instance();
-    $manager->start_processor();
-}
-
-/**
  * Hook to obtain a list of perfomence checks supplied by the plugin.
  *
  * @return \core\check\check[]

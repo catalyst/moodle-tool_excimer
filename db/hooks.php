@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version.
+ * Hook callbacks for tool_excimer
  *
  * @package   tool_excimer
- * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
- * @copyright 2021, Catalyst IT
+ * @author    Sumaiya Javed <sumaiya.javed@catalyst.net.nz>
+ * @copyright 2024, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2024110100;
-$plugin->release = 2024110100;
-$plugin->requires  = 2023100900; // Moodle 4.3.
-$plugin->supported = [403, 405];
-$plugin->component = 'tool_excimer';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->dependencies = [];
+$callbacks = [
+    [
+        'hook' => \core\hook\after_config::class,
+        'callback' => 'tool_excimer\local\hooks\after_config::callback',
+        'priority' => 0,
+    ],
+];
 

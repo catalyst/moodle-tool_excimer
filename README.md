@@ -103,10 +103,11 @@ what matters.
 
 ## Branches
 
-| Moodle version    | Branch           | PHP  | Excimer    |
-|-------------------|------------------|------|------------|
-| Moodle 3.5+       | MOODLE_35_STABLE | 7.1+ | 1.0.2+     |
-| Totara 10+        | MOODLE_35_STABLE | 7.1+ | 1.0.2+     |
+| Moodle version    | Branch           | PHP   | Excimer    |
+|-------------------|------------------|-------|------------|
+| Moodle 4.3+       | MOODLE_403_STABLE | 8.1  | 2024110100 |
+| Moodle 3.5+       | MOODLE_35_STABLE  | 7.1+ | 1.0.2+     |
+| Totara 10+        | MOODLE_35_STABLE  | 7.1+ | 1.0.2+     |
 
 ## Installation
 
