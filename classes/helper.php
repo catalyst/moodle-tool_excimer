@@ -322,9 +322,13 @@ class helper {
             return '';
         }
 
-        // We don't want to show user modified if it was set before the lock (i.e. during creation).
+        // We don't want to show user modified if it was set before the lock (i.e. during creation this is the profile user).
         // No exact comparison, but can check it's different from created or greater than finished plus a small buffer.
-        if ($modified === $profile->get('timecreated') || ($profile->get('finished') + 10) > $modified) {
+        // If a profile is unfinished we need to use a larger buffer to check against modified.
+        $created = $profile->get('timecreated');
+        $finished = $profile->get('finished');
+        $completed = !empty($finished) ? $finished + 10 : $created + DAYSECS;
+        if ($modified === $created || $completed > $modified) {
             return '';
         }
 
