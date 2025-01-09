@@ -38,6 +38,20 @@ function tool_excimer_before_session_start() {
 }
 
 /**
+ * After config
+ *
+ * This is a legacy callback that is used for compatibility with older Moodle versions.
+ * Moodle 4.5+ will use tool_abconfig\hook_callbacks::after_config instead.
+ *
+ * @return void|null
+ */
+function tool_excimer_after_config(): void {
+    // Start processor.
+    $manager = manager::get_instance();
+    $manager->start_processor();
+}
+
+/**
  * Hook to obtain a list of perfomence checks supplied by the plugin.
  *
  * @return \core\check\check[]
