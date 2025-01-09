@@ -41,7 +41,7 @@ function tool_excimer_before_session_start() {
  * After config
  *
  * This is a legacy callback that is used for compatibility with older Moodle versions.
- * Moodle 4.5+ will use tool_abconfig\hook_callbacks::after_config instead.
+ * Moodle 4.5+ will use tool_excimer\local\hooks\after_config::callback instead.
  *
  * @return void|null
  */
