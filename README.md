@@ -1,6 +1,5 @@
-<a href="https://github.com/catalyst/moodle-tool_excimer/actions/workflows/ci.yml?query=branch%3AMOODLE_35_STABLE">
-<img src="https://github.com/catalyst/moodle-tool_excimer/workflows/ci/badge.svg?branch=MOODLE_35_STABLE">
-</a>
+[![ci](https://github.com/catalyst/moodle-tool_excimer/actions/workflows/ci.yml/badge.svg?branch=MOODLE_403_STABLE)](https://github.com/catalyst/moodle-tool_excimer/actions/workflows/ci.yml?branch=MOODLE_403_STABLE)
+
 
 # moodle-tool_excimer
 
