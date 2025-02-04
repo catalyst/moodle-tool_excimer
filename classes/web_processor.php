@@ -42,6 +42,8 @@ class web_processor implements processor {
     protected $samplems;
     /** @var bool */
     protected $partialsave;
+    /** @var bool */
+    protected static $isinsideprocess = false;
 
     /**
      * Construct the web processor.
@@ -111,6 +113,14 @@ class web_processor implements processor {
      * @throws \dml_exception
      */
     public function process(manager $manager, bool $isfinal) {
+        // We want to prevent doubling up of processing, so skip if an existing process is still executing.
+        // The profile logs will be kept and processed the next time.
+        if (self::$isinsideprocess) {
+            debugging('tool_excimer: starting web_processor::process when previous process has not yet finished');
+            return;
+        }
+        self::$isinsideprocess = true;
+
         $log = $manager->get_profiler()->flush();
         $this->sampleset->add_many_samples($log);
 
@@ -134,5 +144,7 @@ class web_processor implements processor {
             }
             $this->profile->save_record();
         }
+
+        self::$isinsideprocess = false;
     }
 }
