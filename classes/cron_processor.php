@@ -42,6 +42,9 @@ class cron_processor implements processor {
     /** @var int */
     protected $samplems;
 
+    /** @var bool */
+    protected static $isinsideoninterval = false;
+
     /**
      * Initialises the processor
      *
@@ -93,6 +96,14 @@ class cron_processor implements processor {
      * @param manager $manager
      */
     public function on_interval(manager $manager) {
+        // We want to prevent doubling up of processing, so skip if an existing process is still executing.
+        // The profile logs will be kept and processed the next time.
+        if (self::$isinsideoninterval) {
+            debugging('tool_excimer: starting cron_processor::on_interval when previous call has not yet finished');
+            return;
+        }
+        self::$isinsideoninterval = true;
+
         $profiler = $manager->get_profiler();
         $log = $profiler->flush();
         $memoryusage = memory_get_usage();  // Record and set initial memory usage at this point.
@@ -135,6 +146,8 @@ class cron_processor implements processor {
             // So it needs to be saved each loop.
             $this->sampletime = $sampletime;
         }
+
+        self::$isinsideoninterval = false;
     }
 
     /**
