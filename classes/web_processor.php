@@ -44,6 +44,8 @@ class web_processor implements processor {
     protected $partialsave;
     /** @var bool */
     protected static $isinsideprocess = false;
+    /** @var bool  */
+    protected $hasoverlapped = false;
 
     /**
      * Construct the web processor.
@@ -80,7 +82,9 @@ class web_processor implements processor {
 
         if ($this->partialsave) {
             $manager->get_timer()->setCallback(function () use ($manager) {
-                $this->process($manager, false);
+                if (!$this->hasoverlapped) {
+                    $this->process($manager, false);
+                }
             });
         }
 
@@ -116,6 +120,7 @@ class web_processor implements processor {
         // We want to prevent doubling up of processing, so skip if an existing process is still executing.
         // The profile logs will be kept and processed the next time.
         if (self::$isinsideprocess) {
+            $this->hasoverlapped = true;
             debugging('tool_excimer: starting web_processor::process when previous process has not yet finished');
             return;
         }
