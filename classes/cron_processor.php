@@ -42,6 +42,9 @@ class cron_processor implements processor {
     /** @var int */
     protected $samplems;
 
+    /** @var bool */
+    protected static $alreadyprofiling = false;
+
     /**
      * Initialises the processor
      *
@@ -61,7 +64,7 @@ class cron_processor implements processor {
             function () use ($manager) {
                 $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
-                $this->on_interval($manager);
+                $this->on_interval($manager, true);
                 if ($this->tasksampleset) {
                     $this->process($manager, microtime(true));
                 }
@@ -91,8 +94,21 @@ class cron_processor implements processor {
      * We then check for a new task with the current sample.
      *
      * @param manager $manager
+     * @param bool $isfinal Set to true when this is called during shutdown.
      */
-    public function on_interval(manager $manager) {
+    public function on_interval(manager $manager, bool $isfinal = false) {
+        // We want to prevent doubling up of processing, so skip if an existing process is still executing.
+        // The profile logs will be kept and processed the next time.
+        if (self::$alreadyprofiling) {
+            debugging('tool_excimer: starting cron_processor::on_interval when previous call has not yet finished');
+            if ($isfinal) {
+                // This should never happen.
+                debugging('tool_excimer: alreadyprofiling is true during final on_interval.');
+            }
+            return;
+        }
+        self::$alreadyprofiling = true;
+
         $profiler = $manager->get_profiler();
         $log = $profiler->flush();
         $memoryusage = memory_get_usage();  // Record and set initial memory usage at this point.
@@ -135,6 +151,8 @@ class cron_processor implements processor {
             // So it needs to be saved each loop.
             $this->sampletime = $sampletime;
         }
+
+        self::$alreadyprofiling = false;
     }
 
     /**

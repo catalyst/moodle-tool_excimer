@@ -42,6 +42,10 @@ class web_processor implements processor {
     protected $samplems;
     /** @var bool */
     protected $partialsave;
+    /** @var bool */
+    protected static $alreadyprofiling = false;
+    /** @var bool  */
+    protected $hasoverlapped = false;
 
     /**
      * Construct the web processor.
@@ -78,7 +82,10 @@ class web_processor implements processor {
 
         if ($this->partialsave) {
             $manager->get_timer()->setCallback(function () use ($manager) {
-                $this->process($manager, false);
+                // Once overlapping has happened once, we prevent all future partial saving.
+                if (!$this->hasoverlapped) {
+                    $this->process($manager, false);
+                }
             });
         }
 
@@ -111,6 +118,19 @@ class web_processor implements processor {
      * @throws \dml_exception
      */
     public function process(manager $manager, bool $isfinal) {
+        // We want to prevent overlapping of processing, so skip if an existing process is still executing.
+        // The profile logs will be kept and processed the next time.
+        if (self::$alreadyprofiling) {
+            $this->hasoverlapped = true;
+            debugging('tool_excimer: starting web_processor::process when previous process has not yet finished');
+            if ($isfinal) {
+                // This should never happen.
+                debugging('tool_excimer: alreadyprofiling is true during final process.');
+            }
+            return;
+        }
+        self::$alreadyprofiling = true;
+
         $log = $manager->get_profiler()->flush();
         $this->sampleset->add_many_samples($log);
 
@@ -134,5 +154,7 @@ class web_processor implements processor {
             }
             $this->profile->save_record();
         }
+
+        self::$alreadyprofiling = false;
     }
 }
