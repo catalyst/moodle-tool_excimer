@@ -25,7 +25,7 @@ namespace tool_excimer;
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_helper_test extends \advanced_testcase {
+class tool_excimer_profile_helper_test extends \core_phpunit\testcase {
 
     /**
      * Set up before each test

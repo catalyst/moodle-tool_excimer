@@ -26,7 +26,7 @@ use PHPUnit\Framework\TestCase;
  * @copyright  2022, Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class excimer_testcase extends \advanced_testcase {
+class excimer_testcase extends \core_phpunit\testcase {
 
     /**
      * Creates a stub for the ExcimerLogEntry class for testing purposes.
