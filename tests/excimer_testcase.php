@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_excimer;
-
 use PHPUnit\Framework\TestCase;
+use tool_excimer\manager;
+use tool_excimer\profile;
 
 /**
  * Intermediary class to provide stubs for Excimer classes.
@@ -156,7 +156,7 @@ class excimer_testcase extends \core_phpunit\testcase {
      * @param float $starttime
      * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_manager_stub(processor $processor, \ExcimerProfiler $profiler, \ExcimerTimer $timer, float $starttime) {
+    protected function get_manager_stub(tool_excimer\processor $processor, \ExcimerProfiler $profiler, \ExcimerTimer $timer, float $starttime) {
 
         $stub = $this->getMockBuilder(manager::class)
             ->setConstructorArgs([$processor])

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_excimer;
-
 /**
  * Units tests for the scriptmetadata class.
  *
@@ -24,6 +22,10 @@ namespace tool_excimer;
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use tool_excimer\script_metadata;
+use tool_excimer\profile;
+
 class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
 
     /**
