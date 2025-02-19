@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_excimer;
-
 /**
  * Units tests for the helper class.
  *
@@ -25,7 +23,10 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \tool_excimer\helper
  */
-class tool_excimer_helper_test extends \advanced_testcase {
+
+use tool_excimer\helper;
+
+class tool_excimer_helper_test extends \core_phpunit\testcase {
     /**
      * Tests course_display_name function
      */

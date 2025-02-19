@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_excimer;
-
 /**
  * Defines names of plugin types and some strings used at the plugin managment
  *
@@ -25,7 +23,15 @@ namespace tool_excimer;
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_helper_test extends \advanced_testcase {
+
+use tool_excimer\script_metadata;
+use tool_excimer\profile;
+use tool_excimer\profile_helper;
+use tool_excimer\flamed3_node;
+use tool_excimer\manager;
+use tool_excimer\web_processor;
+
+class tool_excimer_profile_helper_test extends \core_phpunit\testcase {
 
     /**
      * Set up before each test

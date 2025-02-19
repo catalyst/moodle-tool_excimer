@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace tool_excimer;
-
 use tool_excimer\task\purge_page_groups;
 
 /**
@@ -26,7 +24,7 @@ use tool_excimer\task\purge_page_groups;
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_purge_page_group_test extends \advanced_testcase {
+class tool_excimer_purge_page_group_test extends \core_phpunit\testcase {
 
     /**
      * Set up before each test
