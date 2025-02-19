@@ -99,12 +99,19 @@ about. As you make changes improvements to code it should be smart enough to pri
 what matters.
 
 
-## Branches
+## Moodle supported branches
 
-| Moodle version    | Branch           | PHP  | Excimer    |
-|-------------------|------------------|------|------------|
-| Moodle 3.5+       | MOODLE_35_STABLE | 7.1+ | 1.0.2+     |
-| Totara 10+        | MOODLE_35_STABLE | 7.1+ | 1.0.2+     |
+| version    | Branch           | PHP   | Excimer    |
+|-------------------|------------------|-------|------------|
+| Moodle 4.3+       | MOODLE_403_STABLE | 8.1  | 2024110100 |
+| Moodle 3.5-4.2    | MOODLE_35_STABLE  | 7.1+ | 1.0.2+     |
+
+## Totara supported branches
+
+| version    | Branch           | PHP   | Excimer    |
+|-------------------|------------------|-------|------------|
+| Totara 10-18    | MOODLE_35_STABLE  | 7.1+ | 1.0.2+     |
+| Totara 19       | TOTARA_19  | 8.1+ | 1.0.2+     |
 
 ## Installation
 
