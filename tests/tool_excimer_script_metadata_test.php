@@ -56,7 +56,7 @@ class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
      *
      * @return array[]
      */
-    public function strip_parameters_provider(): array {
+    public static function strip_parameters_provider(): array {
         return [
             [
                 '',
@@ -112,7 +112,7 @@ class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
      *
      * @return \string[][]
      */
-    public function get_parameters_provider(): array {
+    public static function get_parameters_provider(): array {
         $args = [
             ['a=1&b=2&c=3', 'a=1&b=2&c=3'],
         ];
@@ -150,7 +150,7 @@ class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
      *
      * @return \string[][]
      */
-    public function scriptgroup_value_provider(): array {
+    public static function scriptgroup_value_provider(): array {
         return [
             ['admin/index.php', '', '', 'admin/index.php'],
             ['admin/index.php', '/a/54/c', '', 'admin/index.php/a/x/c'],
@@ -181,7 +181,7 @@ class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
      *
      * @return \int[][]
      */
-    public function sampling_limit_provider(): array {
+    public static function sampling_limit_provider(): array {
         return [
             [0, 1024],
             [1, 1],
@@ -208,7 +208,7 @@ class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
      * Provider for test_get_normalised_relative_script_path().
      * @return \string[][]
      */
-    public function relative_script_path_provider(): array {
+    public static function relative_script_path_provider(): array {
         return [
             ['', '/'],
             ['/', '/'],
@@ -254,7 +254,7 @@ class tool_excimer_script_metadata_test extends \core_phpunit\testcase {
      *
      * @return array[]
      */
-    public function get_redactable_param_names_provider(): array {
+    public static function get_redactable_param_names_provider(): array {
         return [
             [
                 "extra\nfeeble\n",
