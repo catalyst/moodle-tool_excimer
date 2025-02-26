@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use tool_excimer\task\purge_page_groups;
+use tool_excimer\monthint;
+use tool_excimer\page_group;
 
 /**
  * <insertdescription>
