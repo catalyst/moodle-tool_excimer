@@ -56,9 +56,8 @@ class after_config {
             // Start processor.
             $manager = manager::get_instance();
             $manager->start_processor();
-        } catch (\Exception $exception) {
-            debugging('tool_excimer_after_config error',
-            DEBUG_DEVELOPER, $exception->getTrace());
+        } catch (\Throwable $e) {
+            debugging('tool_excimer_after_config error', DEBUG_DEVELOPER, $e->getTrace());
         }
 
     }
