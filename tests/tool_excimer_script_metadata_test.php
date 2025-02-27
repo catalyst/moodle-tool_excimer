@@ -86,8 +86,9 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @covers \tool_excimer\script_metadata::get_parameters
      * @param string $querystring
      * @param string $expected
+     * @param bool $fallback params that shouldn't be retrieved using $ME
      */
-    public function test_get_parameters(string $querystring, string $expected) {
+    public function test_get_parameters(string $querystring, string $expected, bool $fallback) {
         global $ME;
 
         script_metadata::init();
@@ -95,7 +96,11 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
         $globalme = $ME ?? null;
         $ME = 'abc.php?' . $querystring;
         $params = script_metadata::get_parameters(profile::SCRIPTTYPE_WEB);
-        $this->assertEquals($expected, $params);
+        if (!$fallback) {
+            $this->assertEquals($expected, $params);
+        } else {
+            $this->assertEquals('', $params);
+        }
         $ME = $globalme;
 
         $serverquerystring = $_SERVER['QUERY_STRING'] ?? null;
@@ -112,13 +117,15 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      */
     public function get_parameters_provider(): array {
         $args = [
-            ['a=1&b=2&c=3', 'a=1&b=2&c=3'],
+            ['a=1&b=2&c=3', 'a=1&b=2&c=3', false],
+            ['a[0]=1', http_build_query(['a' => ['0' => 1]]), false],
+            ['a[0][0]=1', http_build_query(['a' => ['0' => ['0' => 1]]]), true],
         ];
         foreach (script_metadata::DENY_LIST as $tobedenied) {
-            $args[] = ['a=1&b=2&' . $tobedenied . '=1', 'a=1&b=2'];
+            $args[] = ['a=1&b=2&' . $tobedenied . '=1', 'a=1&b=2', false];
         }
         foreach (script_metadata::REDACT_LIST as $toberedacted) {
-            $args[] = ['a=1&b=2&' . $toberedacted . '=1', 'a=1&b=2&' . $toberedacted . '='];
+            $args[] = ['a=1&b=2&' . $toberedacted . '=1', 'a=1&b=2&' . $toberedacted . '=', false];
         }
         return $args;
     }
