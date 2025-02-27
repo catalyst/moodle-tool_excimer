@@ -139,7 +139,8 @@ class script_metadata {
             return implode(' ', array_slice($_SERVER['argv'], 1));
         }
 
-        if (isset($ME)) {
+        // There is a core bug where url::get_query string cannot handle nested array keys.
+        if (isset($ME) && !str_contains($ME, '][')) {
             $querystring = (new \moodle_url($ME))->get_query_string(false);
         } else if (isset($_SERVER['QUERY_STRING'])) {
             $querystring = $_SERVER['QUERY_STRING'];
