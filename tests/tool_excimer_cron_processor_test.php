@@ -49,11 +49,11 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         $taskname = $processor->findtaskname($entry);
         $this->assertNull($taskname);
 
-        $entry = $this->get_log_entry_stub(['bud', 'cron_run_inner_scheduled_task', 'ced::execute']);
+        $entry = $this->get_log_entry_stub(['bud', 'run_inner_scheduled_task', 'ced::execute']);
         $taskname = $processor->findtaskname($entry);
         $this->assertEquals('ced', $taskname);
 
-        $entry = $this->get_log_entry_stub(['bud', 'cron_run_inner_scheduled_task', 'max']);
+        $entry = $this->get_log_entry_stub(['bud', 'run_inner_scheduled_task', 'max']);
         $taskname = $processor->findtaskname($entry);
         $this->assertNull($taskname);
     }
@@ -90,8 +90,8 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
         // Adding 3 more samples.
         $profiler = $this->get_profiler_stub([
             ['a', 'b'],
-            ['cron_run_inner_scheduled_task', 'max::execute', 'read::john'],
-            ['cron_run_inner_scheduled_task', 'max::execute'],
+            ['run_inner_scheduled_task', 'max::execute', 'read::john'],
+            ['run_inner_scheduled_task', 'max::execute'],
         ], $period, ($period * 1));
 
         $manager = $this->get_manager_stub($processor, $profiler, $timer, $started);
@@ -105,9 +105,9 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
 
         // Adding four more samples. Should record two sample sets into the database.
         $profiler = $this->get_profiler_stub([
-            ['cron_run_inner_scheduled_task', 'max::execute'],
+            ['run_inner_scheduled_task', 'max::execute'],
             ['a', 'b'],
-            ['cron_run_inner_adhoc_task', 'simle::execute'],
+            ['run_inner_adhoc_task', 'simle::execute'],
             ['a', 'b'],
         ], $period, ($period * 4));
 

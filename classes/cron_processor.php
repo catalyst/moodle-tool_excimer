@@ -166,7 +166,7 @@ class cron_processor implements processor {
         $length = count($trace);
         for ($i = 0; $i < $length; ++$i) {
             $fnname = $trace[$i]['function'] ?? null;
-            if ($fnname == 'cron_run_inner_scheduled_task' || $fnname == 'cron_run_inner_adhoc_task') {
+            if ($fnname == 'run_inner_scheduled_task' || $fnname == 'run_inner_adhoc_task') {
                 if ($i + 1 < $length) {
                     if ('execute' == ($trace[$i + 1]['function'] ?? null)) {
                         return $trace[$i + 1]['class'];
