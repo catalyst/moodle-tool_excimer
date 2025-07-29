@@ -47,13 +47,13 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
         $firstofthismonth = date('Y-m') . '-01';
         $months = [
             monthint::from_timestamp(time()),
-            monthint::from_timestamp(strtotime($firstofthismonth . '1 month ago')),
-            monthint::from_timestamp(strtotime($firstofthismonth . '2 months ago')),
-            monthint::from_timestamp(strtotime($firstofthismonth . '3 months ago')),
-            monthint::from_timestamp(strtotime($firstofthismonth . '4 months ago')),
-            monthint::from_timestamp(strtotime($firstofthismonth . '5 months ago')),
-            monthint::from_timestamp(strtotime($firstofthismonth . '6 months ago')),
-            monthint::from_timestamp(strtotime($firstofthismonth . '7 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 1 month ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 2 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 3 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 4 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 5 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 6 months ago')),
+            monthint::from_timestamp(strtotime($firstofthismonth . 'second Monday of 7 months ago')),
         ];
         foreach ($months as $month) {
             $DB->insert_record(page_group::TABLE, (object) ['month' => $month, 'fuzzydurationcounts' => '']);
@@ -80,7 +80,7 @@ class tool_excimer_purge_page_group_test extends \advanced_testcase {
         $this->assertEquals($cutoff + 1, count($records));
 
         // Check that no month stored is earlier than the cutoff month.
-        $cutoffmonth = monthint::from_timestamp(strtotime(($cutoff + 1) . ' months ago'));
+        $cutoffmonth = monthint::from_timestamp(strtotime('second Monday of' . ($cutoff + 1) . ' months ago'));
         foreach ($records as $record) {
             $this->assertGreaterThan($cutoffmonth, (int) $record->month);
         }
