@@ -25,11 +25,11 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \tool_excimer\helper
  */
-class tool_excimer_helper_test extends \advanced_testcase {
+final class tool_excimer_helper_test extends \advanced_testcase {
     /**
      * Tests course_display_name function
      */
-    public function test_course_display_name() {
+    public function test_course_display_name(): void {
         $this->resetAfterTest(true);
 
         // Test with real course.
@@ -44,7 +44,7 @@ class tool_excimer_helper_test extends \advanced_testcase {
     /**
      * Tests course_display_link function
      */
-    public function test_course_display_link() {
+    public function test_course_display_link(): void {
         $this->resetAfterTest(true);
 
         // Test with real course.

@@ -24,9 +24,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['adminname'] = 'Excimer profiler';
 $string['pluginname'] = 'Excimer profiler';
 $string['reportname'] = 'Profiler reports';
-$string['adminname'] = 'Excimer profiler';
 
 // Admin Tree.
 $string['report_slowest'] = 'Slowest profiles';

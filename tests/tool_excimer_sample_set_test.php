@@ -29,14 +29,14 @@ require_once(__DIR__ . "/excimer_testcase.php");
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_sample_set_test extends excimer_testcase {
+final class tool_excimer_sample_set_test extends excimer_testcase {
 
     /**
      * Tests adding samples to the object.
      *
      * @covers \tool_excimer\sample_set::add_many_samples
      */
-    public function test_add_sample() {
+    public function test_add_sample(): void {
         $samples = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
@@ -56,7 +56,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
      * @covers \tool_excimer\sample_set::add_many_samples
      * @covers \tool_excimer\sample_set::apply_doubling
      */
-    public function test_filtering() {
+    public function test_filtering(): void {
         $samples = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
@@ -98,7 +98,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
      * @covers \tool_excimer\sample_set::add_many_samples
      * @covers \tool_excimer\sample_set::apply_doubling
      */
-    public function test_stripping() {
+    public function test_stripping(): void {
         $samples = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
@@ -131,7 +131,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
      *
      * @covers \tool_excimer\sample_set::add_many_samples
      */
-    public function test_automatic_doubling_when_adding_samples() {
+    public function test_automatic_doubling_when_adding_samples(): void {
         $samples1 = [
             $this->get_log_entry_stub(['a']),
             $this->get_log_entry_stub(['b']),
@@ -180,7 +180,7 @@ class tool_excimer_sample_set_test extends excimer_testcase {
      *
      * @covers \tool_excimer\sample_set::add_many_samples
      */
-    public function test_event_count() {
+    public function test_event_count(): void {
         script_metadata::init();
         $eventcounts = [1, 1, 4, 1, 2, 1];
         $samples1 = [

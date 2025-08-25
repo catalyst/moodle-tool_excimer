@@ -410,7 +410,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         $table->add_field('fuzzydurationsum', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0);
 
         // Adding keys to table tool_excimer_profile_groups.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
         // Conditionally launch create table for tool_excimer_profile_groups.
         if (!$dbman->table_exists($table)) {

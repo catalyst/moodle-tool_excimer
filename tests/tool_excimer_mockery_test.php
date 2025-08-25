@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 namespace tool_excimer;
 
 defined('MOODLE_INTERNAL') || die();
@@ -29,7 +28,7 @@ require_once(__DIR__ . "/excimer_testcase.php"); // This is needed. File will no
  * @copyright  2022, Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_mockery_test extends excimer_testcase {
+final class tool_excimer_mockery_test extends excimer_testcase {
 
     /**
      * Tests excimer_mockery::get_log_entry_stub()
