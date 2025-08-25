@@ -25,7 +25,7 @@ namespace tool_excimer;
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_helper_test extends \advanced_testcase {
+final class tool_excimer_profile_helper_test extends \advanced_testcase {
 
     /**
      * Set up before each test
@@ -401,7 +401,7 @@ class tool_excimer_profile_helper_test extends \advanced_testcase {
      *
      * @covers \tool_excimer\profile
      */
-    public function test_minimal_db_reads_writes_for_warm_cache() {
+    public function test_minimal_db_reads_writes_for_warm_cache(): void {
         global $DB;
         $this->preventResetByRollback();
 

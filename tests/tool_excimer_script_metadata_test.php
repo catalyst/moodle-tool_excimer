@@ -24,7 +24,7 @@ namespace tool_excimer;
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_script_metadata_test extends \advanced_testcase {
+final class tool_excimer_script_metadata_test extends \advanced_testcase {
 
     /**
      * Set up before each test
@@ -43,7 +43,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param array $params
      * @param array $expected
      */
-    public function test_strip_parameters(string $config, array $params, array $expected) {
+    public function test_strip_parameters(string $config, array $params, array $expected): void {
         set_config('redact_params', $config, 'tool_excimer');
         script_metadata::init();
         $this->assertEquals($expected, script_metadata::strip_parameters($params));
@@ -88,7 +88,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param string $expected
      * @param bool $fallback params that shouldn't be retrieved using $ME
      */
-    public function test_get_parameters(string $querystring, string $expected, bool $fallback) {
+    public function test_get_parameters(string $querystring, string $expected, bool $fallback): void {
         global $ME;
 
         script_metadata::init();
@@ -140,7 +140,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param string $parameters
      * @param string $expected
      */
-    public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected) {
+    public function test_get_groupby_value(string $request, string $pathinfo, string $parameters, string $expected): void {
         script_metadata::init();
         $profile = new profile();
         $profile->set('request', $request);
@@ -174,7 +174,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param int $limit
      * @param int $expected
      */
-    public function test_get_sample_limit(int $limit, int $expected) {
+    public function test_get_sample_limit(int $limit, int $expected): void {
         $this->preventResetByRollback();
         set_config('samplelimit', $limit, 'tool_excimer');
         script_metadata::init();
@@ -203,7 +203,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param string $path
      * @param string $expected
      */
-    public function test_get_normalised_relative_script_path(string $path, string $expected) {
+    public function test_get_normalised_relative_script_path(string $path, string $expected): void {
         script_metadata::init();
         $this->assertEquals($expected, script_metadata::get_normalised_relative_script_path($path, null));
         $this->assertEquals($expected, script_metadata::get_normalised_relative_script_path(null, $path));
@@ -248,7 +248,7 @@ class tool_excimer_script_metadata_test extends \advanced_testcase {
      * @param string $config
      * @param array $expected
      */
-    public function test_get_redactable_param_names(string $config, array $expected) {
+    public function test_get_redactable_param_names(string $config, array $expected): void {
         set_config('redact_params', $config, 'tool_excimer');
         script_metadata::init();
         $this->assertEquals($expected, script_metadata::get_redactable_param_names());
