@@ -25,7 +25,7 @@ namespace tool_excimer;
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_profile_test extends \advanced_testcase {
+final class tool_excimer_profile_test extends \advanced_testcase {
 
     /**
      * Set up before each test
@@ -169,7 +169,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
      *
      * @covers \tool_excimer\profile::save_record
      */
-    public function test_partial_save() {
+    public function test_partial_save(): void {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(1); // TODO change to use stubs.
@@ -255,7 +255,7 @@ class tool_excimer_profile_test extends \advanced_testcase {
      *
      * @covers \tool_excimer\profile::save_record
      */
-    public function test_save_course() {
+    public function test_save_course(): void {
         global $COURSE, $DB;
         $this->preventResetByRollback();
 
