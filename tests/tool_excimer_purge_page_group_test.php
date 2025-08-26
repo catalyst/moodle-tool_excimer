@@ -27,7 +27,7 @@ use tool_excimer\page_group;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-final class tool_excimer_purge_page_group_test extends \advanced_testcase {
+final class tool_excimer_purge_page_group_test extends \core_phpunit\testcase {
     /**
      * Set up before each test
      */
