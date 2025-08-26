@@ -28,7 +28,7 @@ require_once(__DIR__ . "/excimer_testcase.php"); // This is needed. File will no
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_excimer_cron_processor_test extends excimer_testcase {
+final class tool_excimer_cron_processor_test extends excimer_testcase {
 
     /**
      * Set up before each test
@@ -43,7 +43,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
      *
      * @covers \tool_excimer\cron_processor::findtaskname
      */
-    public function test_findtaskname() {
+    public function test_findtaskname(): void {
         $processor = new cron_processor();
         $entry = $this->get_log_entry_stub(['c::a', 'b', 'c']);
         $taskname = $processor->findtaskname($entry);
@@ -63,7 +63,7 @@ class tool_excimer_cron_processor_test extends excimer_testcase {
      *
      * @covers \tool_excimer\cron_processor::on_interval
      */
-    public function test_on_interval() {
+    public function test_on_interval(): void {
         global $DB;
         $this->preventResetByRollback();
 
