@@ -39,17 +39,52 @@ class purge_page_groups extends \core\task\scheduled_task {
     }
 
     /**
-     * Do the job.
+     * Execute the scheduled task.
+     *
+     * @param int|null $now Optional timestamp for testing
      */
-    public function execute() {
+    public function execute(?int $now = null) {
+        $this->purge($now ?? time());
+    }
+
+    /**
+     * Purge page group records older than the retention period.
+     *
+     * @param int $now Current timestamp (injectable for tests)
+     */
+    public function purge(int $now): void {
         global $DB;
 
-        // Because we want to keep n full months of data, we add one to include the current month.
-        $months = get_config('tool_excimer', 'expiry_fuzzy_counts');
-        // Only purge if a value is set.
-        if (!empty($months)) {
-            $month = monthint::from_timestamp(strtotime(($months + 1) . ' months ago'));
-            $DB->delete_records_select(page_group::TABLE, 'month <= ' . $month);
+        $keepmonths = (int)get_config('tool_excimer', 'expiry_fuzzy_counts');
+
+        if (!empty($keepmonths) && $keepmonths > 0) {
+            $cutoff = $this->calculate_cutoff_month($now, $keepmonths);
+
+            // Delete all page group records less than or equal our cutoff month.
+            $DB->delete_records_select(page_group::TABLE, 'month <= ' . $cutoff);
         }
     }
+
+    /**
+     * Calculate the cutoff month number based on $now and months to keep.
+     *
+     * @param int $now Current timestamp
+     * @param int $keepmonths Number of months to retain
+     * @return int Cutoff month number (for comparison in DB)
+     */
+    public function calculate_cutoff_month(int $now, int $keepmonths): int {
+        // Because we want to keep n full months of data (n = $keepmonths).
+        // We add one month ($keepmonths += 1) to include the current month.
+        $keepmonths += 1;
+
+        $date = new \DateTime();
+        $date->setTimestamp($now);
+        $date->modify('first day of this month');
+        $date->modify("-{$keepmonths} months");
+
+        // Return a custom from_timestamp year/month number (e.g., 202508).
+        // We can call this custom timestamp the "cutoff month".
+        return monthint::from_timestamp($date->getTimestamp());
+    }
+
 }
