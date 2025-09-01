@@ -84,18 +84,15 @@ class sample_set {
             $this->samples[] = $sample;
             $this->counter = 0;
         }
-        // If this is a log entry, it will count the number of total events
-        // processed instead.
+        // If this is a log entry.
         // Each time a sample is added, recalculate the maxstackdepth for this set.
+        $this->totaladded++;
         if ($sample instanceof \ExcimerLogEntry) {
-            $this->totaladded += $sample->getEventCount();
             $trace = $sample->getTrace();
             if ($trace) {
                 $this->maxstackdepth = max($this->maxstackdepth, count($trace));
             }
-            return;
         }
-        $this->totaladded++;
     }
 
     /**
@@ -145,17 +142,23 @@ class sample_set {
      * This is the total sum of events. Noting that the filtering, if required,
      * will have a reduced amount when compared to the totaladded count.
      *
-     * @return int count of $this->samples
+     * @return int total of events stored in $this->samples
      */
     public function count(): int {
-        $count = count($this->samples);
-        if ($count > 0 && $this->samples[0] instanceof \ExcimerLogEntry) {
-            $count = array_reduce($this->samples, function ($acc, $sample) {
-                $acc += $sample->getEventCount();
-                return $acc;
-            }, 0);
+        return count($this->samples);
+    }
+
+    /**
+     * Get Sample Rate.
+     * @param float|null $finished Finished time.
+     * @return float rate
+     */
+    public function get_sample_rate(?float $finished = null): float {
+        if ($finished === null) {
+            $finished = microtime(true);
         }
-        return $count;
+        $ms = ($finished - $this->starttime) * 1000;
+        return $ms / count($this->samples);
     }
 
     /**

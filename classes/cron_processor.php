@@ -199,7 +199,7 @@ class cron_processor implements processor {
             $profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
             $profile->set('numsamples', $this->tasksampleset->count());
-            $profile->set('samplerate', $this->tasksampleset->filter_rate() * $this->samplems);
+            $profile->set('samplerate', $this->tasksampleset->get_sample_rate($finishtime));
             $profile->save_record();
         }
         return $profile;
