@@ -266,7 +266,8 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(\stdClass $record): string {
-        $displayedrequest = helper::full_request($record);
+        $fullrequest = helper::full_request($record);
+        $displayedrequest = format_text($fullrequest, FORMAT_PLAIN);
 
         // Return plaintext for download table response format.
         if ($this->is_downloading()) {
@@ -277,7 +278,7 @@ class profile_table extends \table_sql {
         $html = $record->method . ' ' . \html_writer::link(
                 new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
                 shorten_text($displayedrequest, 100, true, '…'),
-                ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
+                ['title' => $fullrequest, 'style' => 'word-break: break-all']);
 
         if (!empty($record->lockreason)) {
             $html .= ' ' . \html_writer::tag('span', get_string('locked', 'tool_excimer'), [
