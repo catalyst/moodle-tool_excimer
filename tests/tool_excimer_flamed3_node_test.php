@@ -31,7 +31,6 @@ require_once(__DIR__ . "/excimer_testcase.php"); // This is needed. File will no
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class tool_excimer_flamed3_node_test extends excimer_testcase {
-
     /**
      * Set up before each test
      */

@@ -18,7 +18,6 @@ namespace tool_excimer\check;
 
 use tool_excimer\profile;
 use tool_excimer\helper;
-
 use core\check\check;
 use core\check\result;
 
@@ -31,7 +30,6 @@ use core\check\result;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class slowest extends check {
-
     /**
      * Links to the profile list ordered by duration.
      *
@@ -60,7 +58,7 @@ class slowest extends check {
             $profile->duration = format_time($profile->duration);
             $status = result::INFO;
             $summary = get_string('checkslowest:summary', 'tool_excimer', $profile);
-            $profile->request = helper::full_request($profile);
+            $profile->request = format_text(helper::full_request($profile), FORMAT_PLAIN);
             $details = get_string('checkslowest:details', 'tool_excimer', $profile);
         }
         return new result($status, $summary, $details);

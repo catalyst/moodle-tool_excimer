@@ -37,7 +37,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     // Automatically generated Moodle v3.11.0 release upgrade line.
     // Put any upgrade step following this.
     if ($oldversion < 2021121500) {
-
         // Define field pathinfo to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('pathinfo', XMLDB_TYPE_CHAR, '256', null, XMLDB_NOTNULL, null, null, 'request');
@@ -87,7 +86,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021122001) {
-
         // Define field contenttypecategory to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('contenttypecategory', XMLDB_TYPE_CHAR, '30', null, null, null, null, 'flamedatad3');
@@ -164,7 +162,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021122900) {
-
         // Changing type of field flamedatad3 on table tool_excimer_profiles to binary.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('flamedatad3', XMLDB_TYPE_BINARY, null, null, null, null, null, 'numsamples');
@@ -188,7 +185,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021123100) {
-
         // Define field dbreads to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('dbreads', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'contenttypevalue');
@@ -211,7 +207,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022010400) {
-
         // Define field dbreads to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('dbreplicareads', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'dbwrites');
@@ -226,7 +221,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022011300) {
-
         // Define field usermodified to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, 0, 'dbreplicareads');
@@ -255,7 +249,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022011400) {
-
         // Define field groupby to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('groupby', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'request');
@@ -279,7 +272,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022040802) {
-
         // Change field 'parameters' into a text field.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('parameters', XMLDB_TYPE_TEXT);
@@ -293,7 +285,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022041300) {
-
         // Define field memoryusagedatad3 to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('memoryusagedatad3', XMLDB_TYPE_BINARY, null, null, null, null, null, 'flamedatad3');
@@ -317,7 +308,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022041301) {
-
         // Define field samplerate to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('samplerate', XMLDB_TYPE_INTEGER, '11', null, null, null, null, 'memoryusagemax');
@@ -382,7 +372,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022090100) {
-
         // Define field lockreason to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('lockreason', XMLDB_TYPE_TEXT, null, null, null, null, null, 'samplerate');
@@ -397,7 +386,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022091500) {
-
         // Define table tool_excimer_profile_groups to be created.
         $table = new xmldb_table('tool_excimer_page_groups');
 
@@ -422,7 +410,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023050800) {
-
         // Define field id to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, null);
@@ -445,7 +432,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023082900) {
-
         // Define field id to be changed in tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('referer', XMLDB_TYPE_TEXT, null, null, false);
@@ -460,7 +446,6 @@ function xmldb_tool_excimer_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024050700) {
-
         // Define field id to be added to tool_excimer_profiles.
         $table = new xmldb_table('tool_excimer_profiles');
         $field = new xmldb_field('lockheld', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);

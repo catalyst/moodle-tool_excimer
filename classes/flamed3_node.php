@@ -25,7 +25,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class flamed3_node {
-
     /** @var string Node name */
     public $name;
     /** @var int Node value */

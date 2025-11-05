@@ -30,7 +30,6 @@ require_once(__DIR__ . "/excimer_testcase.php");
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class tool_excimer_sample_set_test extends excimer_testcase {
-
     /**
      * Tests adding samples to the object.
      *

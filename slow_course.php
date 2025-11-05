@@ -26,8 +26,8 @@ use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
 use tool_excimer\grouped_courses_profile_table;
 
-require_once(__DIR__.'/../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
 

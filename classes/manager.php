@@ -63,7 +63,7 @@ class manager {
      * @return false|\moodle_database|null
      */
     public static function get_altconnection() {
-        global $DB;
+        global $CFG, $DB;
 
         // Do not use an alternate connection during unit tests.
         if (PHPUNIT_TEST) {
@@ -71,11 +71,16 @@ class manager {
         }
 
         if (is_null(self::$altconnection)) {
-            $cfg = $DB->export_dbconfig();
-            self::$altconnection = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
+            self::$altconnection = \moodle_database::get_driver_instance($CFG->dbtype, $CFG->dblibrary);
             try {
                 self::$altconnection->connect(
-                    $cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+                    $CFG->dbhost,
+                    $CFG->dbuser,
+                    $CFG->dbpass,
+                    $CFG->dbname,
+                    $CFG->prefix,
+                    $CFG->dboptions
+                );
             } catch (\moodle_exception $e) {
                 // Rather than engage with complex error handling, we choose to simply not record, and move on.
                 debugging('tool_excimer: failed to open second DB connection when saving profile: ' . $e->getMessage());
@@ -332,8 +337,10 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = profile_helper::get_min_duration_for_group_and_reason($profile->get('scriptgroup'),
-            profile::REASON_SLOW);
+        $requestminduration = profile_helper::get_min_duration_for_group_and_reason(
+            $profile->get('scriptgroup'),
+            profile::REASON_SLOW
+        );
         if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }

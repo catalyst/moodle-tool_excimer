@@ -27,7 +27,6 @@ use tool_excimer\profile_helper;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class expire_logs extends \core\task\scheduled_task {
-
     /**
      * Get a descriptive name for this task (shown to admins).
      *

@@ -37,8 +37,10 @@ final class tool_excimer_helper_test extends \advanced_testcase {
         $this->assertEquals($course->fullname, helper::course_display_name($course->id));
 
         // Test with course that does not exist.
-        $this->assertEquals(get_string('deletedcourse', 'tool_excimer', $course->id + 1),
-            helper::course_display_name($course->id + 1));
+        $this->assertEquals(
+            get_string('deletedcourse', 'tool_excimer', $course->id + 1),
+            helper::course_display_name($course->id + 1)
+        );
     }
 
     /**

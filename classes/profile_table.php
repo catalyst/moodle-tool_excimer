@@ -25,7 +25,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile_table extends \table_sql {
-
     /** Columns to be displayed. */
     const COLUMNS = [
         'duration',
@@ -137,7 +136,7 @@ class profile_table extends \table_sql {
         }
 
         if ($this->scripttypes) {
-            list($query, $params) = $DB->get_in_or_equal($this->scripttypes);
+            [$query, $params] = $DB->get_in_or_equal($this->scripttypes);
             $filterstring .= " and scripttype $query";
             $filterparams = array_merge($filterparams, $params);
         }
@@ -165,7 +164,7 @@ class profile_table extends \table_sql {
      */
     protected function put_sql(): void {
 
-        list($filterstring, $filterparams) = $this->get_filter_for_sql();
+        [$filterstring, $filterparams] = $this->get_filter_for_sql();
 
         $fields = [
             '{tool_excimer_profiles}.id as id',
@@ -240,14 +239,16 @@ class profile_table extends \table_sql {
         // Wrap fields in span which more accurately describes them on hover.
         if (!$this->is_downloading()) {
             $str = \html_writer::span(
-                    $scripttype,
-                    '',
-                    ['title' => get_string('field_scripttype', 'tool_excimer')]);
+                $scripttype,
+                '',
+                ['title' => get_string('field_scripttype', 'tool_excimer')]
+            );
             if ($contenttype) {
                 $str .= ' - ' . \html_writer::span(
-                        $contenttype,
-                        '',
-                        ['title' => get_string('field_contenttypecategory', 'tool_excimer')]);
+                    $contenttype,
+                    '',
+                    ['title' => get_string('field_contenttypecategory', 'tool_excimer')]
+                );
             }
         } else {
             $str = $scripttype;
@@ -266,7 +267,8 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(\stdClass $record): string {
-        $displayedrequest = helper::full_request($record);
+        $fullrequest = helper::full_request($record);
+        $displayedrequest = format_text($fullrequest, FORMAT_PLAIN);
 
         // Return plaintext for download table response format.
         if ($this->is_downloading()) {
@@ -275,9 +277,10 @@ class profile_table extends \table_sql {
 
         // Return the web format.
         $html = $record->method . ' ' . \html_writer::link(
-                new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
-                shorten_text($displayedrequest, 100, true, '…'),
-                ['title' => $displayedrequest, 'style' => 'word-break: break-all']);
+            new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $record->id]),
+            shorten_text($displayedrequest, 100, true, '…'),
+            ['title' => $fullrequest, 'style' => 'word-break: break-all']
+        );
 
         if (!empty($record->lockreason)) {
             $html .= ' ' . \html_writer::tag('span', get_string('locked', 'tool_excimer'), [
@@ -385,16 +388,18 @@ class profile_table extends \table_sql {
         $actions = '';
 
         $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $record->id]);
-        $lockprofileicon = new \pix_icon($record->lockreason != '' ? 'i/unlock' : 'i/lock',
-            get_string('edit_lock', 'tool_excimer'));
-        $lockprofilelink = new \action_link($lockprofileurl, '', null, null,  $lockprofileicon);
+        $lockprofileicon = new \pix_icon(
+            $record->lockreason != '' ? 'i/unlock' : 'i/lock',
+            get_string('edit_lock', 'tool_excimer')
+        );
+        $lockprofilelink = new \action_link($lockprofileurl, '', null, null, $lockprofileicon);
         $actions .= $OUTPUT->render($lockprofilelink);
 
         if (empty($record->lockreason)) {
             $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $record->id, 'sesskey' => sesskey()]);
             $confirmaction = new \confirm_action(get_string('deleteprofilewarning', 'tool_excimer'));
             $deleteicon = new \pix_icon('t/delete', get_string('deleteprofile', 'tool_excimer'));
-            $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);
+            $link = new \action_link($deleteurl, '', $confirmaction, null, $deleteicon);
             $actions .= $OUTPUT->render($link);
         }
 
