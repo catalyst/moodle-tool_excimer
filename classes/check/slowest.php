@@ -60,7 +60,7 @@ class slowest extends check {
             $profile->duration = format_time($profile->duration);
             $status = result::INFO;
             $summary = get_string('checkslowest:summary', 'tool_excimer', $profile);
-            $profile->request = helper::full_request($profile);
+            $profile->request = format_text(helper::full_request($profile), FORMAT_PLAIN);
             $details = get_string('checkslowest:details', 'tool_excimer', $profile);
         }
         return new result($status, $summary, $details);

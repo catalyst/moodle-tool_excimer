@@ -142,7 +142,7 @@ if (isset($data['lockwait'])) {
     $data['lockwaiturl'] = '-';
 }
 
-$data['request'] = helper::full_request($profile->to_record());
+$data['request'] = format_text(helper::full_request($profile->to_record()), FORMAT_PLAIN);
 
 // If GET request then it should be reproducable as a idempotent request (readonly).
 if ($profile->get('method') === 'GET') {
