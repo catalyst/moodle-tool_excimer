@@ -25,7 +25,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class session_profile_table extends profile_table {
-
     /** Columns to be displayed */
     const COLUMNS = [
         'duration',

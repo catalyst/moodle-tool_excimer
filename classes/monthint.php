@@ -32,7 +32,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class monthint {
-
     /** Format to create the value. */
     protected const FORMAT = '%Y%m';
     /** Extra amount to move to go from Dec->Jan or Jan->Dec. */

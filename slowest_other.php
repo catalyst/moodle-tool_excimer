@@ -29,7 +29,7 @@ use tool_excimer\profile_table;
 use tool_excimer\profile_table_page;
 
 require_once('../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 // The script can either be a URL, or a task name, or whatever may be used
 // for a request name. So we need to accept TEXT input.

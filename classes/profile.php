@@ -28,7 +28,6 @@ use core\persistent;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile extends persistent {
-
     /** Table name. */
     const TABLE = 'tool_excimer_profiles';
 
@@ -262,7 +261,7 @@ class profile extends persistent {
         $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));
         $this->raw_set('scriptgroup', script_metadata::get_groupby_value($this));
 
-        list($contenttypevalue, $contenttypekey, $contenttypecategory) = script_metadata::resolve_content_type($this);
+        [$contenttypevalue, $contenttypekey, $contenttypecategory] = script_metadata::resolve_content_type($this);
         $this->raw_set('contenttypevalue', $contenttypevalue);
         $this->raw_set('contenttypekey', $contenttypekey);
         $this->raw_set('contenttypecategory', $contenttypecategory);

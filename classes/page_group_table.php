@@ -25,7 +25,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class page_group_table extends \table_sql {
-
     /** Columns to be displayed. */
     const COLUMNS = [
         'name',
@@ -135,7 +134,7 @@ class page_group_table extends \table_sql {
         $histogram = helper::make_histogram($record);
         $lines = [];
         foreach ($histogram as $rec) {
-            $lines[] = get_string('fuzzydurationrange', 'tool_excimer', $rec) . ': '. $rec['value'];
+            $lines[] = get_string('fuzzydurationrange', 'tool_excimer', $rec) . ': ' . $rec['value'];
         }
         return implode(\html_writer::empty_tag('br'), $lines);
     }
