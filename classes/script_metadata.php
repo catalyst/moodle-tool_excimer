@@ -28,7 +28,6 @@ use core_filetypes;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class script_metadata {
-
     /** Request's fallback value for when the $SCRIPT is null */
     const REQUEST_UNKNOWN = 'UNKNOWN';
 
@@ -269,8 +268,8 @@ class script_metadata {
             foreach ($headers as $header) {
                 $index = strpos(strtolower($header), 'content-type');
                 if ($index === 0) {
-                    list($contenttypewhole) = explode(';', $header, 2);
-                    list(, $contenttypevalue) = explode(': ', $contenttypewhole, 2);
+                    [$contenttypewhole] = explode(';', $header, 2);
+                    [, $contenttypevalue] = explode(': ', $contenttypewhole, 2);
                     break;
                 }
             }
@@ -305,8 +304,8 @@ class script_metadata {
                 $contenttypekey = 'js';
                 $contenttypecategory = 'js';
             } else if ($requestbasename === 'font.php') {
-                list(, $trailingpathinfo) = explode('.', $pathinfo, 2);
-                list($extension) = explode('?', $trailingpathinfo, 2);
+                [, $trailingpathinfo] = explode('.', $pathinfo, 2);
+                [$extension] = explode('?', $trailingpathinfo, 2);
 
                 // Use the extension of the request to determine the 'key' (more
                 // or less analogous to the expected file extension anyways).

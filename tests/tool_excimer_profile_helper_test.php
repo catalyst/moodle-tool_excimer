@@ -26,7 +26,6 @@ namespace tool_excimer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class tool_excimer_profile_helper_test extends \advanced_testcase {
-
     /**
      * Set up before each test
      */
@@ -83,8 +82,14 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
      * @param string $lockreason
      * @return int The ID of the record.
      */
-    public function quick_save(string $request, flamed3_node $node, int $reason,
-            float $duration, int $created = 12345, string $lockreason = ''): int {
+    public function quick_save(
+        string $request,
+        flamed3_node $node,
+        int $reason,
+        float $duration,
+        int $created = 12345,
+        string $lockreason = ''
+    ): int {
         $profile = new profile();
         $profile->add_env($request);
         $profile->set('reason', $reason);
@@ -130,23 +135,29 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         profile_helper::purge_fastest($numtokeep);
         $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
-        $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
+        $this->assertEquals(
+            $sortedtimes[0],
+            $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW])
+        );
 
         // Should remove a few more profiles.
         $numtokeep = 5;
         profile_helper::purge_fastest($numtokeep);
         $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
         $sortedtimes = array_slice($sortedtimes, -$numtokeep);
-        $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
+        $this->assertEquals(
+            $sortedtimes[0],
+            $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW])
+        );
 
         // Should remove no profiles.
         $numtokeepnew = 9;
         profile_helper::purge_fastest($numtokeepnew);
         $this->assertEquals($numtokeep + 3, $DB->count_records(profile::TABLE));
-        $this->assertEquals($sortedtimes[0],
-                $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW]));
+        $this->assertEquals(
+            $sortedtimes[0],
+            $DB->get_field_sql("select min(duration) from {tool_excimer_profiles} where reason = ?", [profile::REASON_SLOW])
+        );
     }
 
     /**
@@ -427,7 +438,7 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->assertEquals(0, $DB->perf_get_reads() - $startreads);
         $this->assertEquals(0, $DB->perf_get_writes() - $startwrites);
 
-        foreach ([
+        $durations = [
             3, // Should add 3.
             3, // Should add 3 - request quota reached.
             4, // Should add 4.
@@ -438,18 +449,20 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
                // reached. It will warm the reason cache and set the min value.
             4, // Same as above, but for the request. Since min is 4 it won't be
                // added, but this will warm the cache.
-        ] as $duration) {
+        ];
+        foreach ($durations as $duration) {
             $this->mock_profile_insertion_with_duration($duration / 1000);
         }
 
         $startwarmcachereads = $DB->perf_get_reads();
         $startwarmcachewrites = $DB->perf_get_writes();
-        foreach ([
+        $durations = [
             // Cache should be warm, anything under here should be 0/0.
             1, 2, 3, 4,
             1, 2, 3, 4,
             1, 2, 3, 4,
-        ] as $duration) {
+        ];
+        foreach ($durations as $duration) {
             $this->mock_profile_insertion_with_duration($duration / 1000);
         }
 

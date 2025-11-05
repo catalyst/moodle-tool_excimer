@@ -27,7 +27,6 @@ use tool_excimer\task\purge_page_groups;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class tool_excimer_purge_page_group_test extends \advanced_testcase {
-
     /**
      * Set up before each test
      */

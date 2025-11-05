@@ -26,7 +26,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile_helper {
-
     /** @var string Name used for group of all */
     public const ALL_GROUP_CACHE_KEY = '__all__';
 
@@ -208,7 +207,6 @@ class profile_helper {
             "created < :cutoff and lockreason = ''",
             ['cutoff' => $cutoff]
         );
-
     }
 
     /**
@@ -244,7 +242,7 @@ class profile_helper {
         // Remove profiles where the reason (after updating) would be
         // REASON_NONE, as they no longer have a reason to exist.
         if (!empty($idstodelete)) {
-            list($insql, $inparams) = $DB->get_in_or_equal($idstodelete);
+            [$insql, $inparams] = $DB->get_in_or_equal($idstodelete);
             $DB->delete_records_select(profile::TABLE, 'id ' . $insql, $inparams);
             $updateordelete = true;
         }
@@ -276,8 +274,8 @@ class profile_helper {
             "SELECT id, scriptgroup, reason, lockreason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
-           ORDER BY duration ASC
-               ", [profile::REASON_NONE, $numtokeep]
+           ORDER BY duration ASC",
+            [profile::REASON_NONE, $numtokeep]
         );
 
         // Group profiles by request / page.
@@ -330,7 +328,10 @@ class profile_helper {
             "SELECT id, reason, lockreason
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
-           ORDER BY duration DESC", [profile::REASON_NONE], $numtokeep);
+           ORDER BY duration DESC",
+            [profile::REASON_NONE],
+            $numtokeep
+        );
 
         if (!empty($records)) {
             self::remove_reason($records, profile::REASON_SLOW);

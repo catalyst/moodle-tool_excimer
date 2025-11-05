@@ -27,7 +27,6 @@ use core\persistent;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class page_group extends persistent {
-
     /** The name of the database table. */
     public const TABLE = 'tool_excimer_page_groups';
 
@@ -147,8 +146,10 @@ class page_group extends persistent {
      */
     public static function record_fuzzy_counts(profile $profile, ?int $month = null, $retry = true) {
         // Do this only if both auto profiling and fuzzy counting is set.
-        if (!get_config('tool_excimer', 'enable_auto') ||
-            !get_config('tool_excimer', 'enable_fuzzy_count')) {
+        if (
+            !get_config('tool_excimer', 'enable_auto') ||
+            !get_config('tool_excimer', 'enable_fuzzy_count')
+        ) {
             return;
         }
 

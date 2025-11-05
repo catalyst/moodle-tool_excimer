@@ -34,7 +34,6 @@ namespace tool_excimer;
  * @package   tool_excimer
  */
 interface processor {
-
     /**
      * Initialises the processor
      *

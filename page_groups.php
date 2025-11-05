@@ -29,7 +29,7 @@ use tool_excimer\helper;
 use tool_excimer\output\tabs;
 
 require_once('../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 $download = optional_param('download', '', PARAM_ALPHA);
 $month = optional_param('month', null, PARAM_INT);

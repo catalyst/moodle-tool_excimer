@@ -30,7 +30,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class grouped_profile_table extends profile_table {
-
     /** Columns to be displayed.*/
     const COLUMNS = [
         'maxduration',
@@ -61,7 +60,7 @@ abstract class grouped_profile_table extends profile_table {
      * Sets the SQL for the table.
      */
     protected function put_sql(): void {
-        list($filterstring, $filterparams) = $this->get_filter_for_sql();
+        [$filterstring, $filterparams] = $this->get_filter_for_sql();
 
         $this->set_count_sql(
             "SELECT count(distinct request)
@@ -76,9 +75,9 @@ abstract class grouped_profile_table extends profile_table {
         $this->set_sql(
             $groupby . ', COUNT(request) as requestcount, MAX(created) as maxcreated, MIN(created) as mincreated,
             MAX(duration) as maxduration, MIN(duration) as minduration',
-           '{tool_excimer_profiles}',
-           $filterstring,
-           $filterparams
+            '{tool_excimer_profiles}',
+            $filterstring,
+            $filterparams
         );
     }
 
@@ -173,11 +172,13 @@ abstract class grouped_profile_table extends profile_table {
         $groupby = $this->get_group_by();
         $filter = json_encode([$groupby => $record->$groupby]);
 
-        $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php',
-                ['filter' => $filter, 'sesskey' => sesskey()]);
+        $deleteurl = new \moodle_url(
+            '/admin/tool/excimer/delete.php',
+            ['filter' => $filter, 'sesskey' => sesskey()]
+        );
         $confirmaction = new \confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
         $deleteicon = new \pix_icon('t/delete', get_string('deleteprofiles_script', 'tool_excimer'));
-        $link = new \action_link($deleteurl, '', $confirmaction, null,  $deleteicon);
+        $link = new \action_link($deleteurl, '', $confirmaction, null, $deleteicon);
         return $OUTPUT->render($link);
     }
 }
