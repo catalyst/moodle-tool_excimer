@@ -26,8 +26,7 @@ use tool_excimer\profile_helper;
  * @copyright 2021, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class purge_fastest  extends \core\task\scheduled_task {
-
+class purge_fastest extends \core\task\scheduled_task {
     /**
      * Get a descriptive name for this task (shown to admins).
      *

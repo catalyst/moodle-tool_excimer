@@ -32,4 +32,3 @@ $plugin->supported = [403, 405];
 $plugin->component = 'tool_excimer';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->dependencies = [];
-

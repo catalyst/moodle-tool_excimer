@@ -28,7 +28,6 @@ use tool_excimer\page_group;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class purge_page_groups extends \core\task\scheduled_task {
-
     /**
      * Get a descriptive name for this task (shown to admins).
      *
@@ -86,5 +85,4 @@ class purge_page_groups extends \core\task\scheduled_task {
         // We can call this custom timestamp the "cutoff month".
         return monthint::from_timestamp($date->getTimestamp());
     }
-
 }

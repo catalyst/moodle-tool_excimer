@@ -27,7 +27,6 @@ use tool_excimer\manager;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class after_config {
-
     /**
      * Hook to be run after initial site config.
      *
@@ -59,6 +58,5 @@ class after_config {
         } catch (\Throwable $e) {
             debugging('tool_excimer_after_config error', DEBUG_DEVELOPER, $e->getTrace());
         }
-
     }
 }

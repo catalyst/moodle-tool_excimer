@@ -27,7 +27,6 @@ use tool_excimer\output\tabs;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile_table_page {
-
     /**
      * Common display function for reports.
      *

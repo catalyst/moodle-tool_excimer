@@ -25,7 +25,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class grouped_session_profile_table extends grouped_script_profile_table {
-
     /** Columns to be displayed.*/
     const COLUMNS = [
         'maxlockheld',
@@ -51,7 +50,7 @@ class grouped_session_profile_table extends grouped_script_profile_table {
      * Sets the SQL for the table.
      */
     protected function put_sql(): void {
-        list($filterstring, $filterparams) = $this->get_filter_for_sql();
+        [$filterstring, $filterparams] = $this->get_filter_for_sql();
 
         $this->set_count_sql(
             "SELECT count(distinct request)
@@ -72,9 +71,9 @@ class grouped_session_profile_table extends grouped_script_profile_table {
         $this->set_sql(
             $groupby . ', COUNT(request) as requestcount, MAX(created) as maxcreated, MIN(created) as mincreated,
             MAX(lockheld) as maxlockheld, MIN(lockheld) as minlockheld',
-           '{tool_excimer_profiles}',
-           $filterstring,
-           $filterparams
+            '{tool_excimer_profiles}',
+            $filterstring,
+            $filterparams
         );
     }
 

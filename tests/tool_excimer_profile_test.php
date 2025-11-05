@@ -26,7 +26,6 @@ namespace tool_excimer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class tool_excimer_profile_test extends \advanced_testcase {
-
     /**
      * Set up before each test
      */
