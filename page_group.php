@@ -31,7 +31,7 @@ use tool_excimer\output\tabs;
 use tool_excimer\page_group;
 
 require_once('../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 $expiry = get_config('tool_excimer', 'expiry_fuzzy_counts');
 $pagegroupid = required_param('id', PARAM_INT);

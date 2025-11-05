@@ -65,15 +65,21 @@ if ($hassiteconfig) {
             $warntext  .= $OUTPUT->notification(get_string('noexcimerprofiler', 'tool_excimer', $packageinstalllink));
         }
         $warntext .= get_string('general_settings_desc', 'tool_excimer');
-        $settings->add(new admin_setting_heading('tool_excimer/general',
-            new lang_string('general_settings', 'tool_excimer'), $warntext));
+        $settings->add(new admin_setting_heading(
+            'tool_excimer/general',
+            new lang_string('general_settings', 'tool_excimer'),
+            $warntext
+        ));
 
         $settings->add(
             new admin_setting_configtext(
                 'tool_excimer/sample_ms',
                 get_string('period_ms', 'tool_excimer'),
-                get_string('period_ms_desc', 'tool_excimer',
-                    ['min' => script_metadata::SAMPLING_PERIOD_MIN * 1000, 'max' => script_metadata::SAMPLING_PERIOD_MAX * 1000]),
+                get_string(
+                    'period_ms_desc',
+                    'tool_excimer',
+                    ['min' => script_metadata::SAMPLING_PERIOD_MIN * 1000, 'max' => script_metadata::SAMPLING_PERIOD_MAX * 1000]
+                ),
                 '10',
                 PARAM_INT
             )

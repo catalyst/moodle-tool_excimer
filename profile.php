@@ -28,7 +28,7 @@ use tool_excimer\helper;
 use tool_excimer\output\tabs;
 
 require_once('../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 /** Report section - recent - lists the most recent profiles first */
 const REPORT_SECTION_RECENT = 'recent';
@@ -83,7 +83,7 @@ $url = new moodle_url("/admin/tool/excimer/index.php");
 
 $profile = new profile($profileid);
 
-$prevurl = new moodle_url('/admin/tool/excimer/' . $report. '.php', ['group' => $profile->get('scriptgroup')]);
+$prevurl = new moodle_url('/admin/tool/excimer/' . $report . '.php', ['group' => $profile->get('scriptgroup')]);
 $PAGE->navbar->add($profile->get('scriptgroup'), $prevurl);
 
 $PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'));
@@ -107,8 +107,10 @@ if ($profile->get('lockreason') != '') {
     $deletebutton->disabled = true;
 }
 
-$deleteallurl = new \moodle_url('/admin/tool/excimer/delete.php',
-        ['script' => $profile->get('request'), 'returnurl' => $returnurl]);
+$deleteallurl = new \moodle_url(
+    '/admin/tool/excimer/delete.php',
+    ['script' => $profile->get('request'), 'returnurl' => $returnurl]
+);
 $deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_script', 'tool_excimer'));
 $deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
 

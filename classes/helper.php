@@ -28,7 +28,6 @@ use core_filetypes;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
-
     /**
      * Maps HTTP status codes to css badges.
      */

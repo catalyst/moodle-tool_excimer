@@ -18,7 +18,6 @@ namespace tool_excimer\check;
 
 use tool_excimer\profile;
 use tool_excimer\helper;
-
 use core\check\check;
 use core\check\result;
 
@@ -31,7 +30,6 @@ use core\check\result;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class slowest extends check {
-
     /**
      * Links to the profile list ordered by duration.
      *

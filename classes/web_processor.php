@@ -27,7 +27,6 @@ namespace tool_excimer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class web_processor implements processor {
-
     /** @var profile The profile object for the run. */
     protected $profile;
 

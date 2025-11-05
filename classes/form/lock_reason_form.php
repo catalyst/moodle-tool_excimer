@@ -25,7 +25,6 @@ namespace tool_excimer\form;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class lock_reason_form extends \moodleform {
-
     /**
      * Form definition
      */
@@ -37,8 +36,12 @@ class lock_reason_form extends \moodleform {
         $mform->setType('returnurl', PARAM_LOCALURL);
         $mform->setDefault('returnurl', get_local_referer(false));
 
-        $mform->addElement('textarea', 'lockreason', get_string('lockreason', 'tool_excimer'),
-            ['rows' => '4', 'style' => 'width:100%']);
+        $mform->addElement(
+            'textarea',
+            'lockreason',
+            get_string('lockreason', 'tool_excimer'),
+            ['rows' => '4', 'style' => 'width:100%']
+        );
 
         $mform->addElement('static', 'lockreason_help', '', get_string('lockreason_help', 'tool_excimer'));
 

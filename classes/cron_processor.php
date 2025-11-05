@@ -29,7 +29,6 @@ use tool_excimer\script_metadata;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cron_processor implements processor {
-
     /** @var float Timestamp updated after processing each sample */
     public $sampletime;
 

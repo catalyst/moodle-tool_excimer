@@ -29,7 +29,7 @@ use tool_excimer\helper;
 use tool_excimer\output\tabs;
 
 require_once('../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 $profileid = required_param('profileid', PARAM_INT);
 $pluginname = get_string('pluginname', 'tool_excimer');
@@ -58,7 +58,7 @@ if ($data = $form->get_data()) {
     $form->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);
 }
 
-$prevurl = new moodle_url('/admin/tool/excimer/' . $reporttype. '.php', ['group' => $profile->get('scriptgroup')]);
+$prevurl = new moodle_url('/admin/tool/excimer/' . $reporttype . '.php', ['group' => $profile->get('scriptgroup')]);
 $PAGE->navbar->add($profile->get('scriptgroup'), $prevurl);
 
 $profileurl = new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $profileid]);

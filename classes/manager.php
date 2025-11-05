@@ -75,7 +75,13 @@ class manager {
             self::$altconnection = \moodle_database::get_driver_instance($cfg->dbtype, $cfg->dblibrary);
             try {
                 self::$altconnection->connect(
-                    $cfg->dbhost, $cfg->dbuser, $cfg->dbpass, $cfg->dbname, $cfg->prefix, $cfg->dboptions);
+                    $cfg->dbhost,
+                    $cfg->dbuser,
+                    $cfg->dbpass,
+                    $cfg->dbname,
+                    $cfg->prefix,
+                    $cfg->dboptions
+                );
             } catch (\moodle_exception $e) {
                 // Rather than engage with complex error handling, we choose to simply not record, and move on.
                 debugging('tool_excimer: failed to open second DB connection when saving profile: ' . $e->getMessage());
@@ -332,8 +338,10 @@ class manager {
         // request minimum.
         // If a min duration exists, it means the quota is filled, and only
         // profiles slower than the fastest stored profile should be stored.
-        $requestminduration = profile_helper::get_min_duration_for_group_and_reason($profile->get('scriptgroup'),
-            profile::REASON_SLOW);
+        $requestminduration = profile_helper::get_min_duration_for_group_and_reason(
+            $profile->get('scriptgroup'),
+            profile::REASON_SLOW
+        );
         if ($requestminduration && $duration <= $requestminduration) {
             return false;
         }
