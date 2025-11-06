@@ -152,7 +152,7 @@ if ($profile->get('method') === 'GET') {
             $profile->get('pathinfo') . '?' . htmlentities($profile->get('parameters')));
     $data['request'] = \html_writer::link(
         $requesturl,
-        urldecode($data['request']),
+        $data['request'],
         [
             'rel' => 'noreferrer noopener',
             'target' => '_blank',
