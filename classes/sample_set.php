@@ -27,6 +27,7 @@ namespace tool_excimer;
 class sample_set {
     /** @var string name of the sample set. */
     public $name;
+
     /** @var float Starting time of the sample set. */
     public $starttime;
 
@@ -75,9 +76,10 @@ class sample_set {
      * @param array|\ExcimerLogEntry $sample
      */
     public function add_sample($sample) {
-        $trace = false;
+        $doubling = false;
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
+            $doubling = true;
         }
         $this->counter += 1;
         if ($this->counter === $this->filterrate) {
@@ -93,9 +95,10 @@ class sample_set {
             if ($trace) {
                 $this->maxstackdepth = max($this->maxstackdepth, count($trace));
             }
-            return;
+        } else {
+            $this->totaladded++;
         }
-        $this->totaladded++;
+        return $doubling;
     }
 
     /**

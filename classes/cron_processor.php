@@ -57,7 +57,7 @@ class cron_processor implements processor {
         });
 
         // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
-        $this->samplems = (int) get_config('tool_excimer', 'sample_ms');
+        $this->samplems = script_metadata::get_sampling_period();
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {
@@ -79,6 +79,12 @@ class cron_processor implements processor {
      */
     public function get_min_duration(): float {
         return (float) get_config('tool_excimer', 'task_min_duration');
+    }
+
+    public function on_reach_limit(manager $manager) {
+        $this->samplems *= 2;
+        $manager->get_profiler()->setPeriod($this->samplems);
+        $manager->get_profiler()->start();
     }
 
     /**
@@ -136,8 +142,10 @@ class cron_processor implements processor {
 
             // If the sampleset exists, add the current sample to it.
             if ($this->tasksampleset) {
-                $this->tasksampleset->add_sample($sample);
-
+                $doubling  = $this->tasksampleset->add_sample($sample);
+                if ($doubling){
+                    $this->on_reach_limit($manager);
+                }
                 // Add memory usage:
                 // Note that due to the looping this is probably inaccurate.
                 $this->memoryusagesampleset->add_sample([
@@ -198,7 +206,7 @@ class cron_processor implements processor {
             $profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
             $profile->set('numsamples', $this->tasksampleset->count());
-            $profile->set('samplerate', $this->tasksampleset->filter_rate() * $this->samplems);
+            $profile->set('samplerate', $this->samplems * 1000);
             $profile->save_record();
         }
         return $profile;
