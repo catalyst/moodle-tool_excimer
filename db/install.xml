@@ -13,6 +13,8 @@
         <FIELD NAME="created" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="time in epoch seconds"/>
         <FIELD NAME="finished" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="finish time in epoch seconds (0 if profile is incomplete)"/>
         <FIELD NAME="duration" TYPE="number" LENGTH="12" NOTNULL="true" SEQUENCE="false" DECIMALS="6" COMMENT="Time duration of the profile in seconds."/>
+        <FIELD NAME="usercpuduration" TYPE="number" LENGTH="12" NOTNULL="false" SEQUENCE="false" DECIMALS="6" COMMENT="User time used as given by rusage."/>
+        <FIELD NAME="systemcpuduration" TYPE="number" LENGTH="12" NOTNULL="false" SEQUENCE="false" DECIMALS="6" COMMENT="System time used as given by rusage."/>
         <FIELD NAME="request" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="URL, command, or similar identifying string"/>
         <FIELD NAME="scriptgroup" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Value to use for grouping."/>
         <FIELD NAME="pathinfo" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="See PHP documentation on $_SERVER['PATH_INFO'] for more information."/>

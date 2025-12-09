@@ -138,7 +138,11 @@ class web_processor implements processor {
             'value' => memory_get_usage(),
         ]);
         $current = microtime(true);
+        $currentrusage = getrusage();
         $this->profile->set('duration', $current - $manager->get_starttime());
+        $cpuduration = helper::get_rusage_timediff($manager->get_startrusage(), $currentrusage);
+        $this->profile->set('usercpuduration', $cpuduration['user']);
+        $this->profile->set('systemcpuduration', $cpuduration['system']);
         $this->profile->set('maxstackdepth', $this->sampleset->get_stack_depth());
         $reason = $manager->get_reasons($this->profile);
         if ($reason !== profile::REASON_NONE) {

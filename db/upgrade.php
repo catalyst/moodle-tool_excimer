@@ -538,5 +538,27 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024082301, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2025120903) {
+        // Define field id to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+
+        $field = new xmldb_field('usercpuduration', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
+
+        // Conditionally add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('systemcpuduration', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
+
+        // Conditionally add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2025120903, 'tool', 'excimer');
+    }
+
     return true;
 }

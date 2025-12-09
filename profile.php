@@ -127,7 +127,14 @@ $data['created'] = userdate($data['created']);
 $data['finished'] = userdate($data['finished']);
 
 $duration = $data['duration'];
-$data['duration'] = helper::duration_display_text($duration, true);
+$usercpuduration = $data['usercpuduration'];
+$systemcpuduration = $data['systemcpuduration'];
+
+$data['duration'] = !empty($duration) ? helper::duration_display_text($duration, true) : '-';
+$data['usercpuduration'] = !empty($usercpuduration) ? helper::duration_display_text($usercpuduration, true) : '-';
+$data['systemcpuduration'] = !empty($systemcpuduration) ? helper::duration_display_text($systemcpuduration, true) : '-';
+$data['cpuduration'] = (!empty($usercpuduration) && !empty($systemcpuduration)) ? helper::duration_display_text($systemcpuduration + $usercpuduration, true) : '-';
+
 if (isset($data['lockwait'])) {
     $lockwait = $data['lockwait'];
     $data['lockwait'] = helper::duration_display_text($lockwait, true);

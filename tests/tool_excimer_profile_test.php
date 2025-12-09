@@ -137,6 +137,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $reason = profile::REASON_SLOW;
         $created = 56;
         $duration = 1.123;
+        $usercpuduration = 0.56;
+        $systemcpuduration = 0.16;
         $finished = 57;
         $request = 'mock';
 
@@ -145,6 +147,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $profile->set('reason', $reason);
         $profile->set('created', $created);
         $profile->set('duration', $duration);
+        $profile->set('usercpuduration', $usercpuduration);
+        $profile->set('systemcpuduration', $systemcpuduration);
         $profile->set('finished', $finished);
         $profile->set('flamedatad3', $node);
         $profile->set('numsamples', $sampleset->count());
@@ -157,6 +161,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->scripttype);
         $this->assertEquals($created, $record->created);
         $this->assertEquals($duration, $record->duration);
+        $this->assertEquals($usercpuduration, $record->usercpuduration);
+        $this->assertEquals($systemcpuduration, $record->systemcpuduration);
         $this->assertEquals($flamedatad3json, gzuncompress($record->flamedatad3));
         $this->assertEquals($numsamples, $record->numsamples);
         $this->assertEquals($datasize, $record->datasize);
@@ -177,6 +183,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $reason = profile::REASON_SLOW;
         $created = 56;
         $duration = 1.123;
+        $usercpuduration = 0.56;
+        $systemcpuduration = 0.16;
         $request = 'mock';
 
         $profile = new profile();
@@ -184,6 +192,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $profile->set('reason', $reason);
         $profile->set('created', $created);
         $profile->set('duration', $duration);
+        $profile->set('usercpuduration', $usercpuduration);
+        $profile->set('systemcpuduration', $systemcpuduration);
         $profile->set('finished', 0);
         $profile->set('flamedatad3', $node);
         $id = $profile->save_record();
@@ -194,6 +204,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->get('scripttype'));
         $this->assertEquals($created, $record->get('created'));
         $this->assertEquals($duration, $record->get('duration'));
+        $this->assertEquals($usercpuduration, $record->get('usercpuduration'));
+        $this->assertEquals($systemcpuduration, $record->get('systemcpuduration'));
         $this->assertEquals(0, $record->get('finished'));
         $this->assertEquals($flamedatad3json, $record->get_flamedatad3json());
         $this->assertEquals(getmypid(), $record->get('pid'));
@@ -202,9 +214,13 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $node = flamed3_node::from_excimer_log_entries($log);
         $flamedatad3json = json_encode($node);
         $duration = 2.123;
+        $usercpuduration = 1.2;
+        $systemcpuduration = 0.3;
         $finished = 58;
 
         $profile->set('duration', $duration);
+        $profile->set('usercpuduration', $usercpuduration);
+        $profile->set('systemcpuduration', $systemcpuduration);
         $profile->set('finished', $finished);
         $profile->set('flamedatad3', $node);
         $id2 = $profile->save_record();
@@ -217,6 +233,8 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(profile::SCRIPTTYPE_CLI, $record->get('scripttype'));
         $this->assertEquals($created, $record->get('created'));
         $this->assertEquals($duration, $record->get('duration'));
+        $this->assertEquals($usercpuduration, $record->get('usercpuduration'));
+        $this->assertEquals($systemcpuduration, $record->get('systemcpuduration'));
         $this->assertEquals($finished, $record->get('finished'));
         $this->assertEquals($flamedatad3json, $record->get_flamedatad3json());
         $this->assertEquals(getmypid(), $record->get('pid'));
