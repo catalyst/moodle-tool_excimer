@@ -38,6 +38,9 @@ class helper {
         5 => 'badge-danger',
     ];
 
+    /** @var int Number of microseconds in a second */
+    const MICROSECONDS = 1000000;
+
     /**
      * Returns a printable string for a script type value.
      *
@@ -374,5 +377,37 @@ class helper {
             return $help->export_for_template($output);
         }
         return [];
+    }
+
+
+    /**
+     * Converts a timeval stored in an rusage array to a float.
+     *
+     * @param array $ru
+     * @param string $type
+     * @return float
+     */
+    public static function timeval_to_float(array $ru, string $type): float {
+        return (float) $ru[$type . '.tv_sec'] + ((float) $ru[$type . '.tv_usec']) / self::MICROSECONDS;
+    }
+
+    /**
+     * Gets the difference in CPU usage between two rusage timevals. Includes both user and
+     * system time.
+     *
+     * @param array $startru The starting RU array. Only the timevals are needed.
+     * @param array $finishru The finishing RU array. Only the timevals are needed.
+     * @return array
+     */
+    public static function get_rusage_timediff(array $startru, array $finishru): array {
+        // Get start and finish times as floats.
+        $startuser = self::timeval_to_float($startru, 'ru_utime');
+        $startsystem = self::timeval_to_float($startru, 'ru_stime');
+
+        $finishuser = self::timeval_to_float($finishru, 'ru_utime');
+        $finishsystem = self::timeval_to_float($finishru, 'ru_stime');
+
+        // We want both system time + user time.
+        return ['user' => $finishuser - $startuser, 'system' => $finishsystem - $startsystem];
     }
 }

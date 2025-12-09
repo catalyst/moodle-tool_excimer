@@ -47,6 +47,8 @@ class manager {
     private $timer;
     /** @var float */
     private $starttime;
+    /** @var array */
+    private $startrusage;
     /** @var manager */
     private static $instance;
 
@@ -130,6 +132,16 @@ class manager {
     }
 
     /**
+     * Get the starting rusage stats.
+     *
+     * @return array
+     *
+     */
+    public function get_startrusage(): array {
+        return $this->startrusage;
+    }
+
+    /**
      * Get manager instance.
      *
      * @param bool $initialise If true, will initialise the manager upon creation.
@@ -176,6 +188,7 @@ class manager {
             $this->timer->setPeriod($timerinterval);
 
             $this->starttime = microtime(true);
+            $this->startrusage = getrusage();
 
             $this->profiler->start();
             $this->timer->start();

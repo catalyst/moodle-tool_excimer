@@ -456,6 +456,8 @@ class profile extends persistent {
             'created' => ['type' => PARAM_INT, 'default' => 0],
             'finished' => ['type' => PARAM_INT, 'default' => 0],
             'duration' => ['type' => PARAM_FLOAT, 'default' => 0],
+            'usercpuduration' => ['type' => PARAM_FLOAT],
+            'systemcpuduration' => ['type' => PARAM_FLOAT],
             'request' => ['type' => PARAM_TEXT, 'default' => ''],
             'scriptgroup' => ['type' => PARAM_TEXT, 'default' => ''],
             'pathinfo' => ['type' => PARAM_SAFEPATH, 'default' => ''],
