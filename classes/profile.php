@@ -475,6 +475,7 @@ class profile extends persistent {
             'versionhash' => ['type' => PARAM_TEXT, 'default' => ''],
             'datasize' => ['type' => PARAM_INT, 'default' => 0],
             'numsamples' => ['type' => PARAM_INT, 'default' => 0],
+            'numevents' => ['type' => PARAM_INT, 'default' => 0],
             'samplerate' => ['type' => PARAM_INT, 'default' => 0],
             'memoryusagedatad3' => ['type' => PARAM_RAW],
             'memoryusagemax' => ['type' => PARAM_INT],

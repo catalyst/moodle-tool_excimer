@@ -38,12 +38,6 @@ class sample_set {
     /** @var int The maximum stack depth. */
     public $maxstackdepth = 0;
 
-    /** @var int If is R, then only each Rth sample is recorded. */
-    private $filterrate = 1;
-
-    /** @var int Internal counter to help with filtering. */
-    private $counter = 0;
-
     /** @var int Internal counter of how many samples were added (regardless of how many are currently held). */
     private $totaladded = 0;
 
@@ -75,27 +69,29 @@ class sample_set {
      * @param array|\ExcimerLogEntry $sample
      */
     public function add_sample($sample) {
-        $trace = false;
-        if (count($this->samples) === $this->samplelimit) {
-            $this->apply_doubling();
-        }
-        $this->counter += 1;
-        if ($this->counter === $this->filterrate) {
-            $this->samples[] = $sample;
-            $this->counter = 0;
-        }
+        $ismemory = false;
         // If this is a log entry, it will count the number of total events
         // processed instead.
         // Each time a sample is added, recalculate the maxstackdepth for this set.
         if ($sample instanceof \ExcimerLogEntry) {
-            $this->totaladded += $sample->getEventCount();
+            $eventcount = $sample->getEventCount();
             $trace = $sample->getTrace();
+            $this->totaladded += $eventcount;
             if ($trace) {
                 $this->maxstackdepth = max($this->maxstackdepth, count($trace));
             }
-            return;
+            $this->samples[] = [
+                'eventcount' => $eventcount,
+                'trace' => $trace,
+            ];
+        } else {
+            $this->samples[] = $sample;
+            $this->totaladded++;
+            $ismemory = true;
         }
-        $this->totaladded++;
+        if (count($this->samples) >= $this->samplelimit) {
+            $this->apply_doubling($ismemory);
+        }
     }
 
     /**
@@ -110,24 +106,55 @@ class sample_set {
     }
 
     /**
-     * Doubles the filter rate, and strips every second sample from the set.
+     * Merge samples to increase storage
      * Called when the sample limit is reached.
-     *
-     * We have two options here. Either double the sampling period, or apply a filter to record only the
-     * Nth sample passed to sample_set. By using a filter and keeping the sampling period the same, we avoid
-     * spilling over into the next task.
+     * @param bool $ismemory true if the dataset is a memory usage sample set.
      */
-    public function apply_doubling() {
-        $this->filterrate *= 2;
-        $this->samples = array_values(
-            array_filter(
-                $this->samples,
-                function ($key) {
-                    return ($key % 2);
-                },
-                ARRAY_FILTER_USE_KEY
-            )
-        );
+    public function apply_doubling($ismemory) {
+        $ismemory ? $this->merge_memory_usage_sample_set() : $this->merge_excimer_sample_set();
+    }
+
+    /**
+     * Merge memory usage sample set
+     */
+    private function merge_memory_usage_sample_set() {
+        $newsamples = [];
+        for ($i = 0; $i < count($this->samples); $i += 2) {
+            // Prevent sample limit is odd.
+            if ($i == count($this->samples) - 1) {
+                $newsamples[] = $this->samples[$i];
+            } else {
+                $newsamples[] = [
+                    'sampleindex' => $this->samples[$i]['sampleindex'],
+                    'value' => ($this->samples[$i]['value'] + $this->samples[$i + 1]['value']) / 2.0,
+                ];
+            }
+        }
+        $this->samples = $newsamples;
+    }
+
+    /**
+     * Merge excimer sample set
+     */
+    private function merge_excimer_sample_set() {
+        $newsamples = [];
+        for ($i = 0; $i < count($this->samples); $i += 2) {
+            // Prevent sample limit is odd.
+            if ($i == count($this->samples) - 1) {
+                $newsamples[] = $this->samples[$i];
+            } else {
+                if ($this->samples[$i]['eventcount'] >= $this->samples[$i + 1]['eventcount']) {
+                    $trace = $this->samples[$i]['trace'];
+                } else {
+                    $trace = $this->samples[$i + 1]['trace'];
+                }
+                $newsamples[] = [
+                    'eventcount' => ($this->samples[$i]['eventcount'] + $this->samples[$i + 1]['eventcount']),
+                    'trace' => $trace,
+                ];
+            }
+        }
+        $this->samples = $newsamples;
     }
 
     /**
@@ -149,21 +176,13 @@ class sample_set {
      */
     public function count(): int {
         $count = count($this->samples);
-        if ($count > 0 && $this->samples[0] instanceof \ExcimerLogEntry) {
+        if ($count > 0 && array_key_exists("eventcount", $this->samples[0])) {
             $count = array_reduce($this->samples, function ($acc, $sample) {
-                $acc += $sample->getEventCount();
+                $acc += $sample["eventcount"];
                 return $acc;
             }, 0);
         }
-        return $count;
-    }
 
-    /**
-     * Returns the filter rate to calculate the real sampling rate
-     *
-     * @return int
-     */
-    public function filter_rate() {
-        return $this->filterrate;
+        return $count;
     }
 }

@@ -37,9 +37,9 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
      */
     public function test_add_sample(): void {
         $samples = [
-            $this->get_log_entry_stub(['a']),
-            $this->get_log_entry_stub(['b']),
-            $this->get_log_entry_stub(['c']),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['a'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['b'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['c'])),
         ];
 
         $set = new sample_set('a', 0, 1024);
@@ -50,79 +50,89 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
     }
 
     /**
-     * Tests the effect of filtering while adding samples.
+     * Tests the effect of merging memory usage sample set while adding samples.
      *
      * @covers \tool_excimer\sample_set::add_many_samples
      * @covers \tool_excimer\sample_set::apply_doubling
+     * @covers \tool_excimer\sample_set::merge_memory_usage_sample_set
      */
-    public function test_filtering(): void {
+    public function test_merge_memory_usage_sample_set(): void {
         $samples = [
-            $this->get_log_entry_stub(['a']),
-            $this->get_log_entry_stub(['b']),
-            $this->get_log_entry_stub(['c']),
-            $this->get_log_entry_stub(['d']),
+            ['sampleindex' => 0, 'value' => 100000],
+            ['sampleindex' => 1, 'value' => 200000],
+            ['sampleindex' => 2, 'value' => 300000],
+            ['sampleindex' => 3, 'value' => 400000],
+            ['sampleindex' => 5, 'value' => 350000],
         ];
-        // This is every 2nd element of $samples.
         $expected1 = [
-            $samples[1],
-            $samples[3],
+            ['sampleindex' => 0, 'value' => 150000],
+            ['sampleindex' => 2, 'value' => 350000],
+            ['sampleindex' => 5, 'value' => 350000],
         ];
-        // This is every 4th element of $samples.
-        $expected2 = [$samples[3]];
+
+        $expected2 = [
+            ['sampleindex' => 0, 'value' => 250000],
+            ['sampleindex' => 5, 'value' => 350000],
+        ];
+
+        $expected3 = [
+            ['sampleindex' => 0, 'value' => 300000],
+        ];
 
         $set = new sample_set('a', 0, 1024);
-
-        // Each time this is called, the filter rate is doubled.
-        $set->apply_doubling();
-
-        // Filter rate should be 2, thus, only every 2nd sample should be recorded in sample set.
         $set->add_many_samples($samples);
 
-        // Only every 2nd sample should be recorded in sample set.
+        $set->apply_doubling(true);
         $this->assertEquals($expected1, $set->samples);
 
-        $set = new sample_set('a', 0, 1024);
-        $set->apply_doubling();
-        $set->apply_doubling();
-
-        // Filter rate should be 4, thus, only every 4th sample should be recorded in sample set.
-        $set->add_many_samples($samples);
-
+        $set->apply_doubling(true);
         $this->assertEquals($expected2, $set->samples);
+
+        $set->apply_doubling(true);
+        $this->assertEquals($expected3, $set->samples);
     }
 
     /**
-     * Tests stripping existing samples when calling apply_doubling.
+     * Tests the effect of merging memory usage sample set while adding samples.
      *
      * @covers \tool_excimer\sample_set::add_many_samples
      * @covers \tool_excimer\sample_set::apply_doubling
+     * @covers \tool_excimer\sample_set::merge_trace_sample_set
      */
-    public function test_stripping(): void {
+    public function test_merge_trace_sample_set(): void {
         $samples = [
-            $this->get_log_entry_stub(['a']),
-            $this->get_log_entry_stub(['b']),
-            $this->get_log_entry_stub(['c']),
-            $this->get_log_entry_stub(['d']),
+            $this->get_log_entry_stub(['a'], 0, 10),
+            $this->get_log_entry_stub(['b'], 0, 100),
+            $this->get_log_entry_stub(['c'], 0, 100),
+            $this->get_log_entry_stub(['d'], 0, 20),
+            $this->get_log_entry_stub(['e'], 0, 50),
         ];
-        // This is $samples ofter being stripped once.
         $expected1 = [
-            $samples[1],
-            $samples[3],
+            ['eventcount' => 110, 'trace' => [['function' => 'b']]],
+            ['eventcount' => 120, 'trace' => [['function' => 'c']]],
+            ['eventcount' => 50, 'trace' => [['function' => 'e']]],
         ];
-        // This is $samples ofter being stripped twice.
-        $expected2 = [$samples[3]];
+
+        $expected2 = [
+            ['trace' => [['function' => 'c']], 'eventcount' => 230],
+            ['trace' => [['function' => 'e']], 'eventcount' => 50],
+        ];
+
+        $expected3 = [
+            ['trace' => [['function' => 'c']], 'eventcount' => 280],
+        ];
 
         $set = new sample_set('a', 0, 1024);
-
         $set->add_many_samples($samples);
 
-        // Every 2nd sample should be stripped after doubling.
-        $set->apply_doubling();
+        $set->apply_doubling(false);
         $this->assertEquals($expected1, $set->samples);
 
-        // Half of the samples should be stripped again, leaving every 4th from the original.
-        $set->apply_doubling();
+        $set->apply_doubling(false);
         $this->assertEquals($expected2, $set->samples);
+
+        $set->apply_doubling(false);
+        $this->assertEquals($expected3, $set->samples);
     }
 
     /**
@@ -132,33 +142,27 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
      */
     public function test_automatic_doubling_when_adding_samples(): void {
         $samples1 = [
-            $this->get_log_entry_stub(['a']),
-            $this->get_log_entry_stub(['b']),
-            $this->get_log_entry_stub(['c']),
-            $this->get_log_entry_stub(['d']),
-            $this->get_log_entry_stub(['e']),
-            $this->get_log_entry_stub(['f']),
+            $this->get_log_entry_stub(['a'], 0, 10),
+            $this->get_log_entry_stub(['b'], 0, 100),
+            $this->get_log_entry_stub(['c'], 0, 100),
+            $this->get_log_entry_stub(['d'], 0, 20),
+            $this->get_log_entry_stub(['e'], 0, 50),
         ];
-        // This is every second element of $samples1.
         $expected1 = [
-            $samples1[1],
-            $samples1[3],
-            $samples1[5],
+            ['eventcount' => 110, 'trace' => [['function' => 'b']]],
+            ['eventcount' => 120, 'trace' => [['function' => 'c']]],
+            ['eventcount' => 50, 'trace' => [['function' => 'e']]],
         ];
 
         $samples2 = [
-            $this->get_log_entry_stub(['g']),
-            $this->get_log_entry_stub(['h']),
-            $this->get_log_entry_stub(['i']),
-            $this->get_log_entry_stub(['j']),
-            $this->get_log_entry_stub(['k']),
-            $this->get_log_entry_stub(['l']),
+            $this->get_log_entry_stub(['g'], 0, 10),
+            $this->get_log_entry_stub(['h'], 0, 20),
+            $this->get_log_entry_stub(['i'], 0, 10),
         ];
-        // This is every 4th element of $sample1 + $sample2.
+
         $expected2 = [
-            $samples1[3],
-            $samples2[1],
-            $samples2[5],
+            ['eventcount' => 290, 'trace' => [['function' => 'c']]],
+            ['eventcount' => 30, 'trace' => [['function' => 'h']]],
         ];
 
         $set = new sample_set('a', 0, 4);
@@ -170,7 +174,7 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
 
         $set->add_many_samples($samples2);
 
-        // By this point apply_doubling should have been invoked a second time.
+        // By this point apply_doubling should have been invoked two more times.
         $this->assertEquals($expected2, $set->samples);
     }
 

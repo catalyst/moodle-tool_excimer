@@ -43,8 +43,7 @@ class manager {
     private $processor;
     /** @var \ExcimerProfiler */
     private $profiler;
-    /** @var \ExcimerTimer */
-    private $timer;
+
     /** @var float */
     private $starttime;
     /** @var array */
@@ -114,15 +113,6 @@ class manager {
     }
 
     /**
-     * Timer to create events to process samples generated so far.
-     *
-     * @return \ExcimerTimer
-     */
-    public function get_timer(): \ExcimerTimer {
-        return $this->timer;
-    }
-
-    /**
      * Start time for the script.
      *
      * @return float
@@ -169,7 +159,7 @@ class manager {
     }
 
     /**
-     * Initialises the manager. Creates and starts the profiler and timer.
+     * Initialises the manager. Creates and starts the profiler.
      *
      * @throws \dml_exception
      */
@@ -179,19 +169,12 @@ class manager {
             profile_helper::init();
 
             $sampleperiod = script_metadata::get_sampling_period();
-            $timerinterval = script_metadata::get_timer_interval();
-
             $this->profiler = new \ExcimerProfiler();
             $this->profiler->setPeriod($sampleperiod);
-
-            $this->timer = new \ExcimerTimer();
-            $this->timer->setPeriod($timerinterval);
-
             $this->starttime = microtime(true);
             $this->startrusage = getrusage();
 
             $this->profiler->start();
-            $this->timer->start();
         }
     }
 

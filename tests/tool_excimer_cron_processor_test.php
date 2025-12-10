@@ -68,8 +68,6 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
 
         script_metadata::init();
         $processor = new cron_processor();
-        $timer = new \ExcimerTimer();
-
         $started = 100.0;
         $period = 50.0;
 
@@ -79,9 +77,13 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
         $profiler = $this->get_profiler_stub([
             ['c::a', 'b', 'c'],
         ], $period);
-        $manager = $this->get_manager_stub($processor, $profiler, $timer, $started);
+        $log = $this->get_log_stub([
+            ['c::a', 'b', 'c'],
+        ], $period);
 
-        $processor->on_interval($manager);
+        $manager = $this->get_manager_stub($processor, $profiler, $started);
+
+        $processor->on_interval($log, $manager);
 
         $this->assertEquals($started + ($period * 1), $processor->sampletime);
         $this->assertNull($processor->tasksampleset);
@@ -92,9 +94,14 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
             ['run_inner_scheduled_task', 'max::execute', 'read::john'],
             ['run_inner_scheduled_task', 'max::execute'],
         ], $period, ($period * 1));
+        $log = $this->get_log_stub([
+            ['a', 'b'],
+            ['run_inner_scheduled_task', 'max::execute', 'read::john'],
+            ['run_inner_scheduled_task', 'max::execute'],
+        ], $period, ($period * 1));
 
-        $manager = $this->get_manager_stub($processor, $profiler, $timer, $started);
-        $processor->on_interval($manager);
+        $manager = $this->get_manager_stub($processor, $profiler, $started);
+        $processor->on_interval($log, $manager);
         $this->assertEquals($started + ($period * 4), $processor->sampletime);
 
         // There should be a current sample set being recorded.
@@ -109,9 +116,14 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
             ['run_inner_adhoc_task', 'simle::execute'],
             ['a', 'b'],
         ], $period, ($period * 4));
-
-        $manager = $this->get_manager_stub($processor, $profiler, $timer, $started);
-        $processor->on_interval($manager);
+        $log = $this->get_log_stub([
+            ['run_inner_scheduled_task', 'max::execute'],
+            ['a', 'b'],
+            ['run_inner_adhoc_task', 'simle::execute'],
+            ['a', 'b'],
+        ], $period, ($period * 4));
+        $manager = $this->get_manager_stub($processor, $profiler, $started);
+        $processor->on_interval($log, $manager);
         $this->assertEquals($started + ($period * 8), $processor->sampletime);
 
         // There should not be a current sample set.
@@ -133,5 +145,48 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
         $this->assertEquals($started + ($period * 7), $records[1]->finished);
         $this->assertEquals($period * 1, $records[1]->duration);
         $this->assertEquals(1, $records[1]->numsamples);
+    }
+
+
+    /**
+     * Tests cron_processor::on_interval().
+     *
+     * @covers \tool_excimer\cron_processor::on_reach_limit
+     */
+    public function test_on_reach_limit(): void {
+        $this->preventResetByRollback();
+        set_config('sample_ms', 10, 'tool_excimer');
+        set_config('samplelimit', 2, 'tool_excimer');
+        script_metadata::init();
+        $processor = new cron_processor();
+
+        $started = 100.0;
+        $period = 50.0;
+        $profiler = $this->get_profiler_stub([
+            ['a', 'b'],
+            ['run_inner_scheduled_task', 'max::execute', 'read::john'],
+            ['run_inner_scheduled_task', 'max::execute'],
+            ['run_inner_scheduled_task', 'max::execute', 'read::john'],
+            ['run_inner_scheduled_task', 'max::execute'],
+        ], $period, ($period * 1));
+        $log = $this->get_log_stub([
+            ['a', 'b'],
+            ['run_inner_scheduled_task', 'max::execute', 'read::john'],
+            ['run_inner_scheduled_task', 'max::execute'],
+            ['run_inner_scheduled_task', 'max::execute', 'read::john'],
+            ['run_inner_scheduled_task', 'max::execute'],
+        ], $period, ($period * 1));
+
+        $manager = $this->get_manager_stub($processor, $profiler, $started);
+
+        $processor->init($manager);
+        $this->assertEquals(0.01, $processor->get_sampling_period());
+        $this->assertEquals(2, $processor->get_sample_limit());
+
+        $processor->on_interval($log, $manager);
+        $this->assertEquals(0.02, $processor->get_sampling_period());
+
+        $processor->on_interval($log, $manager);
+        $this->assertEquals(0.04, $processor->get_sampling_period());
     }
 }

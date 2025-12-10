@@ -87,10 +87,10 @@ if ($hassiteconfig) {
 
         $settings->add(
             new admin_setting_configtext(
-                'tool_excimer/long_interval_s',
-                get_string('long_interval_s', 'tool_excimer'),
-                get_string('long_interval_s_desc', 'tool_excimer'),
-                '10',
+                'tool_excimer/max_samples',
+                get_string('max_samples', 'tool_excimer'),
+                get_string('max_samples_desc', 'tool_excimer'),
+                '1000',
                 PARAM_INT
             )
         );

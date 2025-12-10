@@ -38,7 +38,13 @@ class web_processor implements processor {
     /** @var int */
     protected $minduration;
     /** @var int */
-    protected $samplems;
+    protected $samplingperiod;
+    /** @var int */
+    protected $samplelimit;
+    /** @var int */
+    protected $maxsamples;
+    /** @var int */
+    protected $logcount = 0;
     /** @var bool */
     protected $partialsave;
     /** @var bool */
@@ -46,13 +52,14 @@ class web_processor implements processor {
     /** @var bool  */
     protected $hasoverlapped = false;
 
+    /** @var array */
+    protected static $logs = [];
     /**
      * Construct the web processor.
      */
     public function __construct() {
         // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
         $this->minduration = (float) get_config('tool_excimer', 'trigger_ms') / 1000.0;
-        $this->samplems = (int) get_config('tool_excimer', 'sample_ms');
         $this->partialsave = get_config('tool_excimer', 'enable_partial_save');
     }
 
@@ -78,23 +85,26 @@ class web_processor implements processor {
         $this->profile = new profile();
         $this->profile->add_env($this->sampleset->name);
         $this->profile->set('created', $this->sampleset->starttime);
+        $this->samplingperiod = script_metadata::get_sampling_period();
+        $this->samplelimit = script_metadata::get_sample_limit();
+        $this->maxsamples = script_metadata::get_max_samples();
 
         if ($this->partialsave) {
-            $manager->get_timer()->setCallback(function () use ($manager) {
+            $manager->get_profiler()->setFlushCallback(function ($log) use ($manager) {
                 // Once overlapping has happened once, we prevent all future partial saving.
                 if (!$this->hasoverlapped) {
-                    $this->process($manager, false);
+                    $this->process($log, $manager);
                 }
-            });
+            }, $this->maxsamples);
         }
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {
-                $manager->get_timer()->stop();
                 $manager->get_profiler()->stop();
-
-                // Keep an approximate count of each profile.
-                $this->process($manager, true);
+                if (!$this->partialsave) {
+                    $log = $manager->get_profiler()->flush();
+                    $this->process($log, $manager, true);
+                }
                 page_group::record_fuzzy_counts($this->profile);
             }
         );
@@ -110,54 +120,78 @@ class web_processor implements processor {
     }
 
     /**
+     * Doubling the sampling period when we reach the samples limit
+     *
+     * @param manager $manager
+     */
+    public function on_reach_limit(manager $manager) {
+        $this->samplingperiod *= 2;
+        // This will take effect the next time start() is called.
+        $manager->get_profiler()->setPeriod($this->samplingperiod);
+        $manager->get_profiler()->start();
+    }
+
+    /**
      * Process a batch of Excimer logs.
      *
+     * @param \ExcimerLog $log
      * @param manager $manager
      * @param bool $isfinal
      * @throws \dml_exception
      */
-    public function process(manager $manager, bool $isfinal) {
+    public function process($log, manager $manager, bool $isfinal = false) {
         // We want to prevent overlapping of processing, so skip if an existing process is still executing.
         // The profile logs will be kept and processed the next time.
+        self::$logs[] = $log;
+
+        // Doubling sampling period if it reaches the limit.
+        $this->logcount += $log->count();
+        if ($this->partialsave && $this->logcount >= $this->samplelimit) {
+            $this->on_reach_limit($manager);
+            $this->logcount = $this->logcount - $this->samplelimit;
+        }
+
         if (self::$alreadyprofiling) {
             $this->hasoverlapped = true;
             debugging('tool_excimer: starting web_processor::process when previous process has not yet finished');
-            if ($isfinal) {
+            if ($isfinal || $log->count() < $this->samplelimit) {
                 // This should never happen.
                 debugging('tool_excimer: alreadyprofiling is true during final process.');
             }
             return;
         }
         self::$alreadyprofiling = true;
+        foreach (self::$logs as $log) {
+            $memoryusage = memory_get_usage();
+            $this->sampleset->add_many_samples($log);
 
-        $log = $manager->get_profiler()->flush();
-        $this->sampleset->add_many_samples($log);
-
-        $this->memoryusagesampleset->add_sample([
-            'sampleindex' => $this->sampleset->total_added() + $this->memoryusagesampleset->count() - 1,
-            'value' => memory_get_usage(),
-        ]);
-        $current = microtime(true);
-        $currentrusage = getrusage();
-        $this->profile->set('duration', $current - $manager->get_starttime());
-        $cpuduration = helper::get_rusage_timediff($manager->get_startrusage(), $currentrusage);
-        $this->profile->set('usercpuduration', $cpuduration['user']);
-        $this->profile->set('systemcpuduration', $cpuduration['system']);
-        $this->profile->set('maxstackdepth', $this->sampleset->get_stack_depth());
-        $reason = $manager->get_reasons($this->profile);
-        if ($reason !== profile::REASON_NONE) {
-            $this->profile->set('reason', $reason);
-            $this->profile->set('finished', $isfinal ? (int) $current : 0);
-            $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
-            $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
-            $this->profile->set('numsamples', $this->sampleset->count());
-            $this->profile->set('samplerate', $this->sampleset->filter_rate() * $this->samplems);
-            foreach (script_metadata::get_lock_info() as $field => $value) {
-                $this->profile->set($field, $value);
+            $this->memoryusagesampleset->add_sample([
+                'sampleindex' => $this->sampleset->total_added() - 1,
+                'value' => $memoryusage,
+            ]);
+            $current = microtime(true);
+            $currentrusage = getrusage();
+            $this->profile->set('duration', $current - $manager->get_starttime());
+            $cpuduration = helper::get_rusage_timediff($manager->get_startrusage(), $currentrusage);
+            $this->profile->set('usercpuduration', $cpuduration['user']);
+            $this->profile->set('systemcpuduration', $cpuduration['system']);
+            $this->profile->set('maxstackdepth', $this->sampleset->get_stack_depth());
+            $reason = $manager->get_reasons($this->profile);
+            if ($reason !== profile::REASON_NONE) {
+                $this->profile->set('reason', $reason);
+                $this->profile->set('finished', $isfinal ? (int)$current : 0);
+                $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
+                $this->profile->set('flamedatad3', flamed3_node::from_sample_set_samples($this->sampleset->samples));
+                $this->profile->set('numsamples', count($this->sampleset->samples));
+                $this->profile->set('numevents', $this->sampleset->count());
+                $this->profile->set('samplerate', $this->samplingperiod * 1000);
+                foreach (script_metadata::get_lock_info() as $field => $value) {
+                    $this->profile->set($field, $value);
+                }
+                $this->profile->save_record();
             }
-            $this->profile->save_record();
         }
-
+        self::$logs = [];
         self::$alreadyprofiling = false;
     }
 }

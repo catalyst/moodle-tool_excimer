@@ -69,18 +69,16 @@ class flamed3_node {
     }
 
     /**
-     * Extracts data from Excimer log entries and converts to a flame node tree, compatible with
+     * Extracts data from sample set samples and converts to a flame node tree, compatible with
      * d3-flame-graph.
      *
-     * @param iterable $entries
+     * @param array $samples samples
      * @return flamed3_node
      */
-    public static function from_excimer_log_entries(iterable $entries): flamed3_node {
+    public static function from_sample_set_samples(array $samples): flamed3_node {
         $root = new flamed3_node('root');
-        foreach ($entries as $entry) {
-            $eventcount = $entry->getEventCount();
-            $trace = array_reverse($entry->getTrace());
-            $root->add_excimer_trace_tail($trace, $eventcount);
+        foreach ($samples as $sample) {
+            $root->add_excimer_trace_tail(array_reverse($sample['trace']), $sample['eventcount']);
         }
         return $root;
     }

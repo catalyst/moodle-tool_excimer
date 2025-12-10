@@ -50,6 +50,34 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         usleep(100);
     }
 
+
+    /**
+     * Parse log entry to sample
+     *
+     * @param \ExcimerLogEntry $entry
+     * @return array
+     */
+    protected function from_log_entry_to_sample($entry) {
+        return [
+            "eventcount" => $entry->getEventCount(),
+            "trace" => $entry->getTrace(),
+        ];
+    }
+
+    /**
+     * Parse log to samples
+     *
+     * @param \ExcimerLog $log
+     * @return array
+     */
+    protected function from_log_to_samples($log) {
+        $samples = [];
+        foreach ($log as $entry) {
+            $samples[] = $this->from_log_entry_to_sample($entry);
+        }
+        return $samples;
+    }
+
     /**
      * Quick & dirty profile generator
      *
@@ -93,7 +121,7 @@ final class tool_excimer_profile_test extends \advanced_testcase {
     /**
      * Tests flamedata
      *
-     * @covers \tool_excimer\flamed3_node::from_excimer_log_entries
+     * @covers \tool_excimer\flamed3_node::from_sample_set_samples
      * @covers \tool_excimer\profile::get_flamedatad3json
      * @throws \coding_exception
      */
@@ -102,7 +130,7 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $log = $this->quick_log(10);
         $sampleset = new sample_set('name', 0);
         $sampleset->add_many_samples($log);
-        $node = flamed3_node::from_excimer_log_entries($sampleset->samples);
+        $node = flamed3_node::from_sample_set_samples($sampleset->samples);
         $nodejson = json_encode($node);
         $compressed = gzcompress($nodejson);
         $size = strlen($compressed);
@@ -130,7 +158,7 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $sampleset = new sample_set('name', 0);
         $sampleset->add_many_samples($log);
 
-        $node = flamed3_node::from_excimer_log_entries($sampleset->samples);
+        $node = flamed3_node::from_sample_set_samples($sampleset->samples);
         $flamedatad3json = json_encode($node);
         $numsamples = $node->value;
         $datasize = strlen(gzcompress($flamedatad3json));
@@ -178,7 +206,7 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $this->preventResetByRollback();
 
         $log = $this->quick_log(1); // TODO change to use stubs.
-        $node = flamed3_node::from_excimer_log_entries($log);
+        $node = flamed3_node::from_sample_set_samples($this->from_log_to_samples($log));
         $flamedatad3json = json_encode($node);
         $reason = profile::REASON_SLOW;
         $created = 56;
@@ -211,7 +239,7 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         $this->assertEquals(getmypid(), $record->get('pid'));
 
         $log = $this->quick_log(2);
-        $node = flamed3_node::from_excimer_log_entries($log);
+        $node = flamed3_node::from_sample_set_samples($this->from_log_to_samples($log));
         $flamedatad3json = json_encode($node);
         $duration = 2.123;
         $usercpuduration = 1.2;
@@ -257,7 +285,12 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 2.345);
+        $id = $this->quick_save(
+            'mock',
+            flamed3_node::from_sample_set_samples($this->from_log_to_samples($log)),
+            $allthereasons,
+            2.345
+        );
         $record = $DB->get_record(profile::TABLE, ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons.
@@ -281,7 +314,12 @@ final class tool_excimer_profile_test extends \advanced_testcase {
 
         // Trigger a log.
         $log = $this->quick_log(0);
-        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_NONE, 2.345);
+        $id = $this->quick_save(
+            'mock',
+            flamed3_node::from_sample_set_samples($this->from_log_to_samples($log)),
+            profile::REASON_NONE,
+            2.345
+        );
 
         // Ensure the courseid was recorded correctly.
         $record = $DB->get_record(profile::TABLE, ['id' => $id]);

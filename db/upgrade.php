@@ -538,9 +538,14 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024082301, 'tool', 'excimer');
     }
 
-    if ($oldversion < 2025120903) {
-        // Define field id to be added to tool_excimer_profiles.
+    if ($oldversion < 2025121000) {
         $table = new xmldb_table('tool_excimer_profiles');
+
+        // Add 'numevents' field - The number of events taken.
+        $field = new xmldb_field('numevents', XMLDB_TYPE_INTEGER, '11', true, XMLDB_NOTNULL, null, 0, 'numsamples');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
         $field = new xmldb_field('usercpuduration', XMLDB_TYPE_NUMBER, '12, 6', null, null, null, null);
 
@@ -557,7 +562,7 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         }
 
         // Excimer savepoint reached.
-        upgrade_plugin_savepoint(true, 2025120903, 'tool', 'excimer');
+        upgrade_plugin_savepoint(true, 2025121000, 'tool', 'excimer');
     }
 
     return true;

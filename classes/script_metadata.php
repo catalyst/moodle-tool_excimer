@@ -72,9 +72,9 @@ class script_metadata {
     const SAMPLING_PERIOD_DEFAULT = 0.1;
 
     /** Minimum timer interval */
-    const TIMER_INTERVAL_MIN = 1;
+    const MAX_SAMPLES_MIN = 1;
     /** Default timer interval */
-    const TIMER_INTERVAL_DEFAULT = 10;
+    const MAX_SAMPLES_DEFAULT = 1000;
 
     /** Maximium stack depth. */
     const STACK_DEPTH_LIMIT = 1000;
@@ -405,17 +405,17 @@ class script_metadata {
     }
 
     /**
-     * Get the timer interval from config, and return it as seconds.
+     * Get the max samples from config.
      *
      * @return float
      * @throws \dml_exception
      */
-    public static function get_timer_interval(): float {
-        $interval = (float) get_config('tool_excimer', 'long_interval_s');
-        if ($interval < self::TIMER_INTERVAL_MIN) {
-            return self::TIMER_INTERVAL_DEFAULT;
+    public static function get_max_samples(): float {
+        $maxsamples = (float) get_config('tool_excimer', 'max_samples');
+        if ($maxsamples < self::MAX_SAMPLES_MIN) {
+            return self::MAX_SAMPLES_DEFAULT;
         }
-        return $interval;
+        return $maxsamples;
     }
 
     /**

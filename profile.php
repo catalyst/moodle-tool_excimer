@@ -192,6 +192,7 @@ $data['numsamples_str'] = get_string(
     'tool_excimer',
     [
         'samples' => number_format($data['numsamples'], 0, $decsep, $thousandssep),
+        'events' => number_format($data['numevents'] ?? $data['numsamples'], 0, $decsep, $thousandssep),
         'samplerate' => $data['samplerate'],
     ]
 );

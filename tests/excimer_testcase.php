@@ -151,11 +151,10 @@ class excimer_testcase extends \advanced_testcase {
      *
      * @param processor $processor
      * @param \ExcimerProfiler $profiler
-     * @param \ExcimerTimer $timer
      * @param float $starttime
      * @return \ExcimerProfiler|mixed|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function get_manager_stub(processor $processor, \ExcimerProfiler $profiler, \ExcimerTimer $timer, float $starttime) {
+    protected function get_manager_stub(processor $processor, \ExcimerProfiler $profiler, float $starttime) {
 
         $stub = $this->getMockBuilder(manager::class)
             ->setConstructorArgs([$processor])
@@ -163,13 +162,38 @@ class excimer_testcase extends \advanced_testcase {
 
         $stub->method('get_profiler')
             ->willReturn($profiler);
-        $stub->method('get_timer')
-            ->willReturn($timer);
         $stub->method('get_starttime')
             ->willReturn($starttime);
         $stub->method('get_reasons')
             ->willReturn(profile::REASON_FLAMEME);
 
         return $stub;
+    }
+
+    /**
+     * Parse log entry to sample
+     *
+     * @param \ExcimerLogEntry $entry
+     * @return array
+     */
+    protected function from_log_entry_to_sample($entry) {
+        return [
+            "eventcount" => $entry->getEventCount(),
+            "trace" => $entry->getTrace(),
+        ];
+    }
+
+    /**
+     * Parse log to samples
+     *
+     * @param \ExcimerLog $log
+     * @return array
+     */
+    protected function from_log_to_samples($log) {
+        $samples = [];
+        foreach ($log as $entry) {
+            $samples[] = $this->from_log_entry_to_sample($entry);
+        }
+        return $samples;
     }
 }
