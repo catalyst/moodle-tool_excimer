@@ -70,9 +70,9 @@
     </div>
 {{/lockreason}}
 <div id="profile-stats" class="container">
-    <div class="row">
+    <div class="d-flex flex-row">
         <div class="">
-            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+            <table class="table table-striped table-sm table-hover w-auto">
                 <tr>
                     <th>{{#str}} field_contenttype, tool_excimer {{/str}}</th>
                         <td>
@@ -85,31 +85,12 @@
                 </tr>
 
                 <tr>
-                    <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
-                    <td>{{sessionid}}…</td>
-                </tr>
-                <tr>
                     <th>{{#str}} field_reason, tool_excimer {{/str}}</th>
                     <td>{{#reason_display}}{{reason}}{{/reason_display}}</td>
                 </tr>
                 <tr>
                     <th>{{#str}} field_scripttype, tool_excimer {{/str}}</th>
                     <td>{{#script_type_display}}{{scripttype}}{{/script_type_display}}</td>
-                </tr>
-                <tr>
-                    <th>{{#str}} field_created, tool_excimer {{/str}}</th>
-                    <td>{{created}}</td>
-                </tr>
-                <tr>
-                    <th>{{#str}} field_finished, tool_excimer {{/str}}</th>
-                    <td>
-                        {{#finished}}
-                            {{finished}}
-                        {{/finished}}
-                        {{^finished}}
-                            {{#str}} didnotfinish, tool_excimer {{/str}}
-                        {{/finished}}
-                    </td>
                 </tr>
                 <tr>
                     <th>{{#str}} field_duration, tool_excimer {{/str}}</th>
@@ -136,6 +117,10 @@
                     <td>{{dbreads}}/{{dbwrites}}</td>
                 </tr>
                 <tr>
+                    <th>{{#str}} field_dbreplicareads, tool_excimer {{/str}}</th>
+                    <td>{{dbreplicareads}}</td>
+                </tr>
+                <tr>
                     <th>{{#str}} field_memoryusagemax, tool_excimer {{/str}}</th>
                     <td>{{memoryusagemax}}</td>
                 </tr>
@@ -156,7 +141,22 @@
             </table>
         </div>
         <div class="">
-            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+            <table class="table table-striped table-sm table-hover w-auto">
+                <tr>
+                    <th>{{#str}} field_created, tool_excimer {{/str}}</th>
+                    <td>{{created}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} field_finished, tool_excimer {{/str}}</th>
+                    <td>
+                        {{#finished}}
+                            {{finished}}
+                        {{/finished}}
+                        {{^finished}}
+                            {{#str}} didnotfinish, tool_excimer {{/str}}
+                        {{/finished}}
+                    </td>
+                </tr>
                 <tr>
                     <th>{{#str}} field_datasize, tool_excimer {{/str}}</th>
                     <td>{{datasize}}</td>
@@ -174,6 +174,10 @@
                     <td>{{#userlink}}<a href="{{userlink}}">{{fullname}}</a>{{/userlink}}
                         {{^userlink}}{{fullname}}{{/userlink}}</td>
                 </tr>
+                <tr>
+                    <th>{{#str}} field_sessionid, tool_excimer {{/str}}</th>
+                    <td>{{sessionid}}…</td>
+                </tr>
 
                 <tr>
                     <th>{{#str}} field_pid, tool_excimer {{/str}}</th>
@@ -190,10 +194,6 @@
                 <tr>
                     <th>{{#str}} field_versionhash, tool_excimer {{/str}}</th>
                     <td><span title="{{versionhash}}">{{#shortentext}} 20,{{versionhash}} {{/shortentext}}</span></td>
-                </tr>
-                <tr>
-                    <th>{{#str}} field_dbreplicareads, tool_excimer {{/str}}</th>
-                    <td>{{dbreplicareads}}</td>
                 </tr>
                 <tr>
                     <th>{{#str}} field_courseid, tool_excimer {{/str}}</th>
