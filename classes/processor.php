@@ -33,18 +33,62 @@ namespace tool_excimer;
  *
  * @package   tool_excimer
  */
-interface processor {
+class processor {
+    /** @var int */
+    protected $minduration;
+
+    /** @var sample_set */
+    public $tasksampleset;
+
+    /** @var sample_set */
+    public $memoryusagesampleset;
+
+    /** @var int */
+    protected $samplingperiod;
+
+    /** @var int */
+    protected $samplelimit;
+
+    /** @var int */
+    protected $maxsamples;
+
+    /** @var int */
+    protected $logcount = 0;
+
+    /** @var bool */
+    protected static $alreadyprofiling = false;
+
+    /** @var array */
+    protected static $logs = [];
+
     /**
-     * Initialises the processor
-     *
-     * @param manager $manager The profiler manager object
+     * Construct the processor.
      */
-    public function init(manager $manager);
+    public function __construct() {
+        // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
+        $this->samplingperiod = script_metadata::get_sampling_period();
+        $this->samplelimit = script_metadata::get_sample_limit();
+        $this->maxsamples = script_metadata::get_max_samples();
+    }
+
+    /**
+     * Doubling the sampling period when we reach the samples limit
+     *
+     * @param manager $manager
+     */
+    public function on_reach_limit(manager $manager) {
+        $this->samplingperiod *= 2;
+        // This will take effect the next time start() is called.
+        $manager->get_profiler()->setPeriod($this->samplingperiod);
+        $manager->get_profiler()->start();
+    }
 
     /**
      * Gets the minimum duration required for a profile to be saved, as seconds.
      *
      * @return float
      */
-    public function get_min_duration(): float;
+    public function get_min_duration(): float {
+        return $this->minduration;
+    }
 }

@@ -28,33 +28,18 @@ use tool_excimer\script_metadata;
  * @copyright 2022, Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class cron_processor implements processor {
+class cron_processor extends processor {
     /** @var float Timestamp updated after processing each sample */
     public $sampletime;
 
-    /** @var sample_set A sample set recorded while processing a task */
-    public $tasksampleset = null;
-
-    /** @var sample_set A sample set for memory usage recorded while processing a task */
-    protected $memoryusagesampleset;
-
-    /** @var int */
-    protected $samplingperiod;
-
-    /** @var int */
-    protected $samplelimit;
-
-    /** @var int */
-    protected $maxsamples;
-
-    /** @var int */
-    protected $logcount = 0;
-
-    /** @var bool */
-    protected static $alreadyprofiling = false;
-
-    /** @var array */
-    protected static $logs = [];
+    /**
+     * Construct the web processor.
+     */
+    public function __construct() {
+        // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
+        parent::__construct();
+        $this->minduration = (float) get_config('tool_excimer', 'task_min_duration');
+    }
 
     /**
      * Initialises the processor
@@ -64,10 +49,7 @@ class cron_processor implements processor {
     public function init(manager $manager) {
         $this->sampletime = $manager->get_starttime();
 
-        // Preload config values to avoid DB access during processing. See manager::get_altconnection() for more information.
-        $this->samplingperiod = script_metadata::get_sampling_period();
-        $this->samplelimit = script_metadata::get_sample_limit();
-        $this->maxsamples = script_metadata::get_max_samples();
+        // The callback is triggered when the number of samples reach the maxsamples and when profiler is destroyed.
         $manager->get_profiler()->setFlushCallback(function ($log) use ($manager) {
             $this->on_interval($log, $manager);
         }, $this->maxsamples);
@@ -84,7 +66,7 @@ class cron_processor implements processor {
 
     /**
      * Get sampling period of processor
-     *
+     * (used for testing)
      * @return int sampling period
      */
     public function get_sampling_period() {
@@ -93,33 +75,11 @@ class cron_processor implements processor {
 
     /**
      * Get sample limit of processor
-     *
+     * (used for testing)
      * @return int sample_limit
      */
     public function get_sample_limit() {
         return $this->samplelimit;
-    }
-
-    /**
-     * Gets the minimum duration required for a profile to be saved, as seconds.
-     *
-     * @return float
-     * @throws \dml_exception
-     */
-    public function get_min_duration(): float {
-        return (float) get_config('tool_excimer', 'task_min_duration');
-    }
-
-    /**
-     * Doubling the sampling period when we reach the samples limit
-     *
-     * @param manager $manager
-     */
-    public function on_reach_limit(manager $manager) {
-        $this->samplingperiod *= 2;
-        // This will take effect the next time start() is called.
-        $manager->get_profiler()->setPeriod($this->samplingperiod);
-        $manager->get_profiler()->start();
     }
 
     /**
@@ -246,7 +206,7 @@ class cron_processor implements processor {
             $profile->set('flamedatad3', flamed3_node::from_sample_set_samples($this->tasksampleset->samples));
             $profile->set('numsamples', count($this->tasksampleset->samples));
             $profile->set('numevents', $this->tasksampleset->count());
-            $profile->set('samplerate', $this->samplingperiod * 1000);
+            $profile->set('samplerate', (int) (($duration * 1000) / $this->tasksampleset->count()));
             $profile->save_record();
         }
         return $profile;

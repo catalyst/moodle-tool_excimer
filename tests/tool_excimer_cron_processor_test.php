@@ -43,6 +43,7 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
      * @covers \tool_excimer\cron_processor::findtaskname
      */
     public function test_findtaskname(): void {
+        script_metadata::init();
         $processor = new cron_processor();
         $entry = $this->get_log_entry_stub(['c::a', 'b', 'c']);
         $taskname = $processor->findtaskname($entry);

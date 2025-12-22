@@ -30,7 +30,7 @@ class sample_set {
     /** @var float Starting time of the sample set. */
     public $starttime;
 
-    /** @var array An array of \ExcimerLogEntry objects. */
+    /** @var array An array of sample objects. It could contain memory usage samples or tasks samples  */
     public $samples = [];
 
     /** @var int Sample limit. */
@@ -126,7 +126,7 @@ class sample_set {
             } else {
                 $newsamples[] = [
                     'sampleindex' => $this->samples[$i]['sampleindex'],
-                    'value' => ($this->samples[$i]['value'] + $this->samples[$i + 1]['value']) / 2.0,
+                    'value' => max($this->samples[$i]['value'], $this->samples[$i + 1]['value']),
                 ];
             }
         }
@@ -149,7 +149,7 @@ class sample_set {
                     $trace = $this->samples[$i + 1]['trace'];
                 }
                 $newsamples[] = [
-                    'eventcount' => ($this->samples[$i]['eventcount'] + $this->samples[$i + 1]['eventcount']),
+                    'eventcount' => ceil(($this->samples[$i]['eventcount'] + $this->samples[$i + 1]['eventcount']) / 2),
                     'trace' => $trace,
                 ];
             }

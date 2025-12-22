@@ -194,6 +194,7 @@ class profile extends persistent {
      *
      * @param string $json
      * @return bool|int the id of the imported profile, or false if unsuccessful
+     * @throws \coding_exception
      */
     public static function import(string $json) {
         global $DB;
@@ -225,7 +226,9 @@ class profile extends persistent {
 
         foreach ($data as $property => $value) {
             if (isset($value) && !in_array($property, $removeproperties)) {
-                $profile->set($property, $value);
+                if (property_exists($profile, $property)) {
+                    $profile->set($property, $value);
+                }
             }
         }
 

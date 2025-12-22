@@ -65,18 +65,18 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
             ['sampleindex' => 5, 'value' => 350000],
         ];
         $expected1 = [
-            ['sampleindex' => 0, 'value' => 150000],
-            ['sampleindex' => 2, 'value' => 350000],
+            ['sampleindex' => 0, 'value' => 200000],
+            ['sampleindex' => 2, 'value' => 400000],
             ['sampleindex' => 5, 'value' => 350000],
         ];
 
         $expected2 = [
-            ['sampleindex' => 0, 'value' => 250000],
+            ['sampleindex' => 0, 'value' => 400000],
             ['sampleindex' => 5, 'value' => 350000],
         ];
 
         $expected3 = [
-            ['sampleindex' => 0, 'value' => 300000],
+            ['sampleindex' => 0, 'value' => 400000],
         ];
 
         $set = new sample_set('a', 0, 1024);
@@ -108,18 +108,18 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['e'], 0, 50),
         ];
         $expected1 = [
-            ['eventcount' => 110, 'trace' => [['function' => 'b']]],
-            ['eventcount' => 120, 'trace' => [['function' => 'c']]],
+            ['eventcount' => 55, 'trace' => [['function' => 'b']]],
+            ['eventcount' => 60, 'trace' => [['function' => 'c']]],
             ['eventcount' => 50, 'trace' => [['function' => 'e']]],
         ];
 
         $expected2 = [
-            ['trace' => [['function' => 'c']], 'eventcount' => 230],
+            ['trace' => [['function' => 'c']], 'eventcount' => 58],
             ['trace' => [['function' => 'e']], 'eventcount' => 50],
         ];
 
         $expected3 = [
-            ['trace' => [['function' => 'c']], 'eventcount' => 280],
+            ['trace' => [['function' => 'c']], 'eventcount' => 54],
         ];
 
         $set = new sample_set('a', 0, 1024);
@@ -149,8 +149,8 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
             $this->get_log_entry_stub(['e'], 0, 50),
         ];
         $expected1 = [
-            ['eventcount' => 110, 'trace' => [['function' => 'b']]],
-            ['eventcount' => 120, 'trace' => [['function' => 'c']]],
+            ['eventcount' => 55, 'trace' => [['function' => 'b']]],
+            ['eventcount' => 60, 'trace' => [['function' => 'c']]],
             ['eventcount' => 50, 'trace' => [['function' => 'e']]],
         ];
 
@@ -161,8 +161,8 @@ final class tool_excimer_sample_set_test extends excimer_testcase {
         ];
 
         $expected2 = [
-            ['eventcount' => 290, 'trace' => [['function' => 'c']]],
-            ['eventcount' => 30, 'trace' => [['function' => 'h']]],
+            ['eventcount' => 44, 'trace' => [['function' => 'c']]],
+            ['eventcount' => 15, 'trace' => [['function' => 'h']]],
         ];
 
         $set = new sample_set('a', 0, 4);

@@ -165,9 +165,6 @@ class manager {
      */
     public function init() {
         if (!self::is_testing()) {
-            script_metadata::init();
-            profile_helper::init();
-
             $sampleperiod = script_metadata::get_sampling_period();
             $this->profiler = new \ExcimerProfiler();
             $this->profiler->setPeriod($sampleperiod);
@@ -193,6 +190,8 @@ class manager {
      *
      */
     public static function create() {
+        script_metadata::init();
+        profile_helper::init();
         if (self::is_cron()) {
             self::$instance = new manager(new cron_processor());
         } else {
