@@ -70,9 +70,9 @@ class sample_set {
      */
     public function add_sample($sample) {
         $ismemory = false;
-        // If this is a log entry, it will count the number of total events
-        // processed instead.
+        // If this is a log entry, it will count the number of total events processed instead.
         // Each time a sample is added, recalculate the maxstackdepth for this set.
+        // The sample set can be either a tasksampleset (ExcimerLogEntry) or a memoryusagesampleset.
         if ($sample instanceof \ExcimerLogEntry) {
             $eventcount = $sample->getEventCount();
             $trace = $sample->getTrace();
@@ -80,6 +80,9 @@ class sample_set {
             if ($trace) {
                 $this->maxstackdepth = max($this->maxstackdepth, count($trace));
             }
+            // We create a new dict to store the useful information.
+            // This will be used in the merge functions because ExcimerLogEntry is immutable.
+            // See https://github.com/wikimedia/php-excimer/blob/master/stubs/ExcimerLogEntry.php
             $this->samples[] = [
                 'eventcount' => $eventcount,
                 'trace' => $trace,
@@ -111,19 +114,24 @@ class sample_set {
      * @param bool $ismemory true if the dataset is a memory usage sample set.
      */
     public function apply_doubling($ismemory) {
+        // Instead of dropping a half of samples, we merge them together to keep useful information.
+        // The merge logic is different for each type of sample set
         $ismemory ? $this->merge_memory_usage_sample_set() : $this->merge_excimer_sample_set();
     }
 
     /**
      * Merge memory usage sample set
+     *
      */
     private function merge_memory_usage_sample_set() {
         $newsamples = [];
         for ($i = 0; $i < count($this->samples); $i += 2) {
-            // Prevent sample limit is odd.
+            // For the case the number of sample is odd.
+            // We keep the last one as is.
             if ($i == count($this->samples) - 1) {
                 $newsamples[] = $this->samples[$i];
             } else {
+                // The final value should be the higher value which can highlight the considerable memory usage.
                 $newsamples[] = [
                     'sampleindex' => $this->samples[$i]['sampleindex'],
                     'value' => max($this->samples[$i]['value'], $this->samples[$i + 1]['value']),
@@ -139,17 +147,19 @@ class sample_set {
     private function merge_excimer_sample_set() {
         $newsamples = [];
         for ($i = 0; $i < count($this->samples); $i += 2) {
-            // Prevent sample limit is odd.
+            // For the case the number of sample is odd.
+            // We keep the last one as is.
             if ($i == count($this->samples) - 1) {
                 $newsamples[] = $this->samples[$i];
             } else {
+                // We keep stacktrace of the bigger sample as it contains the information of long-running task.
                 if ($this->samples[$i]['eventcount'] >= $this->samples[$i + 1]['eventcount']) {
                     $trace = $this->samples[$i]['trace'];
                 } else {
                     $trace = $this->samples[$i + 1]['trace'];
                 }
                 $newsamples[] = [
-                    'eventcount' => ceil(($this->samples[$i]['eventcount'] + $this->samples[$i + 1]['eventcount']) / 2),
+                    'eventcount' => (int) round(($this->samples[$i]['eventcount'] + $this->samples[$i + 1]['eventcount']) / 2),
                     'trace' => $trace,
                 ];
             }

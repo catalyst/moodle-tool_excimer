@@ -51,7 +51,7 @@ class cron_processor extends processor {
 
         // The callback is triggered when the number of samples reach the maxsamples and when profiler is destroyed.
         $manager->get_profiler()->setFlushCallback(function ($log) use ($manager) {
-            $this->on_interval($log, $manager);
+            $this->on_flush($log, $manager);
         }, $this->maxsamples);
 
         \core_shutdown_manager::register_function(
@@ -96,7 +96,7 @@ class cron_processor extends processor {
      * @param \ExcimerLog $log
      * @param manager $manager
      */
-    public function on_interval($log, manager $manager) {
+    public function on_flush($log, manager $manager) {
         // We want to prevent doubling up of processing, so skip if an existing process is still executing.
         // The profile logs will be kept and processed the next time.
         self::$logs[] = $log;

@@ -33,7 +33,7 @@ namespace tool_excimer;
  *
  * @package   tool_excimer
  */
-class processor {
+abstract class processor {
     /** @var int */
     protected $minduration;
 
@@ -60,6 +60,13 @@ class processor {
 
     /** @var array */
     protected static $logs = [];
+
+    /**
+     * Initialises the processor
+     *
+     * @param manager $manager The profiler manager object
+     */
+    abstract public function init(manager $manager);
 
     /**
      * Construct the processor.

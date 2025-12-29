@@ -61,7 +61,7 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
     /**
      * Tests cron_processor::on_interval().
      *
-     * @covers \tool_excimer\cron_processor::on_interval
+     * @covers \tool_excimer\cron_processor::on_flush
      */
     public function test_on_interval(): void {
         global $DB;
@@ -84,7 +84,7 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
 
         $manager = $this->get_manager_stub($processor, $profiler, $started);
 
-        $processor->on_interval($log, $manager);
+        $processor->on_flush($log, $manager);
 
         $this->assertEquals($started + ($period * 1), $processor->sampletime);
         $this->assertNull($processor->tasksampleset);
@@ -102,7 +102,7 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
         ], $period, ($period * 1));
 
         $manager = $this->get_manager_stub($processor, $profiler, $started);
-        $processor->on_interval($log, $manager);
+        $processor->on_flush($log, $manager);
         $this->assertEquals($started + ($period * 4), $processor->sampletime);
 
         // There should be a current sample set being recorded.
@@ -124,7 +124,7 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
             ['a', 'b'],
         ], $period, ($period * 4));
         $manager = $this->get_manager_stub($processor, $profiler, $started);
-        $processor->on_interval($log, $manager);
+        $processor->on_flush($log, $manager);
         $this->assertEquals($started + ($period * 8), $processor->sampletime);
 
         // There should not be a current sample set.
@@ -184,10 +184,10 @@ final class tool_excimer_cron_processor_test extends excimer_testcase {
         $this->assertEquals(0.01, $processor->get_sampling_period());
         $this->assertEquals(2, $processor->get_sample_limit());
 
-        $processor->on_interval($log, $manager);
+        $processor->on_flush($log, $manager);
         $this->assertEquals(0.02, $processor->get_sampling_period());
 
-        $processor->on_interval($log, $manager);
+        $processor->on_flush($log, $manager);
         $this->assertEquals(0.04, $processor->get_sampling_period());
     }
 }

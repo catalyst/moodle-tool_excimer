@@ -70,19 +70,21 @@ class web_processor extends processor {
             $manager->get_profiler()->setFlushCallback(function ($log) use ($manager) {
                 // Once overlapping has happened once, we prevent all future partial saving.
                 if (!$this->hasoverlapped) {
-                    $this->on_interval($log, $manager);
+                    $this->on_flush($log, $manager);
                 }
             }, $this->maxsamples);
         }
 
         \core_shutdown_manager::register_function(
             function () use ($manager) {
+                // The final on_flush is expected to be called if $this->partialsave.
                 $manager->get_profiler()->stop();
                 if (!$this->partialsave) {
                     $log = $manager->get_profiler()->flush();
-                    $this->on_interval($log, $manager);
+                    $this->on_flush($log, $manager);
                 }
-                $this->process($manager);
+                // Do the final profile process.
+                $this->process($manager, true);
                 page_group::record_fuzzy_counts($this->profile);
             }
         );
@@ -102,7 +104,7 @@ class web_processor extends processor {
      * @param \ExcimerLog $log
      * @param manager $manager
      */
-    public function on_interval($log, manager $manager) {
+    public function on_flush($log, manager $manager) {
         // We want to prevent overlapping of processing, so skip if an existing process is still executing.
         // The profile logs will be kept and processed the next time.
         self::$logs[] = $log;
@@ -130,6 +132,7 @@ class web_processor extends processor {
                 'value' => $memoryusage,
             ]);
         }
+        $this->process($manager);
         self::$logs = [];
         self::$alreadyprofiling = false;
     }
@@ -138,9 +141,10 @@ class web_processor extends processor {
      * Processes stored samples to create a profile.
      *
      * @param manager $manager
+     * @param bool $isfinal
      * @throws \dml_exception
      */
-    public function process(manager $manager) {
+    public function process(manager $manager, $isfinal = false) {
         $current = microtime(true);
         $currentrusage = getrusage();
         $duration = $current - $manager->get_starttime();
@@ -152,7 +156,7 @@ class web_processor extends processor {
         $reason = $manager->get_reasons($this->profile);
         if ($reason !== profile::REASON_NONE) {
             $this->profile->set('reason', $reason);
-            $this->profile->set('finished', (int) $current);
+            $this->profile->set('finished', $isfinal ? (int)$current : 0);
             $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
             $this->profile->set('flamedatad3', flamed3_node::from_sample_set_samples($this->tasksampleset->samples));
             $this->profile->set('numsamples', count($this->tasksampleset->samples));
