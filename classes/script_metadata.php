@@ -469,28 +469,8 @@ class script_metadata {
      * @return array key value pairs that are ready to be saved to the profile
      */
     public static function get_lock_info(): array {
-        $lockinfo = [];
-        $sessionlock = \core\session\manager::get_session_lock_info();
-        if (empty($sessionlock)) {
-            return $lockinfo;
-        }
-
-        // Get time spent waiting for lock and time spent holding a lock.
-        $lockinfo['lockwait'] = $sessionlock['wait'] ?? 0;
-
-        if (isset($sessionlock['held'])) {
-            $lockinfo['lockheld'] = $sessionlock['held'];
-        } else if (isset($sessionlock['gained'])) {
-            // Lock hasn't been released yet, so use current time as an estimate.
-            $lockinfo['lockheld'] = microtime(true) - $sessionlock['gained'];
-        }
-
-        // More info about the page holding the url is available when $CFG->debugsessionlock is set.
-        $url = \core\session\manager::get_locked_page_at($sessionlock['start']);
-        if (isset($url) && !empty($url['url'])) {
-            $lockinfo['lockwaiturl'] = $url['url'];
-        }
-
-        return $lockinfo;
+        // Totara's `\core\session\manager` class has no `get_session_lock_info()` function,
+        // so we can't retrieve session lock info.
+        return [];
     }
 }
