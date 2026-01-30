@@ -24,28 +24,26 @@ namespace tool_excimer;
  * @copyright  2022 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sample_set {
+abstract class sample_set {
     /** @var string name of the sample set. */
     public $name;
     /** @var float Starting time of the sample set. */
     public $starttime;
 
-    /** @var array An array of \ExcimerLogEntry objects. */
+    /** @var array An array of sample objects. It could contain memory usage samples or tasks samples  */
     public $samples = [];
+
+    /** @var array An array of sample objects. It is used to store sample upto the filterrate  */
+    public $samplepool = [];
 
     /** @var int Sample limit. */
     public $samplelimit;
-    /** @var int The maximum stack depth. */
-    public $maxstackdepth = 0;
 
     /** @var int If is R, then only each Rth sample is recorded. */
-    private $filterrate = 1;
-
-    /** @var int Internal counter to help with filtering. */
-    private $counter = 0;
+    protected $filterrate = 1;
 
     /** @var int Internal counter of how many samples were added (regardless of how many are currently held). */
-    private $totaladded = 0;
+    protected $totaladded = 0;
 
     /**
      * Constructs the sample set.
@@ -61,41 +59,42 @@ class sample_set {
     }
 
     /**
-     * Return the stack depth for this set.
-     *
-     * @return int
-     */
-    public function get_stack_depth(): int {
-        return (int) $this->maxstackdepth;
-    }
-
-    /**
      * Add a sample to the sample store, applying any filters.
      *
      * @param array|\ExcimerLogEntry $sample
      */
     public function add_sample($sample) {
-        $trace = false;
         if (count($this->samples) === $this->samplelimit) {
             $this->apply_doubling();
         }
-        $this->counter += 1;
-        if ($this->counter === $this->filterrate) {
-            $this->samples[] = $sample;
-            $this->counter = 0;
+        $this->process_samples($sample);
+        if (count($this->samplepool) === $this->filterrate) {
+            $this->samples[] = $this->get_sample_from_pool();
         }
-        // If this is a log entry, it will count the number of total events
-        // processed instead.
-        // Each time a sample is added, recalculate the maxstackdepth for this set.
-        if ($sample instanceof \ExcimerLogEntry) {
-            $this->totaladded += $sample->getEventCount();
-            $trace = $sample->getTrace();
-            if ($trace) {
-                $this->maxstackdepth = max($this->maxstackdepth, count($trace));
-            }
-            return;
-        }
-        $this->totaladded++;
+    }
+
+    /**
+     * Processing given samples before adding into the sample set.
+     *
+     * @param array|\ExcimerLogEntry $sample
+     */
+    abstract public function process_samples($sample);
+
+    /**
+     * Merging sample set
+     *
+     * @param array $samples
+     * @param int $chunksize
+     */
+    abstract public function merge_sample_set(array $samples, int $chunksize = 2);
+
+    /**
+     * Get a significant sample from pool.
+     */
+    private function get_sample_from_pool(): array {
+        $mergedsample = $this->merge_sample_set($this->samplepool, $this->filterrate);
+        $this->samplepool = [];
+        return reset($mergedsample);
     }
 
     /**
@@ -110,24 +109,14 @@ class sample_set {
     }
 
     /**
-     * Doubles the filter rate, and strips every second sample from the set.
+     * Merge samples to increase storage
      * Called when the sample limit is reached.
-     *
-     * We have two options here. Either double the sampling period, or apply a filter to record only the
-     * Nth sample passed to sample_set. By using a filter and keeping the sampling period the same, we avoid
-     * spilling over into the next task.
      */
-    public function apply_doubling() {
+    public function apply_doubling(): void {
         $this->filterrate *= 2;
-        $this->samples = array_values(
-            array_filter(
-                $this->samples,
-                function ($key) {
-                    return ($key % 2);
-                },
-                ARRAY_FILTER_USE_KEY
-            )
-        );
+        // Instead of dropping a half of samples, we merge them together to keep useful information.
+        // The merge logic is different for each type of sample set.
+        $this->samples = $this->merge_sample_set($this->samples);
     }
 
     /**
@@ -135,7 +124,7 @@ class sample_set {
      *
      * @return int number of samples added
      */
-    public function total_added() {
+    public function total_added(): int {
         return $this->totaladded;
     }
 
@@ -147,16 +136,7 @@ class sample_set {
      *
      * @return int count of $this->samples
      */
-    public function count(): int {
-        $count = count($this->samples);
-        if ($count > 0 && $this->samples[0] instanceof \ExcimerLogEntry) {
-            $count = array_reduce($this->samples, function ($acc, $sample) {
-                $acc += $sample->getEventCount();
-                return $acc;
-            }, 0);
-        }
-        return $count;
-    }
+    abstract public function count(): int;
 
     /**
      * Returns the filter rate to calculate the real sampling rate

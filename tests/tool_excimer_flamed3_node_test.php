@@ -97,18 +97,18 @@ final class tool_excimer_flamed3_node_test extends excimer_testcase {
     /**
      * Tests flamed3_node::from_excimer_log_entries
      *
-     * @covers \tool_excimer\flamed3_node::from_excimer_log_entries
+     * @covers \tool_excimer\flamed3_node::from_sample_set_samples
      */
     public function test_from_excimer_log_entries(): void {
-        $entries = [
-            $this->get_log_entry_stub(['c::a', 'b', 'c']),
-            $this->get_log_entry_stub(['c::a', 'd', 'e']),
-            $this->get_log_entry_stub(['m', 'n', 'e']),
-            $this->get_log_entry_stub(['M::m', 'n', 'e']),
-            $this->get_log_entry_stub(['M::m', 'l;12']),
+        $samples = [
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['c::a', 'b', 'c'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['c::a', 'd', 'e'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['m', 'n', 'e'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['M::m', 'n', 'e'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['M::m', 'l;12'])),
         ];
 
-        $node = flamed3_node::from_excimer_log_entries($entries);
+        $node = flamed3_node::from_sample_set_samples($samples);
         $this->assertEquals(5, $node->value);
         $this->assertEquals(3, count($node->children));
         $this->assertEquals('c::a', $node->children[0]->name);
@@ -131,19 +131,19 @@ final class tool_excimer_flamed3_node_test extends excimer_testcase {
     /**
      * Test from log entries counts.
      *
-     * @covers \tool_excimer\flamed3_node::from_excimer_log_entries
+     * @covers \tool_excimer\flamed3_node::from_sample_set_samples
      */
     public function test_from_excimer_log_entries_counts(): void {
-        $entries = [
-            $this->get_log_entry_stub(['c::a', 'b']),
-            $this->get_log_entry_stub(['c::a', 'b']),
-            $this->get_log_entry_stub(['c::a', 'd']),
-            $this->get_log_entry_stub(['m']),
-            $this->get_log_entry_stub(['m']),
-            $this->get_log_entry_stub(['m']),
+        $samples = [
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['c::a', 'b'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['c::a', 'b'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['c::a', 'd'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['m'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['m'])),
+            $this->from_log_entry_to_sample($this->get_log_entry_stub(['m'])),
         ];
 
-        $node = flamed3_node::from_excimer_log_entries($entries);
+        $node = flamed3_node::from_sample_set_samples($samples);
 
         $this->assertEquals(6, $node->value);
         $this->assertEquals(2, count($node->children));
