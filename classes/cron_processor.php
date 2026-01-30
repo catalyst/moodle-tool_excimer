@@ -32,10 +32,10 @@ class cron_processor implements processor {
     /** @var float Timestamp updated after processing each sample */
     public $sampletime;
 
-    /** @var sample_set A sample set recorded while processing a task */
+    /** @var excimer_sample_set A sample set recorded while processing a task */
     public $tasksampleset = null;
 
-    /** @var sample_set A sample set for memory usage recorded while processing a task */
+    /** @var memory_sample_set A sample set for memory usage recorded while processing a task */
     protected $memoryusagesampleset;
 
     /** @var int */
@@ -126,8 +126,8 @@ class cron_processor implements processor {
 
             // If there exists a current task, and the sampleset for it is not created yet, create it.
             if ($taskname && ($this->tasksampleset === null)) {
-                $this->tasksampleset = new sample_set($taskname, $this->sampletime);
-                $this->memoryusagesampleset = new sample_set($taskname, $this->sampletime);
+                $this->tasksampleset = new excimer_sample_set($taskname, $this->sampletime);
+                $this->memoryusagesampleset = new memory_sample_set($taskname, $this->sampletime);
                 if ($memoryusage) { // Ensure this only adds the mem usage for the initial base sample due to accuracy.
                     $this->memoryusagesampleset->add_sample(['sampleindex' => 0, 'value' => $memoryusage]);
                     $memoryusage = 0;
@@ -196,7 +196,8 @@ class cron_processor implements processor {
             $profile->set('reason', $reasons);
             $profile->set('finished', (int) $finishtime);
             $profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
-            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->tasksampleset->samples));
+            $profile->set('flamedatad3', flamed3_node::from_sample_set_samples($this->tasksampleset->samples));
+            $profile->set('numlogentries', count($this->tasksampleset->samples));
             $profile->set('numsamples', $this->tasksampleset->count());
             $profile->set('samplerate', $this->tasksampleset->filter_rate() * $this->samplems);
             $profile->save_record();

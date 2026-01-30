@@ -101,6 +101,34 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         return $profile->save_record();
     }
 
+
+    /**
+     * Parse log entry to sample
+     *
+     * @param \ExcimerLogEntry $entry
+     * @return array
+     */
+    protected function from_log_entry_to_sample($entry) {
+        return [
+            "eventcount" => $entry->getEventCount(),
+            "trace" => $entry->getTrace(),
+        ];
+    }
+
+    /**
+     * Parse log to samples
+     *
+     * @param \ExcimerLog $log
+     * @return array
+     */
+    protected function from_log_to_samples($log) {
+        $samples = [];
+        foreach ($log as $entry) {
+            $samples[] = $this->from_log_entry_to_sample($entry);
+        }
+        return $samples;
+    }
+
     /**
      * Tests the functionality to keep only the N slowest profiles.
      *
@@ -116,7 +144,7 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
-        $node = flamed3_node::from_excimer_log_entries($log);
+        $node = flamed3_node::from_sample_set_samples($this->from_log_to_samples($log));
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $this->quick_save('mock', $node, profile::REASON_FLAMEME, 2.345);
@@ -175,7 +203,7 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
-        $node = flamed3_node::from_excimer_log_entries($log);
+        $node = flamed3_node::from_sample_set_samples($this->from_log_to_samples($log));
 
         foreach ($times as $time) {
             $this->quick_save('mock', $node, profile::REASON_SLOW, $time, 0, 'X');
@@ -214,7 +242,7 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         $sortedtimes = $times;
         sort($sortedtimes);
         $this->assertGreaterThan($sortedtimes[0], $sortedtimes[1]); // Sanity check.
-        $node = flamed3_node::from_excimer_log_entries($log);
+        $node = flamed3_node::from_sample_set_samples($this->from_log_to_samples($log));
 
         // Non-auto saves should have no impact, so chuck a few in to see if it gums up the works.
         $this->quick_save('a', $node, profile::REASON_FLAMEME, 2.345);
@@ -267,7 +295,13 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         $this->assertEquals(0, profile_helper::get_num_profiles());
         $expectedcount = 0;
         foreach ($times as $time) {
-            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_FLAMEME, 0.2, $time);
+            $this->quick_save(
+                'mock',
+                flamed3_node::from_sample_set_samples($this->from_log_to_samples($log)),
+                profile::REASON_FLAMEME,
+                0.2,
+                $time
+            );
             $this->assertEquals(++$expectedcount, profile_helper::get_num_profiles());
         }
 
@@ -300,7 +334,14 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
 
         $expectedcount = count($times);
         foreach ($times as $time) {
-            $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), profile::REASON_FLAMEME, 0.2, $time, 'X');
+            $this->quick_save(
+                'mock',
+                flamed3_node::from_sample_set_samples($this->from_log_to_samples($log)),
+                profile::REASON_FLAMEME,
+                0.2,
+                $time,
+                'X'
+            );
         }
 
         profile_helper::purge_profiles_before_epoch_time($cutoff1);
@@ -331,7 +372,12 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 2.345);
+        $id = $this->quick_save(
+            'mock',
+            flamed3_node::from_sample_set_samples($this->from_log_to_samples($log)),
+            $allthereasons,
+            2.345
+        );
         $profile = $DB->get_record(profile::TABLE, ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
@@ -367,7 +413,14 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         foreach (profile::REASONS as $reason) {
             $allthereasons |= $reason;
         }
-        $id = $this->quick_save('mock', flamed3_node::from_excimer_log_entries($log), $allthereasons, 2.345, 0, 'X');
+        $id = $this->quick_save(
+            'mock',
+            flamed3_node::from_sample_set_samples($this->from_log_to_samples($log)),
+            $allthereasons,
+            2.345,
+            0,
+            'X'
+        );
         $profile = $DB->get_record(profile::TABLE, ['id' => $id]);
 
         // Fetch profile from DB and confirm it matches for all the reasons, and
@@ -399,7 +452,7 @@ final class tool_excimer_profile_helper_test extends \advanced_testcase {
         // Divide by 1000 required, as microtime(true) returns the value in seconds.
         $reason = $manager->get_reasons($profile);
         if ($reason !== profile::REASON_NONE) {
-            $profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($profiler->getLog()));
+            $profile->set('flamedatad3', flamed3_node::from_sample_set_samples($this->from_log_to_samples($profiler->getLog())));
             $profile->set('reason', $reason);
 
             // Won't show DB writes count since saves are stored via another DB connection.

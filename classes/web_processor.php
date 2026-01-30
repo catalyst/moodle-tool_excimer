@@ -30,9 +30,9 @@ class web_processor implements processor {
     /** @var profile The profile object for the run. */
     protected $profile;
 
-    /** @var sample_set */
+    /** @var excimer_sample_set */
     protected $sampleset;
-    /** @var sample_set */
+    /** @var memory_sample_set */
     protected $memoryusagesampleset;
 
     /** @var int */
@@ -69,10 +69,10 @@ class web_processor implements processor {
 
         $request = script_metadata::get_normalised_relative_script_path($ME, $SCRIPT);
         $starttime = (int) $manager->get_starttime();
-        $this->sampleset = new sample_set($request, $starttime);
+        $this->sampleset = new excimer_sample_set($request, $starttime);
 
         // Add sampleset for memory usage - this sets the baseline for the profile.
-        $this->memoryusagesampleset = new sample_set($request, $starttime);
+        $this->memoryusagesampleset = new memory_sample_set($request, $starttime);
         $this->memoryusagesampleset->add_sample(['sampleindex' => 0, 'value' => $memoryusage]);
 
         $this->profile = new profile();
@@ -149,7 +149,8 @@ class web_processor implements processor {
             $this->profile->set('reason', $reason);
             $this->profile->set('finished', $isfinal ? (int) $current : 0);
             $this->profile->set('memoryusagedatad3', $this->memoryusagesampleset->samples);
-            $this->profile->set('flamedatad3', flamed3_node::from_excimer_log_entries($this->sampleset->samples));
+            $this->profile->set('flamedatad3', flamed3_node::from_sample_set_samples($this->sampleset->samples));
+            $this->profile->set('numlogentries', count($this->sampleset->samples));
             $this->profile->set('numsamples', $this->sampleset->count());
             $this->profile->set('samplerate', $this->sampleset->filter_rate() * $this->samplems);
             foreach (script_metadata::get_lock_info() as $field => $value) {

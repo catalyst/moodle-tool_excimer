@@ -575,5 +575,19 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026030601, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2026031200) {
+        // Define field numlogentries to be added to tool_excimer_profiles.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $field = new xmldb_field('numlogentries', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null, 'numsamples');
+
+        // Conditionally launch add field numlogentries.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2026031200, 'tool', 'excimer');
+    }
+
     return true;
 }

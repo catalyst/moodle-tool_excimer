@@ -172,4 +172,31 @@ class excimer_testcase extends \advanced_testcase {
 
         return $stub;
     }
+
+    /**
+     * Parse log entry to sample
+     *
+     * @param \ExcimerLogEntry $entry
+     * @return array
+     */
+    protected function from_log_entry_to_sample($entry) {
+        return [
+            "eventcount" => $entry->getEventCount(),
+            "trace" => $entry->getTrace(),
+        ];
+    }
+
+    /**
+     * Parse log to samples
+     *
+     * @param \ExcimerLog $log
+     * @return array
+     */
+    protected function from_log_to_samples($log) {
+        $samples = [];
+        foreach ($log as $entry) {
+            $samples[] = $this->from_log_entry_to_sample($entry);
+        }
+        return $samples;
+    }
 }

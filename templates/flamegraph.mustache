@@ -81,7 +81,7 @@ function displaysamplestats(d) {
     }
 
     const percentage = ((d.x1 - d.x0) * 100).toFixed(3);
-    const samplecount = d.value.toLocaleString("{{locale}}");
+    const samplecount = parseInt(d.value).toLocaleString("{{locale}}");
 
     return d.data.name + ` (${percentage}%, ${samplecount} {{#str}} samples, tool_excimer {{/str}}, {{#str}} duration, tool_excimer {{/str}} ~ ${durationstr})`;
 }
