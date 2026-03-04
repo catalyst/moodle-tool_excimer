@@ -53,7 +53,7 @@
 <div id="flamedetails" style="min-height: 1.5rem; clear: both;"></div>
 
 {{#flamedatad3}}
-<script>
+<script type="module">
 
 init();
 window.addEventListener('resize', _ => init());
@@ -112,12 +112,13 @@ function init() {
     }
 
     window.excimerChart.label(displaysamplestats);
-
-    const tip = flamegraph.tooltip.defaultFlamegraphTooltip().text(displaysamplestats);
-    window.excimerChart.tooltip(tip);
 }
 
 function draw() {
+    d3.selectAll('.d3-flame-graph-tip').remove();
+    const tip = flamegraph.tooltip.defaultFlamegraphTooltip().text(displaysamplestats);
+    window.excimerChart.tooltip(tip);
+
     let svg = document.querySelector('#flamechart svg');
     if (svg !== null) {
         svg.remove();
