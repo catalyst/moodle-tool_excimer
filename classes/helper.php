@@ -321,7 +321,7 @@ class helper {
             return '';
         }
 
-        $user = $DB->get_record('user', ['id' => $userid]);
+        $user = \core_user::get_user($userid);
         if ($user) {
             $link = new \moodle_url('/user/profile.php', ['id' => $userid]);
             return \html_writer::link($link, fullname($user));
