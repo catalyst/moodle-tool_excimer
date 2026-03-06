@@ -166,12 +166,13 @@ class profile_helper {
      */
     public static function get_slowest_profile() {
         global $DB;
-        return $DB->get_record_sql(
+        $records = $DB->get_records_sql(
             "SELECT id, request, duration, pathinfo, parameters, scripttype
-                FROM {tool_excimer_profiles}
-            ORDER BY duration DESC
-               LIMIT 1"
+               FROM {tool_excimer_profiles}
+           ORDER BY duration DESC",
+            null, 0, 1
         );
+        return reset($records);
     }
 
     /**
