@@ -91,7 +91,7 @@ $PAGE->requires->js('/admin/tool/excimer/lib/d3/dist/d3.min.js', true);
 $PAGE->requires->js('/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph.min.js', true);
 $PAGE->requires->js('/admin/tool/excimer/lib/d3-flame-graph/dist/d3-flamegraph-tooltip.min.js', true);
 
-$user = $DB->get_record('user', ['id' => $profile->get('userid')]);
+$user = \core_user::get_user($profile->get('userid'));
 
 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteid' => $profileid, 'returnurl' => $returnurl]);
 $deletebutton = new \single_button($deleteurl, get_string('deleteprofile', 'tool_excimer'));
