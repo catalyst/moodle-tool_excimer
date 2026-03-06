@@ -304,8 +304,7 @@ class helper {
 
     /**
      * Returns the linked display name of the user who locked a profile, or an empty string
-     * if the locker cannot be determined (e.g. the profile has no lock, or was never modified
-     * after creation).
+     * if the locker cannot be determined.
      *
      * @param profile $profile
      * @return string HTML linked name, or empty string
@@ -318,14 +317,7 @@ class helper {
         }
 
         $userid = $profile->get('usermodified');
-        $modified = $profile->get('timemodified');
-
-        if (empty($userid) && empty($modified)) {
-            return '';
-        }
-
-        // Exclude the case where usermodified was set during profile creation rather than locking.
-        if ($modified === $profile->get('timecreated') || ($profile->get('finished') + 10) > $modified) {
+        if (empty($userid)) {
             return '';
         }
 
@@ -343,38 +335,12 @@ class helper {
      * @return string
      */
     public static function lock_display_modified($profile): string {
-        global $DB;
-
-        // Only proceed if there's a lock.
-        if (empty($profile->get('lockreason'))) {
+        $lockername = self::lock_display_locker_name($profile);
+        if ($lockername === '') {
             return '';
         }
-
-        // Locks are the only time a profile should be modified after being fully saved.
-        $userid = $profile->get('usermodified');
-        $modified = $profile->get('timemodified');
-
-        // If we have neither userid or time modified a lock doesn't exist.
-        if (empty($userid) && empty($modified)) {
-            return '';
-        }
-
-        // We don't want to show user modified if it was set before the lock (i.e. during creation).
-        // No exact comparison, but can check it's different from created or greater than finished plus a small buffer.
-        if ($modified === $profile->get('timecreated') || ($profile->get('finished') + 10) > $modified) {
-            return '';
-        }
-
-        $user = $DB->get_record('user', ['id' => $userid]);
-        if ($user) {
-            $link = new \moodle_url('/user/profile.php', ['id' => $userid]);
-            $userdisplay = \html_writer::link($link, fullname($user));
-        } else {
-            $userdisplay = get_string('unknown', 'tool_excimer');
-        }
-        $date = userdate($modified, get_string('strftimedate', 'core_langconfig'));
-
-        return get_string('lockedinfo', 'tool_excimer', ['user' => $userdisplay, 'date' => $date]);
+        $date = userdate($profile->get('timemodified'), get_string('strftimedate', 'core_langconfig'));
+        return get_string('lockedinfo', 'tool_excimer', ['user' => $lockername, 'date' => $date]);
     }
 
     /**

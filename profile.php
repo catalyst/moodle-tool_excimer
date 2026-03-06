@@ -70,13 +70,6 @@ admin_externalpage_setup('tool_excimer_report_' . $report);
 
 $output = $PAGE->get_renderer('tool_excimer');
 
-$lockform = new \tool_excimer\form\lock_reason_form($url);
-if ($lockdata = $lockform->get_data()) {
-    $DB->update_record('tool_excimer_profiles', ['id' => $profileid, 'lockreason' => $lockdata->lockreason]);
-} else {
-    $lockform->set_data(['lockreason' => $DB->get_field('tool_excimer_profiles', 'lockreason', ['id' => $profileid])]);
-}
-
 $pluginname = get_string('pluginname', 'tool_excimer');
 
 $url = new moodle_url("/admin/tool/excimer/index.php");
