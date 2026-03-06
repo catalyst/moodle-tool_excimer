@@ -207,6 +207,10 @@ if ($user) {
     $data['fullname'] = '-';
 }
 $data['lockreason'] = format_text($data['lockreason']);
+$lockerlink = helper::lock_display_locker_name($profile);
+$data['lockedheading'] = $lockerlink
+    ? get_string('locked_by', 'tool_excimer', $lockerlink)
+    : get_string('locked', 'tool_excimer');
 $data['lockmodified'] = helper::lock_display_modified($profile);
 $tabs = new tabs($url);
 

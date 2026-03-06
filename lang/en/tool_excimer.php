@@ -198,6 +198,7 @@ $string['reason_import'] = 'Import';
 // Lock reason form.
 $string['lock_profile'] = 'Lock Profile';
 $string['locked'] = 'Profile is locked';
+$string['locked_by'] = 'Profile is locked by {$a}';
 $string['lockedinfo'] = 'Locked by {$a->user} on {$a->date}';
 $string['lockreason'] = 'Lock Profile Reason';
 $string['lockreason_help'] = 'Submitting text will prevent this profile from being deleted.

@@ -303,6 +303,41 @@ class helper {
     }
 
     /**
+     * Returns the linked display name of the user who locked a profile, or an empty string
+     * if the locker cannot be determined (e.g. the profile has no lock, or was never modified
+     * after creation).
+     *
+     * @param profile $profile
+     * @return string HTML linked name, or empty string
+     */
+    public static function lock_display_locker_name($profile): string {
+        global $DB;
+
+        if (empty($profile->get('lockreason'))) {
+            return '';
+        }
+
+        $userid = $profile->get('usermodified');
+        $modified = $profile->get('timemodified');
+
+        if (empty($userid) && empty($modified)) {
+            return '';
+        }
+
+        // Exclude the case where usermodified was set during profile creation rather than locking.
+        if ($modified === $profile->get('timecreated') || ($profile->get('finished') + 10) > $modified) {
+            return '';
+        }
+
+        $user = $DB->get_record('user', ['id' => $userid]);
+        if ($user) {
+            $link = new \moodle_url('/user/profile.php', ['id' => $userid]);
+            return \html_writer::link($link, fullname($user));
+        }
+        return get_string('unknown', 'tool_excimer');
+    }
+
+    /**
      * Displays the user who locked the profile and the date it was locked.
      * @param profile $profile
      * @return string

@@ -189,6 +189,7 @@ class profile_table extends \table_sql {
             'middlename',
             'alternatename',
             'lockreason',
+            'usermodified',
             'courseid',
             'lockwait',
             'lockheld',
@@ -267,6 +268,7 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(\stdClass $record): string {
+        global $DB;
         $fullrequest = helper::full_request($record);
         $displayedrequest = format_text($fullrequest, FORMAT_PLAIN);
 
@@ -283,7 +285,19 @@ class profile_table extends \table_sql {
         );
 
         if (!empty($record->lockreason)) {
-            $html .= ' ' . \html_writer::tag('span', get_string('locked', 'tool_excimer'), [
+            $lockerlabel = get_string('locked', 'tool_excimer');
+            if (!empty($record->usermodified)) {
+                $locker = $DB->get_record(
+                    'user',
+                    ['id' => $record->usermodified],
+                    implode(',', array_merge(['id'], \core_user\fields::get_name_fields())),
+                    IGNORE_MISSING
+                );
+                if ($locker) {
+                    $lockerlabel = get_string('locked_by', 'tool_excimer', fullname($locker));
+                }
+            }
+            $html .= ' ' . \html_writer::tag('span', $lockerlabel, [
                 'class' => 'badge badge-info',
                 'title' => s($record->lockreason),
             ]);
