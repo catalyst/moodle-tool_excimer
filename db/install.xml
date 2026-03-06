@@ -58,6 +58,7 @@
       <INDEXES>
         <INDEX NAME="createdindex" UNIQUE="false" FIELDS="created"/>
         <INDEX NAME="durationindex" UNIQUE="false" FIELDS="duration"/>
+        <INDEX NAME="scriptgroupduration" UNIQUE="false" FIELDS="scriptgroup, duration"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="tool_excimer_page_groups" COMMENT="Metadata about groups of profiles.">

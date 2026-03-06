@@ -560,5 +560,20 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025120903, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2026030601) {
+        // Add a composite index on (scriptgroup, duration) to tool_excimer_profiles.
+        // scriptgroup is used as a filter in quota-check queries that also order by duration,
+        // so a composite index avoids both a full table scan and a filesort.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $index = new xmldb_index('scriptgroupduration', XMLDB_INDEX_NOTUNIQUE, ['scriptgroup', 'duration']);
+
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2026030601, 'tool', 'excimer');
+    }
+
     return true;
 }

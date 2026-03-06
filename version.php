@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2025120903;
-$plugin->release = 2025120903;
+$plugin->version = 2026030601;
+$plugin->release = 2026030601;
 $plugin->requires  = 2023100900; // Moodle 4.3.
 $plugin->supported = [403, 405];
 $plugin->component = 'tool_excimer';
