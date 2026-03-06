@@ -168,10 +168,10 @@ if ($profile->get('method') === 'GET') {
 }
 
 $data['script_type_display'] = function ($text, $render) {
-    return helper::script_type_display((int) $render($text));
+    return helper::script_type_display((int) (string) $render($text));
 };
 $data['reason_display'] = function ($text, $render) {
-    return helper::reason_display((int) $render($text));
+    return helper::reason_display((int) (string) $render($text));
 };
 
 $data['datasize'] = display_size($profile->get('datasize'));
