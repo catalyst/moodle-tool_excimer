@@ -126,7 +126,8 @@ $systemcpuduration = $data['systemcpuduration'];
 $data['duration'] = !empty($duration) ? helper::duration_display_text($duration, true) : '-';
 $data['usercpuduration'] = !empty($usercpuduration) ? helper::duration_display_text($usercpuduration, true) : '-';
 $data['systemcpuduration'] = !empty($systemcpuduration) ? helper::duration_display_text($systemcpuduration, true) : '-';
-$data['cpuduration'] = (!empty($usercpuduration) && !empty($systemcpuduration)) ? helper::duration_display_text($systemcpuduration + $usercpuduration, true) : '-';
+$data['cpuduration'] = (!empty($usercpuduration) && !empty($systemcpuduration))
+    ? helper::duration_display_text($systemcpuduration + $usercpuduration, true) : '-';
 
 if (isset($data['lockwait'])) {
     $lockwait = $data['lockwait'];
