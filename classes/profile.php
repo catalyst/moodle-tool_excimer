@@ -442,7 +442,9 @@ class profile extends persistent {
             "SELECT id, request, duration, pathinfo, parameters, scripttype
                FROM {tool_excimer_profiles}
            ORDER BY duration DESC",
-            null, 0, 1
+            null,
+            0,
+            1
         );
         return reset($records);
     }
