@@ -131,6 +131,7 @@ $string['lock_profile'] = 'Lock Profile';
 $string['locked'] = 'Profile is locked';
 $string['locked_by'] = 'Profile is locked by {$a}';
 $string['lockedinfo'] = 'Locked by {$a->user} on {$a->date}';
+$string['lockedprofiles_count'] = '{$a} locked profile(s)';
 $string['lockreason'] = 'Lock Profile Reason';
 $string['lockreason_help'] = 'Submitting text will prevent this profile from being deleted. It will not be purged during cleanup tasks, nor can it be deleted manually (will also be excluded from group deletes). Typically you would provide a reason why you want to keep this profile. Clearing this box will allow the profile to be deleted.';
 $string['lockwaitnotification'] = 'The majority of the duration was spent waiting for a session lock, the page may not be slow.';

@@ -46,6 +46,7 @@ class grouped_courses_profile_table extends grouped_profile_table {
 
         // Create a drill-down url for this course instead of linking to the course itself.
         $url = new \moodle_url($this->urlpath, ['courseid' => $record->courseid]);
-        return \html_writer::link($url, helper::course_display_name($record->courseid));
+        $link = \html_writer::link($url, helper::course_display_name($record->courseid));
+        return $link . $this->locked_count_badge((int)($record->lockedcount ?? 0));
     }
 }

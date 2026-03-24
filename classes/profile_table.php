@@ -268,7 +268,7 @@ class profile_table extends \table_sql {
      * @return string
      */
     public function col_request(\stdClass $record): string {
-        global $DB;
+        global $DB, $OUTPUT;
         $fullrequest = helper::full_request($record);
         $displayedrequest = format_text($fullrequest, FORMAT_PLAIN);
 
@@ -294,7 +294,8 @@ class profile_table extends \table_sql {
                     IGNORE_MISSING
                 );
                 if ($locker) {
-                    $lockerlabel = get_string('locked_by', 'tool_excimer', fullname($locker));
+                    $icon = $OUTPUT->pix_icon('i/lock', $title);
+                    $lockerlabel = $icon . get_string('locked_by', 'tool_excimer', fullname($locker));
                 }
             }
             $html .= ' ' . \html_writer::tag('span', $lockerlabel, [

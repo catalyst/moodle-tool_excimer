@@ -70,7 +70,8 @@ class grouped_session_profile_table extends grouped_script_profile_table {
 
         $this->set_sql(
             $groupby . ', COUNT(request) as requestcount, MAX(created) as maxcreated, MIN(created) as mincreated,
-            MAX(lockheld) as maxlockheld, MIN(lockheld) as minlockheld',
+            MAX(lockheld) as maxlockheld, MIN(lockheld) as minlockheld,
+            COUNT(CASE WHEN lockreason != \'\' THEN 1 END) as lockedcount',
             '{tool_excimer_profiles}',
             $filterstring,
             $filterparams

@@ -64,8 +64,8 @@ abstract class grouped_profile_table extends profile_table {
 
         $this->set_count_sql(
             "SELECT count(distinct request)
-            FROM {tool_excimer_profiles}
-            WHERE $filterstring",
+               FROM {tool_excimer_profiles}
+              WHERE $filterstring",
             $filterparams
         );
 
@@ -73,8 +73,13 @@ abstract class grouped_profile_table extends profile_table {
 
         $filterstring .= " AND " . $groupby . " IS NOT NULL GROUP BY " . $groupby;
         $this->set_sql(
-            $groupby . ', COUNT(request) as requestcount, MAX(created) as maxcreated, MIN(created) as mincreated,
-            MAX(duration) as maxduration, MIN(duration) as minduration',
+            $groupby . ',
+                COUNT(request) as requestcount,
+                MAX(created) as maxcreated,
+                MIN(created) as mincreated,
+                MAX(duration) as maxduration,
+                MIN(duration) as minduration,
+                COUNT (CASE WHEN lockreason != \'\' THEN 1 END) as lockedcount',
             '{tool_excimer_profiles}',
             $filterstring,
             $filterparams
@@ -180,5 +185,25 @@ abstract class grouped_profile_table extends profile_table {
         $deleteicon = new \pix_icon('t/delete', get_string('deleteprofiles_script', 'tool_excimer'));
         $link = new \action_link($deleteurl, '', $confirmaction, null, $deleteicon);
         return $OUTPUT->render($link);
+    }
+
+    /**
+     * Renders a small badge showing the count of locked profiles in the group.
+     * Returns an empty string when downloading or when no profiles are locked.
+     *
+     * @param int $count Number of locked profiles.
+     * @return string HTML badge, or empty string.
+     */
+    protected function locked_count_badge(int $count): string {
+        if ($count <= 0 || $this->is_downloading()) {
+            return '';
+        }
+        global $OUTPUT;
+        $title = get_string('lockedprofiles_count', 'tool_excimer', $count);
+        $icon = $OUTPUT->pix_icon('i/lock', $title);
+        return \html_writer::tag('span', $icon . $count, [
+            'class' => 'badge badge-info ml-1',
+            'title' => $title,
+        ]);
     }
 }
