@@ -144,6 +144,7 @@ git clone git@github.com:catalyst/moodle-tool_excimer.git admin/tool/excimer
 ```
 
 Then login as admin (it should detect the extension), and click through the upgrade process.
+
 ## Applying core patches
 
 For Moodle versions lower than 4.1 this plugin requires Moodle tracker MDL-75014 to be backported to maintain the plugin functionality.
