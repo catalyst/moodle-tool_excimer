@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version.
+ * A profiling tool for Moodle using Excimer
  *
  * @package   tool_excimer
  * @author    Nigel Chapman <nigelchapman@catalyst-au.net>
@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026031702;
-$plugin->release = 2026031702;
+$plugin->version = 2026031703;
+$plugin->release = 2026031703;
 $plugin->requires  = 2023100900; // Moodle 4.3.
 $plugin->supported = [403, 405];
 $plugin->component = 'tool_excimer';
