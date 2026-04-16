@@ -16,6 +16,10 @@
 
 namespace tool_excimer;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . "/quick_save_trait.php");
+
 /**
  * Defines names of plugin types and some strings used at the plugin managment
  *
@@ -26,6 +30,8 @@ namespace tool_excimer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class tool_excimer_profile_test extends \advanced_testcase {
+    use quick_save_trait;
+
     /**
      * Set up before each test
      */
@@ -95,27 +101,6 @@ final class tool_excimer_profile_test extends \advanced_testcase {
         }
         $prof->stop();
         return $prof->flush();
-    }
-
-    /**
-     * A convenience function to save a profile.
-     *
-     * @param string $request
-     * @param flamed3_node $node
-     * @param int $reason
-     * @param float $duration
-     * @param int $created
-     * @return int The ID of the record.
-     */
-    public function quick_save(string $request, flamed3_node $node, int $reason, float $duration, int $created = 12345): int {
-        $profile = new profile();
-        $profile->add_env($request);
-        $profile->set('reason', $reason);
-        $profile->set('flamedatad3', $node);
-        $profile->set('created', $created);
-        $profile->set('duration', $duration);
-        $profile->set('finished', $created + 2);
-        return $profile->save_record();
     }
 
     /**
