@@ -294,7 +294,7 @@ class profile_table extends \table_sql {
                     IGNORE_MISSING
                 );
                 if ($locker) {
-                    $icon = $OUTPUT->pix_icon('i/lock', $title);
+                    $icon = $OUTPUT->pix_icon('i/lock', $lockerlabel);
                     $lockerlabel = $icon . get_string('locked_by', 'tool_excimer', fullname($locker));
                 }
             }
