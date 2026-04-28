@@ -79,7 +79,7 @@ abstract class grouped_profile_table extends profile_table {
                 MIN(created) as mincreated,
                 MAX(duration) as maxduration,
                 MIN(duration) as minduration,
-                COUNT (CASE WHEN lockreason != \'\' THEN 1 END) as lockedcount',
+                COUNT(CASE WHEN lockreason != \'\' THEN 1 END) as lockedcount',
             '{tool_excimer_profiles}',
             $filterstring,
             $filterparams
