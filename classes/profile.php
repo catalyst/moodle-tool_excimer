@@ -214,9 +214,12 @@ class profile extends persistent {
             $data->reason = 0;
         }
 
-        // Add import to reasons.
-        if (isset($data->reason) && $data->reason !== self::REASON_IMPORT) {
-            $data->reason += self::REASON_IMPORT;
+        // Add import to reasons, defaulting to 0 if reason is missing or null.
+        $data->reason = (isset($data->reason) ? (int) $data->reason : self::REASON_NONE) | self::REASON_IMPORT;
+
+        // Apply defaults for required fields that may be missing or null in older exports.
+        if (!isset($data->scripttype)) {
+            $data->scripttype = self::SCRIPTTYPE_WEB;
         }
 
         // Convert flamedatad3 to flame_node.
@@ -224,9 +227,10 @@ class profile extends persistent {
             $data->flamedatad3 = flamed3_node::from_import($data->flamedatad3);
         }
 
+        $definitions = self::properties_definition();
         foreach ($data as $property => $value) {
             if (isset($value) && !in_array($property, $removeproperties)) {
-                if (property_exists($profile, $property)) {
+                if (array_key_exists($property, $definitions)) {
                     $profile->set($property, $value);
                 }
             }
