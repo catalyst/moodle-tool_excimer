@@ -37,16 +37,19 @@ $expiry = get_config('tool_excimer', 'expiry_fuzzy_counts');
 $pagegroupid = required_param('id', PARAM_INT);
 $monthstodisplay = optional_param('monthstodisplay', $expiry, PARAM_INT);
 
-$url = new \moodle_url('/admin/tool/excimer/page_group.php');
+$url = new \moodle_url('/admin/tool/excimer/page_group.php', ['id' => $pagegroupid]);
+$pagesgroupsurl = new \moodle_url('/admin/tool/excimer/page_groups.php');
 $context = context_system::instance();
 
 $pagegroup = new page_group($pagegroupid);
 
 $PAGE->set_context($context);
 $PAGE->set_url($url);
-$PAGE->navbar->add($pagegroup->get('name'));
 
 admin_externalpage_setup('tool_excimer_report_page_groups');
+
+$PAGE->navbar->add(get_string('tab_page_groups', 'tool_excimer'), $pagesgroupsurl);
+$PAGE->navbar->add($pagegroup->get('name'));
 
 $output = $PAGE->get_renderer('tool_excimer');
 
@@ -160,10 +163,8 @@ foreach ($durationseries as $idx => $series) {
 }
 
 // Select element to choose how many months in the past to show in the chart.
-$monthstodisplayurl = clone $url;
-$monthstodisplayurl->params(['id' => $pagegroupid]);
 $monthstodisplayselect = new \single_select(
-    $monthstodisplayurl,
+    $url,
     'monthstodisplay',
     // We do the following line to get a 1 to $expiry array with matching indexes.
     array_slice(range(0, $expiry), 1, null, true),
@@ -178,7 +179,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
 
 echo $output->header();
-$tabs = new tabs($url);
+$tabs = new tabs($pagesgroupsurl);
 echo $output->render_tabs($tabs);
 echo $output->render_from_template('tool_excimer/page_group', $data);
 echo html_writer::tag('h3', get_string('histogram_history', 'tool_excimer'));
