@@ -138,7 +138,6 @@ if (isset($data['lockwait'])) {
 
     $processing = $duration - $lockwait;
     if (($processing / $duration) < 0.1 && $processing < 10) {
-        \core\notification::warning(get_string('lockwaitnotification', 'tool_excimer'));
         $data['waitnotification'] = true;
     }
 } else {
