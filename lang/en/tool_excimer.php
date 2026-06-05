@@ -79,6 +79,7 @@ $string['field_explanation'] = 'Explanation';
 $string['field_finished'] = 'Finished';
 $string['field_fuzzycount'] = 'Approx. count';
 $string['field_fuzzydurationcounts'] = 'Histogram';
+$string['field_estimatedduration'] = 'Est. duration (s)';
 $string['field_fuzzydurationsum'] = 'Approx. total duration (s)';
 $string['field_hostname'] = 'Host name';
 $string['field_id'] = 'ID';
