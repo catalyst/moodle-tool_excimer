@@ -97,8 +97,12 @@ class profile_table_page {
      * @param array $filters Exact-match filters from the table, used to render the delete button.
      * @return string HTML
      */
-    private static function render_filter_form(\moodle_url $url, string $current,
-            array $filters = [], string $deleteallbutton = ''): string {
+    private static function render_filter_form(
+        \moodle_url $url,
+        string $current,
+        array $filters = [],
+        string $deleteallbutton = ''
+    ): string {
         // Build a clean URL with all params except urlfilter, for use as hidden fields.
         $actionurl = clone $url;
         $actionurl->remove_params('urlfilter');
@@ -147,17 +151,22 @@ class profile_table_page {
             );
         }
 
-        // The filter inputs go inside a <form>. Delete buttons are separate forms rendered by single_button,
-        // so they must sit outside our form to avoid invalid nested form HTML.
+        $innerdiv = \html_writer::tag(
+            'div',
+            $input . $submit . $clear,
+            ['class' => 'd-flex align-items-center flex-wrap']
+        );
         $form = \html_writer::tag(
             'form',
-            $hidden . \html_writer::tag('div', $input . $submit . $clear,
-                ['class' => 'd-flex align-items-center flex-wrap']),
+            $hidden . $innerdiv,
             ['method' => 'get', 'action' => $actionurl->out_omit_querystring()]
         );
 
-        return \html_writer::tag('div', $form . $deletebutton . $deleteallbutton,
-            ['class' => 'd-flex align-items-center flex-wrap gap-2 mb-3']);
+        return \html_writer::tag(
+            'div',
+            $form . $deletebutton . $deleteallbutton,
+            ['class' => 'd-flex align-items-center flex-wrap gap-2 mb-3']
+        );
     }
 
     /**
