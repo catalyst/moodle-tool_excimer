@@ -49,7 +49,7 @@
 <div id="profile-stats" class="container">
     <div class="row">
         <div>
-            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+            <table class="table table-striped table-sm table-hover w-auto">
                 <tr>
                     <th>{{#str}}field_month, tool_excimer{{/str}}</th>
                     <td>{{month}}</td>
@@ -65,15 +65,17 @@
             </table>
         </div>
         <div>
-            <table class="flexible table table-striped table-sm table-hover generaltable generalbox w-auto">
+            <table class="table table-striped table-sm table-hover w-auto">
                 <tr>
                     <th>{{#str}}field_fuzzydurationcounts, tool_excimer{{/str}}</th>
                     <td></td>
+                    <th>{{#str}}field_estimatedduration, tool_excimer{{/str}}</th>
                 </tr>
                 {{#histogram}}
                     <tr>
                         <td>{{low}} - {{high}}s</td>
                         <td>{{value}}</td>
+                        <td>{{duration}}s</td>
                     </tr>
                 {{/histogram}}
             </table>

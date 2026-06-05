@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core\chart_line;
+use core\chart_bar;
 use core\chart_series;
 use tool_excimer\helper;
 use tool_excimer\monthint;
@@ -57,6 +57,11 @@ $data->month = helper::monthint_formatted($data->month);
 $data->approxcount = pow(2, $data->fuzzycount - 1) . ' - ' . pow(2, $data->fuzzycount);
 $data->approxduration = pow(2, $data->fuzzydurationsum);
 $data->histogram = helper::make_histogram($data);
+// Add estimated duration (count × upper bound) to each histogram row.
+foreach ($data->histogram as &$row) {
+    $row['duration'] = $row['value'] * $row['high'];
+}
+unset($row);
 
 // Data for charts.
 // Each duration range forms its own line on the chart.
@@ -101,21 +106,56 @@ for ($i = 0; $i < $monthstodisplay; ++$i) {
     for ($rangeindex = 0; $rangeindex < $highest; ++$rangeindex) {
         $value = 0;
         if (isset($histograms[$month][$rangeindex])) {
-            $value = $histograms[$month][$rangeindex]['value'];
-            $linelabels[$rangeindex] = get_string('fuzzydurationrange', 'tool_excimer', $histograms[$month][$rangeindex]);
+            $entry = $histograms[$month][$rangeindex];
+            // Weight count by upper bound of duration range to represent total seconds.
+            $value = $entry['value'] * $entry['high'];
+            $linelabels[$rangeindex] = get_string('fuzzydurationrange', 'tool_excimer', $entry);
         }
         $durationseries[$rangeindex][] = $value;
     }
     $month = monthint::increment_month($month);
 }
 
-$chart = new chart_line();
+$chart = new chart_bar();
+$chart->set_stacked(true);
 $chart->set_labels($labels);
+
+// Colour stops from green to yellow to orange to red to purple.
+$colorstops = [
+    [0x2ecc71, 0], // Green.
+    [0xf1c40f, 25], // Yellow.
+    [0xe67e22, 50], // Orange.
+    [0xe74c3c, 75], // Red.
+    [0x8e44ad, 100], // Purple.
+];
+
+// Interpolate a hex colour along the defined stops given a 0-100 position.
+$interpolatecolor = function (float $pct) use ($colorstops): string {
+    for ($i = 0; $i < count($colorstops) - 1; $i++) {
+        [$cola, $posa] = $colorstops[$i];
+        [$colb, $posb] = $colorstops[$i + 1];
+        if ($pct <= $posb) {
+            $t = ($posb === $posa) ? 0 : ($pct - $posa) / ($posb - $posa);
+            $r = (int) round((($cola >> 16) & 0xff) * (1 - $t) + (($colb >> 16) & 0xff) * $t);
+            $g = (int) round((($cola >> 8) & 0xff) * (1 - $t) + (($colb >> 8) & 0xff) * $t);
+            $b = (int) round(($cola & 0xff) * (1 - $t) + ($colb & 0xff) * $t);
+            return sprintf('#%02x%02x%02x', $r, $g, $b);
+        }
+    }
+    [$lastcol] = end($colorstops);
+    return sprintf('#%02x%02x%02x', ($lastcol >> 16) & 0xff, ($lastcol >> 8) & 0xff, $lastcol & 0xff);
+};
 
 // Add each duration range to the chart, but only those that have non-zero counts.
 foreach ($durationseries as $idx => $series) {
     if (max($series) != 0) {
-        $chart->add_series(new chart_series($linelabels[$idx], $series));
+        // Map colour by log base 16 of duration: each factor of 16 = one colour stop.
+        // idx is the duration exponent (high = 2^idx), so 4 idx steps = factor of 16.
+        // Colour stops: idx 0 = green, 4 = yellow, 8 = orange, 12 = red, 16+ = purple.
+        $pct = min(100.0, $idx * 100.0 / 16.0);
+        $s = new chart_series($linelabels[$idx], $series);
+        $s->set_color($interpolatecolor($pct));
+        $chart->add_series($s);
     }
 }
 
