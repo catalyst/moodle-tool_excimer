@@ -47,6 +47,9 @@ class profile_table extends \table_sql {
     /** @var array Where clause filters. */
     protected $filters = [];
 
+    /** @var array LIKE filters for WHERE clause. */
+    protected $likefilters = [];
+
     /** @var array Filter by specific and/or multiple script types. */
     protected $scripttypes = [];
 
@@ -58,6 +61,16 @@ class profile_table extends \table_sql {
      */
     public function add_filter(string $field, $value): void {
         $this->filters[$field] = $value;
+    }
+
+    /**
+     * Add a LIKE filter to limit profiles to those where the field contains the value.
+     *
+     * @param string $field
+     * @param string $value
+     */
+    public function add_filter_like(string $field, string $value): void {
+        $this->likefilters[$field] = $value;
     }
 
     /**
@@ -130,10 +143,12 @@ class profile_table extends \table_sql {
                 $filter[] = $i . ' = ?';
                 $filterparams[] = $v;
             }
-            $filterstring = implode(' and ', $filter);
-        } else {
-            $filterstring = '1=1';
         }
+        foreach ($this->likefilters as $field => $value) {
+            $filter[] = $DB->sql_like($field, '?', false, false);
+            $filterparams[] = '%' . $DB->sql_like_escape($value) . '%';
+        }
+        $filterstring = $filter ? implode(' and ', $filter) : '1=1';
 
         if ($this->scripttypes) {
             [$query, $params] = $DB->get_in_or_equal($this->scripttypes);
