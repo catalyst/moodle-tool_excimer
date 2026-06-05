@@ -60,6 +60,10 @@
 <h3 style="overflow-wrap: anywhere;">{{{responsecode}}} {{method}} {{{request}}}</h3>
 <p>{{{delete_button}}} {{{delete_all_button}}} {{{export_button}}} {{{profile_lock_button}}}</p>
 
+{{#waitnotification}}
+<div class="alert alert-warning">{{#str}} lockwaitnotification, tool_excimer {{/str}}</div>
+{{/waitnotification}}
+
 {{#lockreason}}
     <div class="alert alert-info alert-block">
         <h4>{{{lockedheading}}}</h4>
