@@ -100,13 +100,6 @@ if ($profile->get('lockreason') != '') {
     $deletebutton->disabled = true;
 }
 
-$deleteallurl = new \moodle_url(
-    '/admin/tool/excimer/delete.php',
-    ['script' => $profile->get('request'), 'returnurl' => $returnurl]
-);
-$deleteallbutton = new \single_button($deleteallurl, get_string('deleteprofiles_script', 'tool_excimer'));
-$deleteallbutton->add_confirm_action(get_string('deleteprofiles_script_warning', 'tool_excimer'));
-
 $lockprofileurl = new \moodle_url('/admin/tool/excimer/lock_profile.php', ['profileid' => $profileid]);
 $lockprofilebutton = new \single_button($lockprofileurl, get_string('edit_lock', 'tool_excimer'), 'GET');
 
@@ -170,7 +163,6 @@ $data['reason_display'] = function ($text, $render) {
 $data['datasize'] = display_size($profile->get('datasize'));
 $data['memoryusagemax'] = display_size($profile->get('memoryusagemax'));
 $data['delete_button'] = $output->render($deletebutton);
-$data['delete_all_button'] = $output->render($deleteallbutton);
 $data['profile_lock_button'] = $output->render($lockprofilebutton);
 $data['export_button'] = $output->render($exportbutton);
 
