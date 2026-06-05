@@ -40,6 +40,12 @@ class profile_table_page {
         global $PAGE;
 
         $download = optional_param('download', '', PARAM_ALPHA);
+        $urlfilter = optional_param('urlfilter', '', PARAM_TEXT);
+
+        if ($urlfilter) {
+            $url->param('urlfilter', $urlfilter);
+            $table->add_filter_like('request', $urlfilter);
+        }
 
         $context = \context_system::instance();
 
@@ -62,19 +68,17 @@ class profile_table_page {
             $tabs = new tabs($url);
             echo $output->render_tabs($tabs);
 
-            if (profile_helper::get_num_profiles() > 0) {
+            $deleteallbutton = '';
+            $isfiltered = $url->get_param('group') || $url->get_param('script');
+            if (!$isfiltered && profile_helper::get_num_profiles() > 0) {
                 $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['deleteall' => true]);
-                $deletebutton = new \single_button($deleteurl, get_string('deleteall'));
-                $deletebutton->add_confirm_action(get_string('deleteallwarning', 'tool_excimer'));
-                echo $output->render($deletebutton);
+                $deleteallbutton = self::render_delete_button(
+                    $deleteurl,
+                    get_string('deleteall'),
+                    get_string('deleteallwarning', 'tool_excimer')
+                );
             }
-            $filters = $table->get_filters();
-            if (!empty($filters)) {
-                $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['filter' => json_encode($filters)]);
-                $deletebutton = new \single_button($deleteurl, get_string('deleteprofiles_filter', 'tool_excimer'));
-                $deletebutton->add_confirm_action(get_string('deleteprofiles_filter_warning', 'tool_excimer'));
-                echo $output->render($deletebutton);
-            }
+            echo self::render_filter_form($url, $urlfilter, $table->get_filters(), $deleteallbutton);
         }
 
         $table->out(40, true); // TODO replace with a value from settings.
@@ -82,5 +86,105 @@ class profile_table_page {
         if (!$table->is_downloading()) {
             echo $output->footer();
         }
+    }
+
+    /**
+     * Renders a URL filter search form.
+     *
+     * @param \moodle_url $url The base URL for the form action (should include any non-filter params).
+     * @param string $current The current filter value.
+     * @param array $filters Exact-match filters from the table, used to render the delete button.
+     * @return string HTML
+     */
+    private static function render_filter_form(\moodle_url $url, string $current,
+            array $filters = [], string $deleteallbutton = ''): string {
+        // Build a clean URL with all params except urlfilter, for use as hidden fields.
+        $actionurl = clone $url;
+        $actionurl->remove_params('urlfilter');
+        $params = $actionurl->params();
+
+        $hidden = '';
+        foreach ($params as $name => $value) {
+            $hidden .= \html_writer::empty_tag('input', [
+                'type' => 'hidden',
+                'name' => $name,
+                'value' => $value,
+            ]);
+        }
+
+        $input = \html_writer::empty_tag('input', [
+            'type' => 'text',
+            'name' => 'urlfilter',
+            'value' => $current,
+            'placeholder' => get_string('filter_url_placeholder', 'tool_excimer'),
+            'class' => 'form-control mr-2',
+            'style' => 'max-width: 400px',
+        ]);
+
+        $submit = \html_writer::empty_tag('input', [
+            'type' => 'submit',
+            'value' => get_string('filter', 'moodle'),
+            'class' => 'btn btn-secondary mr-2',
+        ]);
+
+        $clear = '';
+        if ($current !== '') {
+            $clear = \html_writer::link(
+                $actionurl,
+                get_string('clear', 'tool_excimer'),
+                ['class' => 'btn btn-link mr-2']
+            );
+        }
+
+        $deletebutton = '';
+        if (!empty($filters)) {
+            $deleteurl = new \moodle_url('/admin/tool/excimer/delete.php', ['filter' => json_encode($filters)]);
+            $deletebutton = self::render_delete_button(
+                $deleteurl,
+                get_string('deleteprofiles_filter', 'tool_excimer'),
+                get_string('deleteprofiles_filter_warning', 'tool_excimer')
+            );
+        }
+
+        // The filter inputs go inside a <form>. Delete buttons are separate forms rendered by single_button,
+        // so they must sit outside our form to avoid invalid nested form HTML.
+        $form = \html_writer::tag(
+            'form',
+            $hidden . \html_writer::tag('div', $input . $submit . $clear,
+                ['class' => 'd-flex align-items-center flex-wrap']),
+            ['method' => 'get', 'action' => $actionurl->out_omit_querystring()]
+        );
+
+        return \html_writer::tag('div', $form . $deletebutton . $deleteallbutton,
+            ['class' => 'd-flex align-items-center flex-wrap gap-2 mb-3']);
+    }
+
+    /**
+     * Renders a delete button as a self-contained POST form with a bin icon and JS confirm.
+     *
+     * @param \moodle_url $url The delete action URL (params become hidden fields).
+     * @param string $label Button label text.
+     * @param string $confirm Confirmation message shown before proceeding.
+     * @return string HTML
+     */
+    private static function render_delete_button(\moodle_url $url, string $label, string $confirm): string {
+        $icon = \html_writer::tag('i', '', ['class' => 'fa fa-trash mr-1', 'aria-hidden' => 'true']);
+        $button = \html_writer::tag('button', $icon . $label, [
+            'type' => 'submit',
+            'class' => 'btn btn-secondary',
+            'onclick' => 'return confirm(' . json_encode($confirm) . ')',
+        ]);
+        $hidden = \html_writer::empty_tag('input', [
+            'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+        ]);
+        foreach ($url->params() as $name => $value) {
+            $hidden .= \html_writer::empty_tag('input', [
+                'type' => 'hidden', 'name' => $name, 'value' => $value,
+            ]);
+        }
+        return \html_writer::tag('form', $hidden . $button, [
+            'method' => 'post',
+            'action' => $url->out_omit_querystring(),
+        ]);
     }
 }
