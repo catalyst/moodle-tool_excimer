@@ -49,7 +49,7 @@ class grouped_script_profile_table extends grouped_profile_table {
             $url->param('group', $record->scriptgroup);
             $link = \html_writer::link(
                 $url,
-                shorten_text($displayedvalue, 100, true, '…'),
+                shorten_text(s($displayedvalue), 100, true, '…'),
                 ['title' => $displayedvalue, 'style' => 'word-break: break-all']
             );
             return $link . $this->locked_count_badge((int)($record->lockedcount ?? 0));

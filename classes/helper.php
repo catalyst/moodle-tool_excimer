@@ -299,7 +299,7 @@ class helper {
             return get_string('deletedcourse', 'tool_excimer', $courseid);
         }
 
-        return $course->fullname;
+        return format_string($course->fullname);
     }
 
     /**

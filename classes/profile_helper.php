@@ -278,7 +278,7 @@ class profile_helper {
                FROM {tool_excimer_profiles}
               WHERE $purgablereasons != ?
            ORDER BY duration ASC",
-            [profile::REASON_NONE, $numtokeep]
+            [profile::REASON_NONE]
         );
 
         // Group profiles by request / page.

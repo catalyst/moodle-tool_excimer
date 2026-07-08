@@ -101,7 +101,7 @@ class page_group_table extends \table_sql {
      */
     public function col_name(\stdClass $record): string {
         $link = new \moodle_url('/admin/tool/excimer/page_group.php', ['id' => $record->id]);
-        return \html_writer::link($link, $record->name);
+        return \html_writer::link($link, s($record->name));
     }
 
     /**

@@ -29,8 +29,6 @@ use tool_excimer\form\import_form;
 require_once(dirname(__FILE__) . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
-defined('MOODLE_INTERNAL') || die();
-
 require_login();
 admin_externalpage_setup('tool_excimer_import_profile');
 

@@ -42,6 +42,7 @@ class lock_reason_form extends \moodleform {
             get_string('lockreason', 'tool_excimer'),
             ['rows' => '4', 'style' => 'width:100%']
         );
+        $mform->setType('lockreason', PARAM_TEXT);
 
         $mform->addElement('static', 'lockreason_help', '', get_string('lockreason_help', 'tool_excimer'));
 

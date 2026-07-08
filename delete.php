@@ -70,7 +70,9 @@ if ($deleteid) {
 // Delete profiles according to a filter value.
 if ($filter) {
     $filtervalue = json_decode($filter, true);
-    if (!is_null($filtervalue)) {
+    if (!empty($filtervalue) && is_array($filtervalue)) {
+        $allowedfiltercolumns = ['scriptgroup', 'reason', 'userid'];
+
         // Clears the profile metadata caches affected by this filter.
         $requests = $DB->get_records(profile::TABLE, $filtervalue, '', 'DISTINCT request');
         $reasons = $DB->get_records(profile::TABLE, $filtervalue, '', 'DISTINCT reason');
@@ -85,6 +87,9 @@ if ($filter) {
 
         $select = [];
         foreach ($filtervalue as $key => $value) {
+            if (!in_array($key, $allowedfiltercolumns, true)) {
+                throw new \moodle_exception('invalidfilterkey', 'tool_excimer');
+            }
             $select[] = $DB->sql_equal($key, ":$key");
         }
         $select[] = $DB->sql_isempty(profile::TABLE, 'lockreason', true, true);

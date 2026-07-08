@@ -38,10 +38,14 @@ $params = ['profileid' => $profileid];
 $url = new \moodle_url('/admin/tool/excimer/lock_profile.php', $params);
 $context = context_system::instance();
 
-$profile = new profile($profileid);
-
 $PAGE->set_context($context);
 $PAGE->set_url($url);
+
+// Authenticate and authorise before touching the database.
+require_login();
+require_capability('moodle/site:config', $context);
+
+$profile = new profile($profileid);
 
 $returnurl = get_local_referer(false);
 
@@ -62,7 +66,7 @@ $prevurl = new moodle_url('/admin/tool/excimer/' . $reporttype . '.php', ['group
 $PAGE->navbar->add($profile->get('scriptgroup'), $prevurl);
 
 $profileurl = new \moodle_url('/admin/tool/excimer/profile.php', ['id' => $profileid]);
-$PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'), $profileurl);
+$PAGE->navbar->add(s($profile->get('request')) . s($profile->get('pathinfo')), $profileurl);
 
 $PAGE->navbar->add(get_string('lock_profile', 'tool_excimer'));
 
@@ -78,8 +82,8 @@ $tabs = new tabs($url);
 echo $output->render_tabs($tabs);
 
 $responsecode = helper::status_display($profile->get('scripttype'), $profile->get('responsecode'));
-$method = $profile->get('method');
-$request = $profile->get('request');
+$method = s($profile->get('method'));
+$request = s($profile->get('request'));
 echo html_writer::tag('h3', "$responsecode $method $request");
 
 $form->display();
