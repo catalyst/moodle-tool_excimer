@@ -259,10 +259,10 @@ class profile extends persistent {
         // Store the sample rate at the time this profile is created.
         $this->raw_set('samplerate', script_metadata::$samplems);
 
-        $this->raw_set('method', $_SERVER['REQUEST_METHOD'] ?? '');
-        $this->raw_set('pathinfo', $_SERVER['PATH_INFO'] ?? '');
-        $this->raw_set('useragent', $_SERVER['HTTP_USER_AGENT'] ?? '');
-        $this->raw_set('referer', $_SERVER['HTTP_REFERER'] ?? '');
+        $this->raw_set('method', clean_param($_SERVER['REQUEST_METHOD'] ?? '', PARAM_ALPHA));
+        $this->raw_set('pathinfo', clean_param($_SERVER['PATH_INFO'] ?? '', PARAM_SAFEPATH));
+        $this->raw_set('useragent', clean_param($_SERVER['HTTP_USER_AGENT'] ?? '', PARAM_TEXT));
+        $this->raw_set('referer', clean_param($_SERVER['HTTP_REFERER'] ?? '', PARAM_URL));
         $this->raw_set('cookies', !defined('NO_MOODLE_COOKIES') || !NO_MOODLE_COOKIES);
         $this->raw_set('buffering', !defined('NO_OUTPUT_BUFFERING') || !NO_OUTPUT_BUFFERING);
         $this->raw_set('parameters', script_metadata::get_parameters($this->get('scripttype')));

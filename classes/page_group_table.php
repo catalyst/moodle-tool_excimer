@@ -100,8 +100,9 @@ class page_group_table extends \table_sql {
      * @return string
      */
     public function col_name(\stdClass $record): string {
+        $displayedvalue = format_text($record->name, FORMAT_PLAIN);
         $link = new \moodle_url('/admin/tool/excimer/page_group.php', ['id' => $record->id]);
-        return \html_writer::link($link, $record->name);
+        return \html_writer::link($link, $displayedvalue);
     }
 
     /**
