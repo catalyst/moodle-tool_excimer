@@ -399,7 +399,9 @@ class script_metadata {
         $segments = explode('/', ltrim($pathinfo, '/'), 4);
         $segments[0] = 'x';
         // Contextid for tokenpluginfile.php can be in $segments[1] depending on $CFG->slasharguments.
-        $segments[1] = ctype_digit($segments[1]) ? 'x' : $segments[1];
+        if (isset($segments[1]) && ctype_digit($segments[1])) {
+            $segments[1] = 'x';
+        }
         $segments[3] = 'xxx';
         return '/' . implode('/', $segments);
     }
