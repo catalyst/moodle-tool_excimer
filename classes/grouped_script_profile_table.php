@@ -40,7 +40,7 @@ class grouped_script_profile_table extends grouped_profile_table {
      * @return string
      */
     public function col_scriptgroup(\stdClass $record): string {
-        $displayedvalue = $record->scriptgroup;
+        $displayedvalue = format_text($record->scriptgroup, FORMAT_PLAIN);
 
         if ($this->is_downloading()) {
             return $displayedvalue;
@@ -50,7 +50,7 @@ class grouped_script_profile_table extends grouped_profile_table {
             $link = \html_writer::link(
                 $url,
                 shorten_text($displayedvalue, 100, true, '…'),
-                ['title' => $displayedvalue, 'style' => 'word-break: break-all']
+                ['title' => $displayedvalue, 'style' => 'word-break: break-all'],
             );
             return $link . $this->locked_count_badge((int)($record->lockedcount ?? 0));
         }
