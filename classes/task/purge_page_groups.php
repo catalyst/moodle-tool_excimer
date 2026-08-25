@@ -60,7 +60,7 @@ class purge_page_groups extends \core\task\scheduled_task {
             $cutoff = $this->calculate_cutoff_month($now, $keepmonths);
 
             // Delete all page group records less than or equal our cutoff month.
-            $DB->delete_records_select(page_group::TABLE, 'month <= ' . $cutoff);
+            $DB->delete_records_select(page_group::TABLE, 'month <= :cutoff', ['cutoff' => $cutoff]);
         }
     }
 

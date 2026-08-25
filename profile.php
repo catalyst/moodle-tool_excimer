@@ -79,7 +79,7 @@ $profile = new profile($profileid);
 $prevurl = new moodle_url('/admin/tool/excimer/' . $report . '.php', ['group' => $profile->get('scriptgroup')]);
 $PAGE->navbar->add($profile->get('scriptgroup'), $prevurl);
 
-$PAGE->navbar->add($profile->get('request') . $profile->get('pathinfo'));
+$PAGE->navbar->add(s($profile->get('request')) . s($profile->get('pathinfo')));
 $PAGE->set_title($pluginname);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_heading($pluginname);
