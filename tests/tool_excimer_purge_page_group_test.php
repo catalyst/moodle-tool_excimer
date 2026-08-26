@@ -90,7 +90,7 @@ final class tool_excimer_purge_page_group_test extends \advanced_testcase {
         // Ensures n full months + current month.
         $this->assertEquals($keepmonths + 1, count($records));
 
-        // Assertion 5: Cutoff is expected
+        // Assertion 5: Cutoff is expected.
         $expectedcutoff = 202501;
         $cutoffmonth = $task->calculate_cutoff_month($now->getTimestamp(), $keepmonths);
         $this->assertEquals($expectedcutoff, $cutoffmonth);
