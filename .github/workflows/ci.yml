@@ -6,9 +6,9 @@ on: [push, pull_request]
 jobs:
   ci:
     uses: catalyst/catalyst-moodle-workflows/.github/workflows/ci.yml@main
-    secrets:
-      moodle_org_token: ${{ secrets.MOODLE_ORG_TOKEN }}
+    secrets: inherit
     with:
       disable_behat: true
       disable_grunt: true
       extra_php_extensions: excimer-1.0.2
+      enable_composer_publish: true
