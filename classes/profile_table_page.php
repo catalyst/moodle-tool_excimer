@@ -170,7 +170,7 @@ class profile_table_page {
     }
 
     /**
-     * Renders a delete button as a self-contained POST form with a bin icon and JS confirm.
+     * Renders a delete button as a self-contained POST form with a Moodle confirm dialogue.
      *
      * @param \moodle_url $url The delete action URL (params become hidden fields).
      * @param string $label Button label text.
@@ -178,12 +178,15 @@ class profile_table_page {
      * @return string HTML
      */
     private static function render_delete_button(\moodle_url $url, string $label, string $confirm): string {
+        global $OUTPUT;
         $icon = \html_writer::tag('i', '', ['class' => 'fa fa-trash mr-1', 'aria-hidden' => 'true']);
+        $buttonid = \html_writer::random_id('excimer-delete');
         $button = \html_writer::tag('button', $icon . $label, [
             'type' => 'submit',
+            'id' => $buttonid,
             'class' => 'btn btn-secondary',
-            'onclick' => 'return confirm(' . json_encode($confirm) . ')',
         ]);
+        $OUTPUT->add_action_handler(new \confirm_action($confirm), $buttonid);
         $hidden = \html_writer::empty_tag('input', [
             'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
         ]);
