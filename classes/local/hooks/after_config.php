@@ -43,14 +43,6 @@ class after_config {
      * return void
      */
     public static function callback(\core\hook\after_config $hook): void {
-
-        global $CFG;
-
-        if (during_initial_install() || isset($CFG->upgraderunning)) {
-            // Do nothing during installation or upgrade.
-            return;
-        }
-
         try {
             // Start processor.
             $manager = manager::get_instance();
