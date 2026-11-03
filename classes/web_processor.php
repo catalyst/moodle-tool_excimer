@@ -95,7 +95,11 @@ class web_processor implements processor {
 
                 // Keep an approximate count of each profile.
                 $this->process($manager, true);
-                page_group::record_fuzzy_counts($this->profile);
+                try {
+                    page_group::record_fuzzy_counts($this->profile);
+                } catch (\Throwable $e) {
+                    debugging('tool_excimer: unable to record counts: ' . $e->getMessage(), DEBUG_DEVELOPER);
+                }
             }
         );
     }
@@ -129,7 +133,23 @@ class web_processor implements processor {
             return;
         }
         self::$alreadyprofiling = true;
+        try {
+            $this->process_samples($manager, $isfinal);
+        } catch (\Throwable $e) {
+            // Never break the request, e.g. our tables may not be ready during install or upgrade.
+            debugging('tool_excimer: unable to save profile: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        } finally {
+            self::$alreadyprofiling = false;
+        }
+    }
 
+    /**
+     * Collects the latest samples and saves a profile if warranted.
+     *
+     * @param manager $manager
+     * @param bool $isfinal
+     */
+    protected function process_samples(manager $manager, bool $isfinal) {
         $log = $manager->get_profiler()->flush();
         $this->sampleset->add_many_samples($log);
 
@@ -158,7 +178,5 @@ class web_processor implements processor {
             }
             $this->profile->save_record();
         }
-
-        self::$alreadyprofiling = false;
     }
 }

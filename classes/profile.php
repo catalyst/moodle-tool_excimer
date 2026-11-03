@@ -294,6 +294,11 @@ class profile extends persistent {
             return 0;
         }
 
+        // During install or upgrade our tables may not exist yet, so we silently don't record.
+        if (!$db->get_manager()->table_exists(self::TABLE)) {
+            return 0;
+        }
+
         // Get max memory usage.
         $this->raw_set('memoryusagemax', memory_get_peak_usage());
 
