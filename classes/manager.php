@@ -201,6 +201,8 @@ class manager {
      */
     public function start_processor() {
         if (!self::is_testing()) {
+            // The session is ready by now, so persist any FLAMEALL/FLAMEOFF change for later requests.
+            self::is_flame_all();
             $this->processor->init($this);
         }
     }
@@ -247,6 +249,11 @@ class manager {
      */
     protected static function is_flame_all(): bool {
         global $SESSION;
+        if (empty($SESSION)) {
+            // The session is not ready yet (before_session_start). Honour the request flag for this
+            // request only; the session is updated once it is available.
+            return self::is_flag_set(self::FLAME_ON_PARAM_NAME) && !self::is_flag_set(self::FLAME_OFF_PARAM_NAME);
+        }
         if (self::is_flag_set(self::FLAME_OFF_PARAM_NAME)) {
             unset($SESSION->toolexcimerflameall);
         } else if (self::is_flag_set(self::FLAME_ON_PARAM_NAME)) {
@@ -305,7 +312,7 @@ class manager {
         if (self::is_flag_set(self::FLAME_ME_PARAM_NAME)) {
             $reason |= profile::REASON_FLAMEME;
         }
-        if (isset($SESSION->toolexcimerflameall)) {
+        if (self::is_flame_all()) {
             $reason |= profile::REASON_FLAMEALL;
         }
 
