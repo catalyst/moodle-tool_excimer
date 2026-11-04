@@ -48,7 +48,10 @@ class after_config {
             $manager = manager::get_instance();
             $manager->start_processor();
         } catch (\Throwable $e) {
-            debugging('tool_excimer_after_config error', DEBUG_DEVELOPER, $e->getTrace());
+            // Still attempt to profile, but don't complain when the DB isn't ready (install, behat/phpunit init).
+            if (!during_initial_install() && !defined('BEHAT_UTIL') && !defined('PHPUNIT_UTIL')) {
+                debugging('tool_excimer_after_config error', DEBUG_DEVELOPER, $e->getTrace());
+            }
         }
     }
 }
