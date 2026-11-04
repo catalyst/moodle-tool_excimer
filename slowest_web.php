@@ -37,6 +37,8 @@ $script = optional_param('script', '', PARAM_TEXT);
 $group = optional_param('group', '', PARAM_TEXT);
 
 admin_externalpage_setup('tool_excimer_report_slowest_web');
+$PAGE->set_secondary_active_tab('development');
+$PAGE->set_primary_active_tab('siteadminnode');
 
 $url = new moodle_url('/admin/tool/excimer/slowest_web.php');
 

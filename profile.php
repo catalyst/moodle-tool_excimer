@@ -54,10 +54,6 @@ $profileid = required_param('id', PARAM_INT);
 
 $params = ['id' => $profileid];
 $url = new \moodle_url('/admin/tool/excimer/profile.php', $params);
-$context = context_system::instance();
-
-$PAGE->set_context($context);
-$PAGE->set_url($url);
 
 $returnurl = get_local_referer(false);
 
@@ -66,7 +62,9 @@ $returnurl = get_local_referer(false);
 // from breaking the output of this page.
 $report = explode('.php', basename($returnurl, '.php'))[0] ?? null;
 $report = in_array($report, REPORT_SECTIONS) ? $report : REPORT_SECTION_SLOWEST_WEB;
-admin_externalpage_setup('tool_excimer_report_' . $report);
+admin_externalpage_setup('tool_excimer_report_' . $report, '', null, $url);
+$PAGE->set_secondary_active_tab('development');
+$PAGE->set_primary_active_tab('siteadminnode');
 
 $output = $PAGE->get_renderer('tool_excimer');
 
