@@ -589,5 +589,22 @@ function xmldb_tool_excimer_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026031200, 'tool', 'excimer');
     }
 
+    if ($oldversion < 2026031710) {
+        // Clean up a stray 'groupby' column left over from before it was renamed to 'scriptgroup'.
+        $table = new xmldb_table('tool_excimer_profiles');
+        $oldfield = new xmldb_field('groupby', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'request');
+
+        if ($dbman->field_exists($table, $oldfield)) {
+            if ($dbman->field_exists($table, new xmldb_field('scriptgroup'))) {
+                $dbman->drop_field($table, $oldfield);
+            } else {
+                $dbman->rename_field($table, $oldfield, 'scriptgroup');
+            }
+        }
+
+        // Excimer savepoint reached.
+        upgrade_plugin_savepoint(true, 2026031710, 'tool', 'excimer');
+    }
+
     return true;
 }
