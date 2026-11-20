@@ -271,4 +271,19 @@ final class tool_excimer_script_metadata_test extends \advanced_testcase {
             ],
         ];
     }
+
+    /**
+     * Tests get_lock_info() returns no information after the session is closed.
+     *
+     * Excimer processing can happen during shutdown after a script has called
+     * \core\session\manager::write_close(). Session lock information must not be
+     * accessed after the session has been closed.
+     *
+     * @covers \tool_excimer\script_metadata::get_lock_info
+     */
+    public function test_get_lock_info_with_closed_session(): void {
+        \core\session\manager::write_close();
+
+        $this->assertSame([], script_metadata::get_lock_info());
+    }
 }

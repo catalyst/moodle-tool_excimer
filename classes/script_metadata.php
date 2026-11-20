@@ -471,6 +471,10 @@ class script_metadata {
      */
     public static function get_lock_info(): array {
         $lockinfo = [];
+        // Session may have been closed before shutdown processing.
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return $lockinfo;
+        }
         $sessionlock = \core\session\manager::get_session_lock_info();
         if (empty($sessionlock)) {
             return $lockinfo;
